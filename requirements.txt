@@ -13,11 +13,9 @@ python-dotenv==1.0.1
 jinja2==3.1.6
 python-multipart==0.0.20
 email-validator==2.2.0
-# FCM (Firebase Admin) is OPTIONAL and installed separately (see
-# requirements-fcm.txt). It pulls heavy native deps (grpcio) that can exceed
-# free-tier build limits. The FCM client imports it lazily, so the app runs
-# fine without it — install it only when you enable push notifications.
-# Dev / test
-pytest==9.1.1
-pytest-asyncio==0.25.3
-aiosqlite==0.20.0
+# FCM (Firebase Admin) is OPTIONAL — see requirements-fcm.txt. It pulls heavy
+# native deps (grpcio) that can exceed free-tier build limits. The FCM client
+# imports it lazily, so the app runs fine without it.
+#
+# Dev/test dependencies (pytest, etc.) live in requirements-dev.txt and are NOT
+# installed in production.

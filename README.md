@@ -443,6 +443,7 @@ alembic revision --autogenerate -m "change"   # new migration
 ## Testing
 
 ```bash
+pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ```
 
