@@ -39,8 +39,9 @@ alembic upgrade head
 
 case "${ROLE}" in
   api)
-    echo "[entrypoint] starting API server"
-    exec uvicorn app.main:app --host 0.0.0.0 --port 8000 --workers "${WEB_CONCURRENCY:-2}"
+    # Respect a platform-provided PORT (Render/Railway/Heroku); default 8000.
+    echo "[entrypoint] starting API server on port ${PORT:-8000}"
+    exec uvicorn app.main:app --host 0.0.0.0 --port "${PORT:-8000}" --workers "${WEB_CONCURRENCY:-2}"
     ;;
   worker)
     # Reserved for a future dedicated scheduler/worker process (Celery/RQ).

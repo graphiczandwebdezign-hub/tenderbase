@@ -455,6 +455,37 @@ SQLite DB and a `MockSourceAdapter` (no network, deterministic).
 
 ---
 
+## Deploy to Render (GitHub → managed Postgres, no local machine)
+
+The repo ships a **Render Blueprint** (`render.yaml`) that provisions a managed
+PostgreSQL database and a web service, wires `DATABASE_URL` automatically, and
+generates `API_KEY` / `ADMIN_SECRET` for you.
+
+1. Push this branch to GitHub (already done for `arena/01a04c59-tenderbase`).
+2. In [Render](https://render.com): **New → Blueprint** → connect this repo →
+   **Apply**. Render reads `render.yaml`, creates `tenderbase-db` and
+   `tenderbase-api`, runs `alembic upgrade head`, and starts the server.
+3. When it's live, grab the generated secrets from the service's **Environment**
+   tab (`API_KEY`, `ADMIN_SECRET`), then load data:
+   ```bash
+   curl -X POST -H "X-Admin-Secret: <ADMIN_SECRET>" \
+     https://<your-service>.onrender.com/api/v1/admin/sync
+   ```
+   Open `https://<your-service>.onrender.com/docs`.
+
+`DATABASE_URL` is normalized automatically: managed hosts that emit
+`postgres://` or driver-less `postgresql://` URLs (Render, Railway, Heroku,
+Neon, Supabase) are rewritten to `postgresql+psycopg2://` — no hand-editing.
+
+> ⚠️ **Free plan sleeps when idle**, which pauses the in-process scheduler. For
+> continuous syncing either upgrade the web service to a paid always-on
+> instance, or set `SYNC_ENABLED=false` and add a cron (e.g. cron-job.org) that
+> calls `POST /api/v1/admin/sync` every 15 minutes.
+
+The same pattern works on **Railway**, **Fly.io**, or any host that builds from
+GitHub — point it at the repo, attach a Postgres add-on, and set the same
+environment variables.
+
 ## Production deployment
 
 Recommended single-VPS topology:

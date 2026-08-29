@@ -98,6 +98,24 @@ class Settings(BaseSettings):
     def _coerce_ints(cls, v):
         return [int(x) for x in v]
 
+    @field_validator("database_url", mode="after")
+    @classmethod
+    def _normalize_database_url(cls, v: str) -> str:
+        """Normalize DB URLs from managed hosts so no hand-editing is needed.
+
+        Many providers (Render, Railway, Heroku, Neon, Supabase) hand out a
+        URL beginning with ``postgres://`` (an alias SQLAlchemy 2.x no longer
+        accepts) and without an explicit driver. Rewrite both cases to the
+        canonical ``postgresql+psycopg2://`` form.
+        """
+        if not v:
+            return v
+        if v.startswith("postgres://"):
+            v = "postgresql://" + v[len("postgres://"):]
+        if v.startswith("postgresql://"):
+            v = "postgresql+psycopg2://" + v[len("postgresql://"):]
+        return v
+
     @property
     def is_production(self) -> bool:
         return self.app_env.lower() in {"production", "prod"}
