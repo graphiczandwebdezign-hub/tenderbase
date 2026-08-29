@@ -6,7 +6,8 @@ import secrets
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import Depends, Header, HTTPException, status
+from fastapi import Depends, HTTPException, status
+from fastapi.security import APIKeyHeader
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
@@ -16,6 +17,12 @@ from app.database.database import get_db
 from app.database.models.auth import ApiKey
 
 logger = get_logger("security")
+
+# Security schemes — these make the "Authorize" button appear in Swagger and
+# document the required headers in the OpenAPI spec. auto_error=False so we can
+# return our own consistent error envelope.
+api_key_scheme = APIKeyHeader(name="X-API-Key", auto_error=False, scheme_name="ApiKeyAuth")
+admin_scheme = APIKeyHeader(name="X-Admin-Secret", auto_error=False, scheme_name="AdminSecret")
 
 
 def hash_key(raw_key: str) -> str:
@@ -63,7 +70,7 @@ def _unauthorized(code: str, message: str) -> HTTPException:
 
 
 async def require_api_key(
-    x_api_key: Optional[str] = Header(default=None, alias="X-API-Key"),
+    x_api_key: Optional[str] = Depends(api_key_scheme),
     db: Session = Depends(get_db),
 ) -> ApiKey:
     """Dependency: validate the X-API-Key header against the api_keys table."""
@@ -90,7 +97,7 @@ async def require_api_key(
 
 
 async def require_admin(
-    x_admin_secret: Optional[str] = Header(default=None, alias="X-Admin-Secret"),
+    x_admin_secret: Optional[str] = Depends(admin_scheme),
 ) -> bool:
     """Dependency: gate admin endpoints behind ADMIN_SECRET."""
     if not settings.admin_secret:
