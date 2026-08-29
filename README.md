@@ -588,7 +588,10 @@ docker compose restart && curl localhost:8000/health
 - **Pydantic v2** — validation and stable response schemas.
 - **slowapi** — lightweight rate limiting.
 - **firebase-admin** — FCM push foundation, lazily initialised and fully
-  optional in development.
+  optional. It is **not** in `requirements.txt` (its native `grpcio` dependency
+  can exceed free-tier build limits); install it only when enabling push:
+  `pip install -r requirements.txt -r requirements-fcm.txt` and set
+  `FCM_ENABLED=true`. The app runs normally without it.
 
 Deliberately **excluded** (out of scope for V1): AI features, subscriptions/
 billing/multi-tenancy/CRM, bidding/evaluation, social features, and heavy

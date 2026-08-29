@@ -1,0 +1,5 @@
+# Optional Firebase Cloud Messaging support.
+# Install ON TOP of requirements.txt only when you enable push notifications:
+#   pip install -r requirements.txt -r requirements-fcm.txt
+# Then set FCM_ENABLED=true and the FCM_* credentials in the environment.
+firebase-admin==6.6.0
