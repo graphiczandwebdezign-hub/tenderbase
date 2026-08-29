@@ -1,0 +1,2850 @@
+{
+  "uri": "development-sample",
+  "version": "1.1",
+  "publishedDate": "2026-08-29T09:21:18.799979+02:00",
+  "publisher": {
+    "name": "DEVELOPMENT SAMPLE (not real tender data)"
+  },
+  "releases": [
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0001",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0001-01",
+      "date": "2026-08-29T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-TSH",
+        "name": "City of Tshwane"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-TSH",
+            "legalName": "City of Tshwane"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-TSH-2026-0001",
+        "title": "Construction of Community Health Centre (City)",
+        "description": "Construction of a new 24-hour community health centre including civil works and electrical installation.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-29T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-29T09:21:18.799979+02:00",
+          "endDate": "2026-09-08T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0001-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0001/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0001-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0001/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0002",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0002-01",
+      "date": "2026-08-26T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-EC-DOH",
+        "name": "Department of Health - Eastern Cape"
+      },
+      "parties": [
+        {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-EC-DOH",
+            "legalName": "Department of Health - Eastern Cape"
+          },
+          "address": {
+            "region": "Eastern Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-EC-DOH-2026-0002",
+        "title": "Provision of Cleaning and Hygiene Services (Department)",
+        "description": "Appointment of a service provider for cleaning, hygiene and pest control services for a 24 month period.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-26T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-26T09:21:18.799979+02:00",
+          "endDate": "2026-09-18T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0002-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0002/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0002-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0002/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0003",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0003-01",
+      "date": "2026-08-16T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-ETH",
+        "name": "eThekwini Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-ETH",
+            "legalName": "eThekwini Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-ETH-2026-0003",
+        "title": "Electrification of Rural Households (eThekwini)",
+        "description": "Electrical reticulation, transformer installation and household electrification programme.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-16T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-16T09:21:18.799979+02:00",
+          "endDate": "2026-08-19T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0003-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0003/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0003-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0003/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0004",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0004-01",
+      "date": "2026-08-13T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-EC-DOH",
+        "name": "Department of Health - Eastern Cape"
+      },
+      "parties": [
+        {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-EC-DOH",
+            "legalName": "Department of Health - Eastern Cape"
+          },
+          "address": {
+            "region": "Eastern Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-EC-DOH-2026-0004",
+        "title": "Supply of ICT Hardware and Network Equipment (Department)",
+        "description": "Procurement of laptops, servers and network switches including software licensing and support.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-13T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-13T09:21:18.799979+02:00",
+          "endDate": "2026-09-18T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0004-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0004/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0004-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0004/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0005",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0005-01",
+      "date": "2026-08-09T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-EC-DOH",
+        "name": "Department of Health - Eastern Cape"
+      },
+      "parties": [
+        {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-EC-DOH",
+            "legalName": "Department of Health - Eastern Cape"
+          },
+          "address": {
+            "region": "Eastern Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-EC-DOH-2026-0005",
+        "title": "Skills Development and Learnership Programme (Department)",
+        "description": "Training and capacity building learnership programme for unemployed youth.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-09T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-09T09:21:18.799979+02:00",
+          "endDate": "2026-09-14T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0005-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0005/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0005-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0005/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0006",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0006-01",
+      "date": "2026-08-11T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-EC-DOH",
+        "name": "Department of Health - Eastern Cape"
+      },
+      "parties": [
+        {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-EC-DOH",
+            "legalName": "Department of Health - Eastern Cape"
+          },
+          "address": {
+            "region": "Eastern Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-EC-DOH-2026-0006",
+        "title": "Appointment of Engineering Consultants (Department)",
+        "description": "Panel of professional engineering and quantity surveying consultants for infrastructure projects.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-11T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-11T09:21:18.799979+02:00",
+          "endDate": "2026-08-29T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0006-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0006/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0006-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0006/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-WC-CPT-2026-0007",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-WC-CPT-2026-0007-01",
+      "date": "2026-08-16T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-WC-CPT",
+        "name": "City of Cape Town"
+      },
+      "parties": [
+        {
+          "id": "ZA-WC-CPT",
+          "name": "City of Cape Town",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-WC-CPT",
+            "legalName": "City of Cape Town"
+          },
+          "address": {
+            "region": "Western Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-WC-CPT-2026-0007",
+        "title": "Skills Development and Learnership Programme (City)",
+        "description": "Training and capacity building learnership programme for unemployed youth.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-16T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-16T09:21:18.799979+02:00",
+          "endDate": "2026-08-29T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-WC-CPT",
+          "name": "City of Cape Town"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-WC-CPT-2026-0007-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-WC-CPT-2026-0007/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-WC-CPT-2026-0007-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-WC-CPT-2026-0007/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0008",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0008-01",
+      "date": "2026-08-19T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-EC-DOH",
+        "name": "Department of Health - Eastern Cape"
+      },
+      "parties": [
+        {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-EC-DOH",
+            "legalName": "Department of Health - Eastern Cape"
+          },
+          "address": {
+            "region": "Eastern Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-EC-DOH-2026-0008",
+        "title": "Supply and Delivery of Municipal Fleet Vehicles (Department)",
+        "description": "Procurement of light delivery vehicles, trucks and trailers including maintenance.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-19T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-19T09:21:18.799979+02:00",
+          "endDate": "2026-08-14T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0008-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0008/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0008-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0008/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0009",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0009-01",
+      "date": "2026-08-18T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-ETH",
+        "name": "eThekwini Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-ETH",
+            "legalName": "eThekwini Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-ETH-2026-0009",
+        "title": "Upgrading of Internal Roads and Storm Water (eThekwini)",
+        "description": "Civil works for the upgrading of internal roads, storm water drainage and pavement rehabilitation.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-18T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-18T09:21:18.799979+02:00",
+          "endDate": "2026-09-26T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0009-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0009/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0009-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0009/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-JHB-2026-0010",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-JHB-2026-0010-01",
+      "date": "2026-08-15T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-JHB",
+        "name": "City of Johannesburg Metropolitan Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-JHB",
+          "name": "City of Johannesburg Metropolitan Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-JHB",
+            "legalName": "City of Johannesburg Metropolitan Municipality"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-JHB-2026-0010",
+        "title": "Skills Development and Learnership Programme (City)",
+        "description": "Training and capacity building learnership programme for unemployed youth.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-15T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-15T09:21:18.799979+02:00",
+          "endDate": "2026-09-13T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-JHB",
+          "name": "City of Johannesburg Metropolitan Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-JHB-2026-0010-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-JHB-2026-0010/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-JHB-2026-0010-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-JHB-2026-0010/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0011",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0011-01",
+      "date": "2026-08-20T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-ETH",
+        "name": "eThekwini Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-ETH",
+            "legalName": "eThekwini Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-ETH-2026-0011",
+        "title": "Provision of Learner Transport Services (eThekwini)",
+        "description": "Scholar transport services (bus and shuttle) for rural schools for the 2026 academic year.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-20T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-20T09:21:18.799979+02:00",
+          "endDate": "2026-09-20T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0011-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0011/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0011-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0011/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-FS-MAN-2026-0012",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-FS-MAN-2026-0012-01",
+      "date": "2026-08-23T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-FS-MAN",
+        "name": "Mangaung Metropolitan Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-FS-MAN",
+          "name": "Mangaung Metropolitan Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-FS-MAN",
+            "legalName": "Mangaung Metropolitan Municipality"
+          },
+          "address": {
+            "region": "Free State",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-FS-MAN-2026-0012",
+        "title": "Electrification of Rural Households (Mangaung)",
+        "description": "Electrical reticulation, transformer installation and household electrification programme.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-23T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-23T09:21:18.799979+02:00",
+          "endDate": "2026-09-02T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-FS-MAN",
+          "name": "Mangaung Metropolitan Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-FS-MAN-2026-0012-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-FS-MAN-2026-0012/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-FS-MAN-2026-0012-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-FS-MAN-2026-0012/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0013",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0013-01",
+      "date": "2026-08-20T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-TSH",
+        "name": "City of Tshwane"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-TSH",
+            "legalName": "City of Tshwane"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-TSH-2026-0013",
+        "title": "Supply of ICT Hardware and Network Equipment (City)",
+        "description": "Procurement of laptops, servers and network switches including software licensing and support.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-20T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-20T09:21:18.799979+02:00",
+          "endDate": "2026-09-28T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0013-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0013/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0013-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0013/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0014",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0014-01",
+      "date": "2026-08-26T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-EC-DOH",
+        "name": "Department of Health - Eastern Cape"
+      },
+      "parties": [
+        {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-EC-DOH",
+            "legalName": "Department of Health - Eastern Cape"
+          },
+          "address": {
+            "region": "Eastern Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-EC-DOH-2026-0014",
+        "title": "Refurbishment of Municipal Offices (Department)",
+        "description": "Renovation and refurbishment of municipal head office building including HVAC.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-26T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-26T09:21:18.799979+02:00",
+          "endDate": "2026-08-30T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0014-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0014/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0014-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0014/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0015",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0015-01",
+      "date": "2026-08-18T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-TSH",
+        "name": "City of Tshwane"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-TSH",
+            "legalName": "City of Tshwane"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-TSH-2026-0015",
+        "title": "Refurbishment of Municipal Offices (City)",
+        "description": "Renovation and refurbishment of municipal head office building including HVAC.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-18T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-18T09:21:18.799979+02:00",
+          "endDate": "2026-08-28T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0015-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0015/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0015-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0015/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0016",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-EC-DOH-2026-0016-01",
+      "date": "2026-08-21T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-EC-DOH",
+        "name": "Department of Health - Eastern Cape"
+      },
+      "parties": [
+        {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-EC-DOH",
+            "legalName": "Department of Health - Eastern Cape"
+          },
+          "address": {
+            "region": "Eastern Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-EC-DOH-2026-0016",
+        "title": "Supply of Agricultural Equipment and Seed (Department)",
+        "description": "Supply and delivery of irrigation equipment, fertilizer and seed to emerging farmers.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-21T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-21T09:21:18.799979+02:00",
+          "endDate": "2026-09-22T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-EC-DOH",
+          "name": "Department of Health - Eastern Cape"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0016-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0016/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-EC-DOH-2026-0016-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-EC-DOH-2026-0016/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0017",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0017-01",
+      "date": "2026-08-10T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-TSH",
+        "name": "City of Tshwane"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-TSH",
+            "legalName": "City of Tshwane"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-TSH-2026-0017",
+        "title": "Construction of Community Health Centre (City)",
+        "description": "Construction of a new 24-hour community health centre including civil works and electrical installation.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-10T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-10T09:21:18.799979+02:00",
+          "endDate": "2026-09-18T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0017-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0017/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0017-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0017/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0018",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0018-01",
+      "date": "2026-08-24T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-UMG",
+        "name": "uMgungundlovu District Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-UMG",
+            "legalName": "uMgungundlovu District Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-UMG-2026-0018",
+        "title": "Supply of ICT Hardware and Network Equipment (uMgungundlovu)",
+        "description": "Procurement of laptops, servers and network switches including software licensing and support.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-24T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-24T09:21:18.799979+02:00",
+          "endDate": "2026-09-09T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0018-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0018/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0018-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0018/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0019",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0019-01",
+      "date": "2026-08-12T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-TSH",
+        "name": "City of Tshwane"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-TSH",
+            "legalName": "City of Tshwane"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-TSH-2026-0019",
+        "title": "Skills Development and Learnership Programme (City)",
+        "description": "Training and capacity building learnership programme for unemployed youth.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-12T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-12T09:21:18.799979+02:00",
+          "endDate": "2026-08-28T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0019-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0019/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0019-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0019/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-JHB-2026-0020",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-JHB-2026-0020-01",
+      "date": "2026-08-28T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-JHB",
+        "name": "City of Johannesburg Metropolitan Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-JHB",
+          "name": "City of Johannesburg Metropolitan Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-JHB",
+            "legalName": "City of Johannesburg Metropolitan Municipality"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-JHB-2026-0020",
+        "title": "Supply of ICT Hardware and Network Equipment (City)",
+        "description": "Procurement of laptops, servers and network switches including software licensing and support.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-28T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-28T09:21:18.799979+02:00",
+          "endDate": "2026-09-13T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-JHB",
+          "name": "City of Johannesburg Metropolitan Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-JHB-2026-0020-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-JHB-2026-0020/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-JHB-2026-0020-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-JHB-2026-0020/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-LP-DPW-2026-0021",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-LP-DPW-2026-0021-01",
+      "date": "2026-08-23T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-LP-DPW",
+        "name": "Limpopo Department of Public Works"
+      },
+      "parties": [
+        {
+          "id": "ZA-LP-DPW",
+          "name": "Limpopo Department of Public Works",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-LP-DPW",
+            "legalName": "Limpopo Department of Public Works"
+          },
+          "address": {
+            "region": "Limpopo",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-LP-DPW-2026-0021",
+        "title": "Construction of Community Health Centre (Limpopo)",
+        "description": "Construction of a new 24-hour community health centre including civil works and electrical installation.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-23T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-23T09:21:18.799979+02:00",
+          "endDate": "2026-09-19T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-LP-DPW",
+          "name": "Limpopo Department of Public Works"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-LP-DPW-2026-0021-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-LP-DPW-2026-0021/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-LP-DPW-2026-0021-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-LP-DPW-2026-0021/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0022",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0022-01",
+      "date": "2026-08-23T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-UMG",
+        "name": "uMgungundlovu District Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-UMG",
+            "legalName": "uMgungundlovu District Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-UMG-2026-0022",
+        "title": "Upgrading of Internal Roads and Storm Water (uMgungundlovu)",
+        "description": "Civil works for the upgrading of internal roads, storm water drainage and pavement rehabilitation.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-23T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-23T09:21:18.799979+02:00",
+          "endDate": "2026-09-13T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0022-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0022/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0022-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0022/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0023",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0023-01",
+      "date": "2026-08-25T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-TSH",
+        "name": "City of Tshwane"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-TSH",
+            "legalName": "City of Tshwane"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-TSH-2026-0023",
+        "title": "Appointment of Engineering Consultants (City)",
+        "description": "Panel of professional engineering and quantity surveying consultants for infrastructure projects.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-25T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-25T09:21:18.799979+02:00",
+          "endDate": "2026-08-30T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0023-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0023/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0023-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0023/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0024",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0024-01",
+      "date": "2026-08-12T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-UMG",
+        "name": "uMgungundlovu District Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-UMG",
+            "legalName": "uMgungundlovu District Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-UMG-2026-0024",
+        "title": "Provision of Learner Transport Services (uMgungundlovu)",
+        "description": "Scholar transport services (bus and shuttle) for rural schools for the 2026 academic year.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-12T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-12T09:21:18.799979+02:00",
+          "endDate": "2026-08-31T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0024-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0024/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0024-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0024/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-MP-DOE-2026-0025",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-MP-DOE-2026-0025-01",
+      "date": "2026-08-11T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-MP-DOE",
+        "name": "Department of Education - Mpumalanga"
+      },
+      "parties": [
+        {
+          "id": "ZA-MP-DOE",
+          "name": "Department of Education - Mpumalanga",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-MP-DOE",
+            "legalName": "Department of Education - Mpumalanga"
+          },
+          "address": {
+            "region": "Mpumalanga",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-MP-DOE-2026-0025",
+        "title": "Financial and Internal Audit Services (Department)",
+        "description": "Appointment of a firm to provide internal audit, advisory and financial services.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-11T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-11T09:21:18.799979+02:00",
+          "endDate": "2026-08-30T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-MP-DOE",
+          "name": "Department of Education - Mpumalanga"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-MP-DOE-2026-0025-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-MP-DOE-2026-0025/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-MP-DOE-2026-0025-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-MP-DOE-2026-0025/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-WC-CPT-2026-0026",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-WC-CPT-2026-0026-01",
+      "date": "2026-08-14T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-WC-CPT",
+        "name": "City of Cape Town"
+      },
+      "parties": [
+        {
+          "id": "ZA-WC-CPT",
+          "name": "City of Cape Town",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-WC-CPT",
+            "legalName": "City of Cape Town"
+          },
+          "address": {
+            "region": "Western Cape",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-WC-CPT-2026-0026",
+        "title": "Provision of Learner Transport Services (City)",
+        "description": "Scholar transport services (bus and shuttle) for rural schools for the 2026 academic year.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-14T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-14T09:21:18.799979+02:00",
+          "endDate": "2026-08-20T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-WC-CPT",
+          "name": "City of Cape Town"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-WC-CPT-2026-0026-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-WC-CPT-2026-0026/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-WC-CPT-2026-0026-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-WC-CPT-2026-0026/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0027",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0027-01",
+      "date": "2026-08-09T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-ETH",
+        "name": "eThekwini Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-ETH",
+            "legalName": "eThekwini Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-ETH-2026-0027",
+        "title": "Provision of Cleaning and Hygiene Services (eThekwini)",
+        "description": "Appointment of a service provider for cleaning, hygiene and pest control services for a 24 month period.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-09T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-09T09:21:18.799979+02:00",
+          "endDate": "2026-08-28T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0027-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0027/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0027-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0027/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-NAT-DOT-2026-0028",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-NAT-DOT-2026-0028-01",
+      "date": "2026-08-17T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-NAT-DOT",
+        "name": "National Department of Transport"
+      },
+      "parties": [
+        {
+          "id": "ZA-NAT-DOT",
+          "name": "National Department of Transport",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-NAT-DOT",
+            "legalName": "National Department of Transport"
+          },
+          "address": {
+            "region": "National",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-NAT-DOT-2026-0028",
+        "title": "Construction of Community Health Centre (National)",
+        "description": "Construction of a new 24-hour community health centre including civil works and electrical installation.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-17T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-17T09:21:18.799979+02:00",
+          "endDate": "2026-08-30T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-NAT-DOT",
+          "name": "National Department of Transport"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-NAT-DOT-2026-0028-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NAT-DOT-2026-0028/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-NAT-DOT-2026-0028-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NAT-DOT-2026-0028/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0029",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0029-01",
+      "date": "2026-08-12T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-NW-RUS",
+        "name": "Rustenburg Local Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-NW-RUS",
+            "legalName": "Rustenburg Local Municipality"
+          },
+          "address": {
+            "region": "North West",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-NW-RUS-2026-0029",
+        "title": "Security Guarding Services for Municipal Buildings (Rustenburg)",
+        "description": "Provision of physical security guarding and CCTV surveillance services across municipal facilities.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-12T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-12T09:21:18.799979+02:00",
+          "endDate": "2026-09-01T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0029-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0029/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0029-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0029/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0030",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-GT-TSH-2026-0030-01",
+      "date": "2026-08-26T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-GT-TSH",
+        "name": "City of Tshwane"
+      },
+      "parties": [
+        {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-GT-TSH",
+            "legalName": "City of Tshwane"
+          },
+          "address": {
+            "region": "Gauteng",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-GT-TSH-2026-0030",
+        "title": "Skills Development and Learnership Programme (City)",
+        "description": "Training and capacity building learnership programme for unemployed youth.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-26T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-26T09:21:18.799979+02:00",
+          "endDate": "2026-09-18T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-GT-TSH",
+          "name": "City of Tshwane"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0030-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0030/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-GT-TSH-2026-0030-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-GT-TSH-2026-0030/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-LP-DPW-2026-0031",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-LP-DPW-2026-0031-01",
+      "date": "2026-08-09T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-LP-DPW",
+        "name": "Limpopo Department of Public Works"
+      },
+      "parties": [
+        {
+          "id": "ZA-LP-DPW",
+          "name": "Limpopo Department of Public Works",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-LP-DPW",
+            "legalName": "Limpopo Department of Public Works"
+          },
+          "address": {
+            "region": "Limpopo",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-LP-DPW-2026-0031",
+        "title": "Supply and Delivery of Municipal Fleet Vehicles (Limpopo)",
+        "description": "Procurement of light delivery vehicles, trucks and trailers including maintenance.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-09T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-09T09:21:18.799979+02:00",
+          "endDate": "2026-08-30T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-LP-DPW",
+          "name": "Limpopo Department of Public Works"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-LP-DPW-2026-0031-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-LP-DPW-2026-0031/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-LP-DPW-2026-0031-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-LP-DPW-2026-0031/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-MP-DOE-2026-0032",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-MP-DOE-2026-0032-01",
+      "date": "2026-08-15T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-MP-DOE",
+        "name": "Department of Education - Mpumalanga"
+      },
+      "parties": [
+        {
+          "id": "ZA-MP-DOE",
+          "name": "Department of Education - Mpumalanga",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-MP-DOE",
+            "legalName": "Department of Education - Mpumalanga"
+          },
+          "address": {
+            "region": "Mpumalanga",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-MP-DOE-2026-0032",
+        "title": "Provision of Cleaning and Hygiene Services (Department)",
+        "description": "Appointment of a service provider for cleaning, hygiene and pest control services for a 24 month period.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-15T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-15T09:21:18.799979+02:00",
+          "endDate": "2026-08-09T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-MP-DOE",
+          "name": "Department of Education - Mpumalanga"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-MP-DOE-2026-0032-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-MP-DOE-2026-0032/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-MP-DOE-2026-0032-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-MP-DOE-2026-0032/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0033",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-UMG-2026-0033-01",
+      "date": "2026-08-13T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-UMG",
+        "name": "uMgungundlovu District Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-UMG",
+            "legalName": "uMgungundlovu District Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-UMG-2026-0033",
+        "title": "Security Guarding Services for Municipal Buildings (uMgungundlovu)",
+        "description": "Provision of physical security guarding and CCTV surveillance services across municipal facilities.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-13T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-13T09:21:18.799979+02:00",
+          "endDate": "2026-09-17T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-UMG",
+          "name": "uMgungundlovu District Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0033-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0033/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-UMG-2026-0033-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-UMG-2026-0033/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0034",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0034-01",
+      "date": "2026-08-09T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-ETH",
+        "name": "eThekwini Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-ETH",
+            "legalName": "eThekwini Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-ETH-2026-0034",
+        "title": "Refurbishment of Municipal Offices (eThekwini)",
+        "description": "Renovation and refurbishment of municipal head office building including HVAC.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-09T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-09T09:21:18.799979+02:00",
+          "endDate": "2026-08-31T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0034-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0034/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0034-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0034/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0035",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0035-01",
+      "date": "2026-08-23T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-NW-RUS",
+        "name": "Rustenburg Local Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-NW-RUS",
+            "legalName": "Rustenburg Local Municipality"
+          },
+          "address": {
+            "region": "North West",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-NW-RUS-2026-0035",
+        "title": "Electrification of Rural Households (Rustenburg)",
+        "description": "Electrical reticulation, transformer installation and household electrification programme.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-23T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-23T09:21:18.799979+02:00",
+          "endDate": "2026-08-28T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0035-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0035/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0035-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0035/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0036",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0036-01",
+      "date": "2026-08-13T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-NW-RUS",
+        "name": "Rustenburg Local Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-NW-RUS",
+            "legalName": "Rustenburg Local Municipality"
+          },
+          "address": {
+            "region": "North West",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-NW-RUS-2026-0036",
+        "title": "Supply and Delivery of Municipal Fleet Vehicles (Rustenburg)",
+        "description": "Procurement of light delivery vehicles, trucks and trailers including maintenance.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-13T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-13T09:21:18.799979+02:00",
+          "endDate": "2026-09-20T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0036-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0036/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0036-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0036/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-FS-MAN-2026-0037",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-FS-MAN-2026-0037-01",
+      "date": "2026-08-29T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-FS-MAN",
+        "name": "Mangaung Metropolitan Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-FS-MAN",
+          "name": "Mangaung Metropolitan Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-FS-MAN",
+            "legalName": "Mangaung Metropolitan Municipality"
+          },
+          "address": {
+            "region": "Free State",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-FS-MAN-2026-0037",
+        "title": "Appointment of Engineering Consultants (Mangaung)",
+        "description": "Panel of professional engineering and quantity surveying consultants for infrastructure projects.",
+        "status": "active",
+        "mainProcurementCategory": "services",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-29T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-29T09:21:18.799979+02:00",
+          "endDate": "2026-08-15T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-FS-MAN",
+          "name": "Mangaung Metropolitan Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-FS-MAN-2026-0037-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-FS-MAN-2026-0037/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-FS-MAN-2026-0037-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-FS-MAN-2026-0037/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-LP-DPW-2026-0038",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-LP-DPW-2026-0038-01",
+      "date": "2026-08-28T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-LP-DPW",
+        "name": "Limpopo Department of Public Works"
+      },
+      "parties": [
+        {
+          "id": "ZA-LP-DPW",
+          "name": "Limpopo Department of Public Works",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-LP-DPW",
+            "legalName": "Limpopo Department of Public Works"
+          },
+          "address": {
+            "region": "Limpopo",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-LP-DPW-2026-0038",
+        "title": "Supply of ICT Hardware and Network Equipment (Limpopo)",
+        "description": "Procurement of laptops, servers and network switches including software licensing and support.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-28T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-28T09:21:18.799979+02:00",
+          "endDate": "2026-08-27T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-LP-DPW",
+          "name": "Limpopo Department of Public Works"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-LP-DPW-2026-0038-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-LP-DPW-2026-0038/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-LP-DPW-2026-0038-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-LP-DPW-2026-0038/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0039",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-KZN-ETH-2026-0039-01",
+      "date": "2026-08-14T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-KZN-ETH",
+        "name": "eThekwini Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-KZN-ETH",
+            "legalName": "eThekwini Municipality"
+          },
+          "address": {
+            "region": "KwaZulu-Natal",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-KZN-ETH-2026-0039",
+        "title": "Construction of Community Health Centre (eThekwini)",
+        "description": "Construction of a new 24-hour community health centre including civil works and electrical installation.",
+        "status": "active",
+        "mainProcurementCategory": "works",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-14T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-14T09:21:18.799979+02:00",
+          "endDate": "2026-09-25T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-KZN-ETH",
+          "name": "eThekwini Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0039-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0039/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-KZN-ETH-2026-0039-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-KZN-ETH-2026-0039/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    },
+    {
+      "ocid": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0040",
+      "id": "ocds-9nqbfw-SAMPLE-ZA-NW-RUS-2026-0040-01",
+      "date": "2026-08-25T09:21:18.799979+02:00",
+      "tag": [
+        "tender"
+      ],
+      "initiationType": "tender",
+      "language": "en",
+      "buyer": {
+        "id": "ZA-NW-RUS",
+        "name": "Rustenburg Local Municipality"
+      },
+      "parties": [
+        {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality",
+          "roles": [
+            "buyer",
+            "procuringEntity"
+          ],
+          "identifier": {
+            "scheme": "ZA-CIPC",
+            "id": "ZA-NW-RUS",
+            "legalName": "Rustenburg Local Municipality"
+          },
+          "address": {
+            "region": "North West",
+            "countryName": "South Africa"
+          }
+        }
+      ],
+      "tender": {
+        "id": "SAMPLE-ZA-NW-RUS-2026-0040",
+        "title": "Supply and Delivery of Municipal Fleet Vehicles (Rustenburg)",
+        "description": "Procurement of light delivery vehicles, trucks and trailers including maintenance.",
+        "status": "active",
+        "mainProcurementCategory": "goods",
+        "procurementMethod": "open",
+        "procurementMethodDetails": "Open Tender",
+        "submissionMethod": [
+          "electronicSubmission"
+        ],
+        "submissionMethodDetails": "Submit via the eTenders portal.",
+        "datePublished": "2026-08-25T09:21:18.799979+02:00",
+        "tenderPeriod": {
+          "startDate": "2026-08-25T09:21:18.799979+02:00",
+          "endDate": "2026-08-13T11:00:00+02:00"
+        },
+        "procuringEntity": {
+          "id": "ZA-NW-RUS",
+          "name": "Rustenburg Local Municipality"
+        },
+        "documents": [
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0040-DOC1",
+            "documentType": "tenderNotice",
+            "title": "Tender Notice",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0040/notice.pdf",
+            "format": "application/pdf"
+          },
+          {
+            "id": "SAMPLE-ZA-NW-RUS-2026-0040-DOC2",
+            "documentType": "biddingDocuments",
+            "title": "Bid Document",
+            "url": "https://www.etenders.gov.za/sample/SAMPLE-ZA-NW-RUS-2026-0040/bid.pdf",
+            "format": "application/pdf"
+          }
+        ]
+      }
+    }
+  ]
+}

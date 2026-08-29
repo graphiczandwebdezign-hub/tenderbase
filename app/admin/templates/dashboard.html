@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% block title %}Dashboard{% endblock %}
+{% block nav %}
+  <form class="inline" method="post" action="/admin/sync">
+    <button type="submit">Run sync now</button>
+  </form>
+  <a class="btn btn-ghost" href="/docs" target="_blank" style="margin-left:8px;">API docs</a>
+  <a class="btn btn-ghost" href="/admin/logout" style="margin-left:8px;">Logout</a>
+{% endblock %}
+{% block content %}
+
+<div class="section">
+  <h2>Tender overview</h2>
+  <div class="grid">
+    <div class="card"><div class="k">Active tenders</div><div class="v">{{ stats.active_tenders }}</div></div>
+    <div class="card"><div class="k">Amended</div><div class="v">{{ stats.amended_tenders }}</div></div>
+    <div class="card"><div class="k">New today</div><div class="v">{{ stats.new_today }}</div></div>
+    <div class="card"><div class="k">Closing today</div><div class="v">{{ stats.closing_today }}</div></div>
+    <div class="card"><div class="k">Closing tomorrow</div><div class="v">{{ stats.closing_tomorrow }}</div></div>
+    <div class="card"><div class="k">Closed</div><div class="v">{{ stats.closed }}</div></div>
+    <div class="card"><div class="k">Expired</div><div class="v">{{ stats.expired }}</div></div>
+    <div class="card"><div class="k">Total tenders</div><div class="v">{{ stats.total_tenders }}</div></div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Devices &amp; users</h2>
+  <div class="grid">
+    <div class="card"><div class="k">Registered users</div><div class="v">{{ stats.total_users }}</div></div>
+    <div class="card"><div class="k">Active devices</div><div class="v">{{ stats.total_devices }}</div></div>
+    <div class="card">
+      <div class="k">Last successful sync</div>
+      <div class="v" style="font-size:16px;">
+        {{ stats.last_successful_sync_at.strftime('%Y-%m-%d %H:%M UTC') if stats.last_successful_sync_at else '—' }}
+      </div>
+    </div>
+    <div class="card">
+      <div class="k">Last sync status</div>
+      <div class="v" style="font-size:16px;">
+        {% if stats.last_sync %}<span class="badge b-{{ stats.last_sync.status }}">{{ stats.last_sync.status }}</span>{% else %}—{% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section">
+  <h2>Recent synchronizations</h2>
+  <table>
+    <thead>
+      <tr><th>ID</th><th>Started</th><th>Trigger</th><th>Status</th>
+          <th>Recv</th><th>New</th><th>Upd</th><th>Amend</th><th>Exp</th><th>Fail</th><th>Notif</th><th>Error</th></tr>
+    </thead>
+    <tbody>
+      {% for r in runs %}
+      <tr>
+        <td>{{ r.id }}</td>
+        <td>{{ r.started_at.strftime('%m-%d %H:%M') }}</td>
+        <td>{{ r.trigger }}</td>
+        <td><span class="badge b-{{ r.status }}">{{ r.status }}</span></td>
+        <td>{{ r.records_received }}</td>
+        <td>{{ r.records_created }}</td>
+        <td>{{ r.records_updated }}</td>
+        <td>{{ r.records_amended }}</td>
+        <td>{{ r.records_expired }}</td>
+        <td>{{ r.records_failed }}</td>
+        <td>{{ r.notifications_sent }}</td>
+        <td style="color:#f59e0b;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">{{ r.error_message or '' }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="12" style="color:#94a3b8;">No sync runs yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+{% endblock %}

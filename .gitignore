@@ -1,0 +1,24 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Env / secrets
+.env
+*.env.local
+
+# Local dev database
+*.db
+*.sqlite3
+tenderbase.db
+
+# Logs
+*.log
+
+# OS
+.DS_Store
