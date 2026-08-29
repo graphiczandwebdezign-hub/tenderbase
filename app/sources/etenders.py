@@ -100,7 +100,17 @@ class ETendersSourceAdapter(TenderSourceAdapter):
         if date_to:
             params_base["dateTo"] = date_to.isoformat()
 
-        with httpx.Client(timeout=self.timeout, follow_redirects=True) as client:
+        # A browser-like User-Agent reduces the chance of a WAF dropping the
+        # request. Some government endpoints reject the default httpx UA.
+        headers = {
+            "User-Agent": (
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
+                "(KHTML, like Gecko) Chrome/124.0 Safari/537.36"
+            ),
+            "Accept": "application/json, text/plain, */*",
+        }
+
+        with httpx.Client(timeout=self.timeout, follow_redirects=True, headers=headers) as client:
             for page in range(1, max_pages + 1):
                 params = dict(params_base, PageNumber=page)
                 resp = client.get(self.base_url, params=params)
