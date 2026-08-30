@@ -110,6 +110,21 @@
     <string name="hidden_tenders_title">Hidden tenders</string>
     <string name="hidden_tenders_none">No hidden tenders</string>
     <string name="hidden_tenders_count">%1$d hidden — tap to show them again</string>
+
+    <string name="workspace_title">Bid workspace</string>
+    <string name="note_empty">Tap to add a note…</string>
+    <string name="note_edit_title">Bid note</string>
+    <string name="note_hint">Contacts, site visit dates, pricing notes…</string>
+    <string name="note_clear">Clear</string>
+    <string name="save">Save</string>
+    <string name="add">Add</string>
+    <string name="checklist_add">+ Add checklist item</string>
+    <string name="checklist_add_hint">Checklist item</string>
+    <string name="checklist_delete_title">Remove checklist item?</string>
+    <string name="checklist_delete_confirm">Remove</string>
+    <string name="share_bid_pack">Share bid pack</string>
+    <string name="cd_share_bid_pack">Share a summary of this tender with notes and checklist</string>
+    <string name="doc_group_title">%1$s (%2$d)</string>
     <string name="ref_prefix">REF: %1$s</string>
     <string name="closing_on">Closing on %1$s</string>
     <string name="label_closing_date">Closing date</string>

@@ -5,6 +5,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.provider.CalendarContract
+import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -15,7 +16,10 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.checkbox.MaterialCheckBox
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tenderbase.app.databinding.ActivityDetailBinding
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -53,6 +57,10 @@ class DetailActivity : AppCompatActivity() {
     private var isSaved = false
     private var saveMenuItem: MenuItem? = null
 
+    // Bid workspace state (local Room data for this tender).
+    private var workspaceNote: String? = null
+    private var workspaceChecklist: List<ChecklistItemEntity> = emptyList()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityDetailBinding.inflate(layoutInflater)
@@ -69,7 +77,134 @@ class DetailActivity : AppCompatActivity() {
 
         b.errorRetry.setOnClickListener { load(id) }
         b.addToCalendar.setOnClickListener { addDeadlineToCalendar() }
+        setupWorkspace(id)
         load(id)
+    }
+
+    // -------------------------------------------------------- bid workspace
+
+    /** Local flows: note + checklist for this tender (seeded once). */
+    private fun setupWorkspace(id: Int) {
+        lifecycleScope.launch { repo.ensureDefaultChecklist(id) }
+        lifecycleScope.launch {
+            repo.noteFlow(id).collectLatest { note ->
+                workspaceNote = note?.note
+                renderWorkspaceNote()
+            }
+        }
+        lifecycleScope.launch {
+            repo.checklistFlow(id).collectLatest { items ->
+                workspaceChecklist = items
+                renderChecklist()
+            }
+        }
+        b.workspaceNote.setOnClickListener { showNoteDialog() }
+        b.addChecklistButton.setOnClickListener { showAddChecklistItemDialog() }
+        b.shareBidPack.setOnClickListener { shareBidPack() }
+    }
+
+    private fun renderWorkspaceNote() {
+        val note = workspaceNote
+        b.workspaceNote.text = note?.takeIf { it.isNotBlank() } ?: getString(R.string.note_empty)
+        b.workspaceNote.paint.isItalic = note.isNullOrBlank()
+    }
+
+    private fun renderChecklist() {
+        val items = workspaceChecklist
+        val done = items.count { it.isDone }
+        b.workspaceProgress.text = BidPack.progressLabel(done, items.size)
+
+        b.checklistContainer.removeAllViews()
+        for (item in items) {
+            val box = layoutInflater.inflate(
+                R.layout.item_checklist, b.checklistContainer, false
+            ) as MaterialCheckBox
+            box.text = item.label
+            box.isChecked = item.isDone
+            box.setOnCheckedChangeListener { _, checked ->
+                lifecycleScope.launch { repo.setChecklistDone(item.id, checked) }
+            }
+            box.setOnLongClickListener {
+                confirmDeleteChecklistItem(item)
+                true
+            }
+            b.checklistContainer.addView(box)
+        }
+    }
+
+    private fun confirmDeleteChecklistItem(item: ChecklistItemEntity) {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.checklist_delete_title))
+            .setMessage(item.label)
+            .setPositiveButton(getString(R.string.checklist_delete_confirm)) { _, _ ->
+                lifecycleScope.launch { repo.deleteChecklistItem(item.id) }
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun showNoteDialog() {
+        val input = EditText(this).apply {
+            hint = getString(R.string.note_hint)
+            setText(workspaceNote.orEmpty())
+            minLines = 3
+            gravity = android.view.Gravity.TOP
+            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_MULTI_LINE
+        }
+        val pad = (20 * resources.displayMetrics.density).toInt()
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(pad, pad, pad, 0)
+            addView(input)
+        }
+        val dialog = MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.note_edit_title))
+            .setView(container)
+            .setPositiveButton(getString(R.string.save)) { _, _ ->
+                val text = input.text?.toString().orEmpty()
+                lifecycleScope.launch { repo.saveNote(tenderId, text) }
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+        if (!workspaceNote.isNullOrBlank()) {
+            dialog.setNeutralButton(getString(R.string.note_clear)) { _, _ ->
+                lifecycleScope.launch { repo.saveNote(tenderId, "") }
+            }
+        }
+        dialog.show()
+    }
+
+    private fun showAddChecklistItemDialog() {
+        val input = EditText(this).apply {
+            hint = getString(R.string.checklist_add_hint)
+            maxLines = 1
+            inputType = InputType.TYPE_CLASS_TEXT
+        }
+        val pad = (20 * resources.displayMetrics.density).toInt()
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(pad, pad, pad, 0)
+            addView(input)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.checklist_add))
+            .setView(container)
+            .setPositiveButton(getString(R.string.add)) { _, _ ->
+                val label = input.text?.toString().orEmpty()
+                if (label.isNotBlank()) {
+                    lifecycleScope.launch { repo.addChecklistItem(tenderId, label) }
+                }
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun shareBidPack() {
+        val t = tender ?: return
+        val checklist = workspaceChecklist.map { it.label to it.isDone }
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "Bid pack: ${t.title}")
+            putExtra(Intent.EXTRA_TEXT, BidPack.build(t, workspaceNote, checklist))
+        }
+        startActivity(Intent.createChooser(intent, getString(R.string.share_bid_pack)))
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -205,7 +340,7 @@ class DetailActivity : AppCompatActivity() {
         // Amendments (amended tenders only)
         bindAmendments(t)
 
-        // Documents
+        // Documents, grouped by type (notices / addenda / annexures / other)
         b.docsContainer.removeAllViews()
         if (t.documents.isEmpty()) {
             b.docsLabel.visibility = View.GONE
@@ -213,27 +348,34 @@ class DetailActivity : AppCompatActivity() {
         } else {
             b.docsLabel.visibility = View.VISIBLE
             b.noDocs.visibility = View.GONE
-            for (d in t.documents) {
-                val docView = layoutInflater.inflate(R.layout.item_document, b.docsContainer, false)
-                val titleTv = docView.findViewById<TextView>(R.id.docTitle)
-                val metaTv = docView.findViewById<TextView>(R.id.docMeta)
-                val actionBtn = docView.findViewById<View>(R.id.docAction)
-                titleTv.text = d.title
-                val mimeLabel = d.mime?.substringAfter('/')?.uppercase() ?: "FILE"
-                val size = TenderActions.formatFileSize(d.fileSize)
-                metaTv.text = "$mimeLabel${size?.let { " · $it" } ?: ""}"
+            for (group in BidPack.groupDocuments(t.documents)) {
+                val header = layoutInflater.inflate(
+                    R.layout.item_section_header, b.docsContainer, false
+                ) as TextView
+                header.text = getString(R.string.doc_group_title, group.title, group.documents.size)
+                b.docsContainer.addView(header)
+                for (d in group.documents) {
+                    val docView = layoutInflater.inflate(R.layout.item_document, b.docsContainer, false)
+                    val titleTv = docView.findViewById<TextView>(R.id.docTitle)
+                    val metaTv = docView.findViewById<TextView>(R.id.docMeta)
+                    val actionBtn = docView.findViewById<View>(R.id.docAction)
+                    titleTv.text = d.title
+                    val mimeLabel = d.mime?.substringAfter('/')?.uppercase() ?: "FILE"
+                    val size = TenderActions.formatFileSize(d.fileSize)
+                    metaTv.text = "$mimeLabel${size?.let { " · $it" } ?: ""}"
 
-                // Check if already downloaded
-                val fileName = fileNameFor(t.id, d.title, d.url, d.mime)
-                val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
-                if (file.exists()) {
-                    (actionBtn as? TextView)?.text = "✓ Open PDF"
-                    docView.setOnClickListener { openFile(file) }
-                } else {
-                    (actionBtn as? TextView)?.text = "Download"
-                    docView.setOnClickListener { downloadDocument(d.title, d.url, fileName, docView) }
+                    // Check if already downloaded
+                    val fileName = fileNameFor(t.id, d.title, d.url, d.mime)
+                    val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
+                    if (file.exists()) {
+                        (actionBtn as? TextView)?.text = "✓ Open PDF"
+                        docView.setOnClickListener { openFile(file) }
+                    } else {
+                        (actionBtn as? TextView)?.text = "Download"
+                        docView.setOnClickListener { downloadDocument(d.title, d.url, fileName, docView) }
+                    }
+                    b.docsContainer.addView(docView)
                 }
-                b.docsContainer.addView(docView)
             }
         }
 

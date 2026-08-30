@@ -98,6 +98,45 @@ class TenderRepository(context: Context) {
         prefs.edit().remove("hidden_tender_ids").apply()
     }
 
+    // ------------------------------------------------------- bid workspace
+
+    fun noteFlow(tenderId: Int): Flow<TenderNoteEntity?> = dao.noteFlow(tenderId)
+
+    fun checklistFlow(tenderId: Int): Flow<List<ChecklistItemEntity>> = dao.checklistFlow(tenderId)
+
+    suspend fun saveNote(tenderId: Int, text: String) {
+        if (text.isBlank()) {
+            dao.deleteNote(tenderId)
+        } else {
+            dao.upsertNote(TenderNoteEntity(tenderId = tenderId, note = text.trim()))
+        }
+    }
+
+    suspend fun addChecklistItem(tenderId: Int, label: String) {
+        if (label.isBlank()) return
+        dao.insertChecklistItem(
+            ChecklistItemEntity(
+                tenderId = tenderId,
+                label = label.trim(),
+                position = dao.nextChecklistPosition(tenderId)
+            )
+        )
+    }
+
+    suspend fun setChecklistDone(id: Long, done: Boolean) = dao.setChecklistDone(id, done)
+
+    suspend fun deleteChecklistItem(id: Long) = dao.deleteChecklistItem(id)
+
+    /** Seed the default checklist once, when a workspace is first opened. */
+    suspend fun ensureDefaultChecklist(tenderId: Int) {
+        if (dao.checklistCount(tenderId) > 0) return
+        BidPack.defaultChecklist().forEachIndexed { index, label ->
+            dao.insertChecklistItem(
+                ChecklistItemEntity(tenderId = tenderId, label = label, position = index)
+            )
+        }
+    }
+
     // Offline Cache
     suspend fun cacheTenders(tenders: List<Tender>) {
         val entities = tenders.map { t ->

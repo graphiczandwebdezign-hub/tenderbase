@@ -4,7 +4,13 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /** A single tender, mapped from the TenderBase JSON API. */
-data class TenderDoc(val title: String, val url: String, val mime: String?, val fileSize: Long? = null)
+data class TenderDoc(
+    val title: String,
+    val url: String,
+    val mime: String?,
+    val fileSize: Long? = null,
+    val type: String? = null
+)
 
 /** An amendment recorded for a tender (detail endpoint only). */
 data class TenderAmendment(
@@ -71,7 +77,8 @@ data class Tender(
                                 title = d.optString("title").ifEmpty { "Document" },
                                 url = url,
                                 mime = d.optString("mime_type", null),
-                                fileSize = d.optLong("file_size", -1).takeIf { it >= 0 }
+                                fileSize = d.optLong("file_size", -1).takeIf { it >= 0 },
+                                type = d.optString("type", null)?.takeIf { it.isNotEmpty() && it != "null" }
                             )
                         )
                     }

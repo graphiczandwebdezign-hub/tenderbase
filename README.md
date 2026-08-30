@@ -230,6 +230,18 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Android bid workspace — Sprint 5
+The tender detail screen gains a **Bid workspace** card (local-only Room data,
+migrated in-app v1 → v2):
+- **Checklist** per tender, seeded with a sensible bid template (register,
+  briefing, documents, pricing, submit), with live progress ("2 of 5
+  complete"); items can be added, checked and long-pressed to remove.
+- **Note** per tender (contacts, site-visit dates, pricing notes).
+- **Share bid pack** — a plain-text handover summary: meta, deadline,
+  checklist state, note, grouped documents and the tender deep link.
+Documents on the detail screen are now grouped by source type (tender
+notices, addenda & amendments, annexures, other) with counts.
+
 ### Android deadline command centre — Sprint 4
 The **Deadlines** screen unifies everything that needs action:
 - *Closing this week* — every open tender closing within 7 days (server-side,

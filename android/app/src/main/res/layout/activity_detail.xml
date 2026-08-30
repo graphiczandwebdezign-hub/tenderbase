@@ -318,6 +318,97 @@
                 </LinearLayout>
             </LinearLayout>
 
+            <!-- Bid workspace (local notes + checklist + export) -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/workspaceCard"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/surface"
+                app:strokeColor="@color/cardStroke"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/workspace_title"
+                            android:textColor="@color/text"
+                            android:textSize="15sp"
+                            android:textStyle="bold" />
+
+                        <TextView
+                            android:id="@+id/workspaceProgress"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textColor="@color/primary"
+                            android:textSize="12sp"
+                            android:textStyle="bold"
+                            tools:text="0 of 5 complete" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/workspaceNote"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:background="?attr/selectableItemBackground"
+                        android:minHeight="48dp"
+                        android:gravity="center_vertical"
+                        android:paddingTop="6dp"
+                        android:paddingBottom="6dp"
+                        android:text="@string/note_empty"
+                        android:textColor="@color/textMuted"
+                        android:textSize="13sp"
+                        android:textStyle="italic"
+                        android:contentDescription="@string/note_edit_title" />
+
+                    <LinearLayout
+                        android:id="@+id/checklistContainer"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:orientation="vertical" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addChecklistButton"
+                        style="?attr/borderlessButtonStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:minHeight="44dp"
+                        android:text="@string/checklist_add"
+                        android:textColor="@color/primary"
+                        android:textSize="13sp" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/shareBidPack"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="6dp"
+                        android:minHeight="48dp"
+                        android:text="@string/share_bid_pack"
+                        android:textSize="13sp"
+                        app:cornerRadius="20dp"
+                        app:icon="@drawable/ic_open"
+                        android:contentDescription="@string/cd_share_bid_pack" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
             <!-- Amendments -->
             <TextView
                 android:id="@+id/amendmentsLabel"
