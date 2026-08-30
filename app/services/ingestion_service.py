@@ -64,6 +64,19 @@ class IngestionService:
         max_pages: Optional[int] = None,
     ) -> SyncRun:
         """Execute one full ingestion cycle and return the SyncRun record."""
+        # Reap orphaned RUNNING rows from previously crashed/killed runs. The
+        # worker's process lock guarantees no real run is active here, so any
+        # RUNNING row is stale (e.g. an old synchronous request Render killed).
+        orphans = self.db.execute(
+            select(SyncRun).where(SyncRun.status == SyncStatus.RUNNING)
+        ).scalars().all()
+        for o in orphans:
+            o.status = SyncStatus.FAILED
+            o.completed_at = utcnow()
+            o.error_message = o.error_message or "Interrupted (process restarted before completion)."
+        if orphans:
+            self.db.commit()
+
         run = SyncRun(source=self.adapter.name, trigger=trigger, status=SyncStatus.RUNNING)
         self.db.add(run)
         self.db.commit()
@@ -76,25 +89,35 @@ class IngestionService:
         new_tender_ids: List[int] = []
         amended_tender_ids: List[int] = []
         used_sample = False
+        fetch_error: Optional[str] = None
 
+        # Fetch incrementally so a mid-stream timeout keeps whatever pages were
+        # already retrieved instead of discarding the whole run. The eTenders
+        # API is slow/flaky and often times out partway through a backfill.
+        raw_records: List[dict] = []
         try:
-            raw_records = list(
-                self.adapter.fetch_tenders(date_from=date_from, date_to=date_to, max_pages=max_pages)
-            )
+            for rec in self.adapter.fetch_tenders(
+                date_from=date_from, date_to=date_to, max_pages=max_pages
+            ):
+                raw_records.append(rec)
             log_event(logger, 20, "fetch_complete", source=self.adapter.name,
                       count=len(raw_records), trigger=trigger)
         except Exception as exc:  # noqa: BLE001 - resilience is intentional
+            fetch_error = str(exc)
             log_event(logger, 40, "source_fetch_failed", source=self.adapter.name,
-                      error=str(exc))
-            raw_records = self._maybe_sample_fallback()
-            used_sample = bool(raw_records)
-            if not used_sample:
-                # Source failed and no fallback: keep existing data untouched.
-                run.status = SyncStatus.FAILED
-                run.error_message = f"Source unavailable: {exc}"
-                run.completed_at = utcnow()
-                self.db.commit()
-                return run
+                      error=fetch_error, partial_count=len(raw_records))
+            if not raw_records:
+                # Nothing fetched at all: try the dev sample fallback.
+                raw_records = self._maybe_sample_fallback()
+                used_sample = bool(raw_records)
+                if not used_sample:
+                    # Source failed and no fallback: keep existing data untouched.
+                    run.status = SyncStatus.FAILED
+                    run.error_message = f"Source unavailable: {exc}"
+                    run.completed_at = utcnow()
+                    self.db.commit()
+                    return run
+
 
         taxonomy_service.seed_taxonomy(self.db)
         cat_map = taxonomy_service.category_map(self.db)
@@ -142,9 +165,18 @@ class IngestionService:
         run.records_failed = failed
         run.notifications_sent = notif_sent
         run.completed_at = utcnow()
-        run.status = SyncStatus.PARTIAL if failed else SyncStatus.SUCCESS
         if used_sample:
+            run.status = SyncStatus.PARTIAL if failed else SyncStatus.SUCCESS
             run.error_message = "Live source unreachable; loaded development sample data."
+        elif fetch_error:
+            # Some pages were ingested before the source timed out/errored.
+            run.status = SyncStatus.PARTIAL
+            run.error_message = (
+                f"Partial fetch ({received} records processed before source "
+                f"error): {fetch_error}"
+            )
+        else:
+            run.status = SyncStatus.PARTIAL if failed else SyncStatus.SUCCESS
         self.db.commit()
 
         log_event(logger, 20, "sync_complete", run_id=run.id, status=run.status.value,

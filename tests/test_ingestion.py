@@ -111,3 +111,25 @@ def test_normalization_categories_and_province(db):
     assert t.province == "Gauteng"
     slugs = [link.category.slug for link in t.categories]
     assert "information-technology" in slugs
+
+
+class _PartialFetchAdapter(MockSourceAdapter):
+    """Yields some records, then raises to simulate a mid-stream source timeout."""
+
+    def fetch_tenders(self, date_from=None, date_to=None, max_pages=None):
+        for rec in self._releases:
+            yield rec
+        raise TimeoutError("The read operation timed out")
+
+
+def test_partial_fetch_keeps_ingested_records(db):
+    releases = [make_release("P1", closing_iso=_future()),
+                make_release("P2", closing_iso=_future())]
+    adapter = _PartialFetchAdapter(releases)
+    run = IngestionService(db, adapter).run_sync(trigger="manual")
+    # Records fetched before the timeout are still ingested.
+    assert db.query(Tender).count() == 2
+    assert run.records_created == 2
+    # Run is reported as PARTIAL with the source error preserved.
+    assert run.status.value == "PARTIAL"
+    assert "timed out" in (run.error_message or "")

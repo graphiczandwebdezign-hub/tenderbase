@@ -37,6 +37,7 @@ from __future__ import annotations
 
 import json
 import os
+import time
 from datetime import date, datetime, timezone
 from typing import Iterable, List, Optional
 
@@ -117,9 +118,10 @@ class ETendersSourceAdapter(TenderSourceAdapter):
         with httpx.Client(timeout=timeout, follow_redirects=True, headers=headers) as client:
             for page in range(1, max_pages + 1):
                 params = dict(params_base, PageNumber=page)
-                resp = client.get(self.base_url, params=params)
-                resp.raise_for_status()
-                data = resp.json()
+                # The eTenders API is slow and intermittently times out. Retry
+                # each page a few times before letting the error propagate, so a
+                # single sluggish response does not abort the whole run.
+                data = self._get_page_with_retries(client, params, page)
                 releases = data.get("releases") if isinstance(data, dict) else None
                 if not releases:
                     break
@@ -130,6 +132,27 @@ class ETendersSourceAdapter(TenderSourceAdapter):
                     isinstance(data.get("links"), dict) and data["links"].get("next")
                 ):
                     break
+
+    def _get_page_with_retries(self, client, params, page, attempts: int = 3):
+        last_exc: Optional[Exception] = None
+        for attempt in range(1, attempts + 1):
+            try:
+                resp = client.get(self.base_url, params=params)
+                resp.raise_for_status()
+                return resp.json()
+            except (httpx.TimeoutException, httpx.TransportError) as exc:
+                last_exc = exc
+                log_event(
+                    logger, 30, "page_fetch_retry",
+                    page=page, attempt=attempt, error=str(exc),
+                )
+                if attempt < attempts:
+                    time.sleep(min(2 * attempt, 5))
+                    continue
+                raise
+        # Unreachable, but keeps type-checkers happy.
+        if last_exc:
+            raise last_exc
 
     # -------------------------------------------------------------- normalize
     def normalize_tender(self, raw: dict) -> Optional[NormalizedTender]:
