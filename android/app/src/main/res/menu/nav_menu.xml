@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <group android:checkableBehavior="single">
+        <item
+            android:id="@+id/nav_latest"
+            android:title="Latest Tenders" />
+        <item
+            android:id="@+id/nav_notifications"
+            android:title="Notifications" />
+        <item
+            android:id="@+id/nav_saved"
+            android:title="Saved Tenders" />
+        <item
+            android:id="@+id/nav_downloads"
+            android:title="Downloaded Documents" />
+    </group>
+
+    <item android:title="Preferences">
+        <menu>
+            <item
+                android:id="@+id/nav_categories"
+                android:title="My Categories" />
+            <item
+                android:id="@+id/nav_provinces"
+                android:title="My Provinces" />
+            <item
+                android:id="@+id/nav_settings"
+                android:title="Settings" />
+        </menu>
+    </item>
+
+</menu>
