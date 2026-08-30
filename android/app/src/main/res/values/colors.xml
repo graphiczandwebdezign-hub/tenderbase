@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  XML-level brand colors. The Compose design system (ui/theme/TbTheme.kt) is the
+  source of truth for app surfaces; these entries back the window background,
+  system bars and any pre-Compose chrome so the app never flashes white/black.
+-->
 <resources>
     <color name="primary">#1F6FEB</color>
     <color name="primaryDark">#134FB0</color>
     <color name="onPrimary">#FFFFFF</color>
     <color name="onPrimaryMuted">#D6E4FF</color>
-    <color name="background">#F5F7FA</color>
+    <color name="background">#EDF1F7</color>
     <color name="surface">#FFFFFF</color>
     <color name="text">#0F1520</color>
     <color name="textMuted">#37414F</color>
@@ -14,6 +19,7 @@
     <color name="cardStroke">#E4E8EF</color>
     <color name="ripple">#1A1F6FEB</color>
     <color name="iconBackground">#1F6FEB</color>
+    <color name="windowBackground">#EDF1F7</color>
 
     <!-- Status badge palette: tinted background + dark foreground (AA contrast,
          never colour-only — badges always carry a text label). -->
@@ -31,5 +37,5 @@
     <color name="tagText">#3D4854</color>
 
     <!-- Skeleton placeholders. -->
-    <color name="skeleton">#E7EAF0</color>
+    <color name="skeleton">#E0E6EF</color>
 </resources>

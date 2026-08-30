@@ -52,6 +52,43 @@ enum class DateFilter(val key: String) {
     }
 }
 
+/**
+ * Document-availability refinement (filter sheet + the "With documents"
+ * quick chip). Mapped onto the API's `has_documents` / `document_type`
+ * params so counts and pagination stay server-accurate; [passes] mirrors the
+ * semantics locally for cached/offline rows.
+ */
+enum class DocumentFilter(val key: String) {
+    ANY("any"),
+    HAS_DOCS("has_docs"),
+    HAS_NOTICE("has_notice"),
+    HAS_SPEC("has_spec");
+
+    companion object {
+        fun fromKey(key: String?): DocumentFilter =
+            entries.firstOrNull { it.key == key } ?: ANY
+    }
+}
+
+/** True when [doc] looks like a tender notice (type or title word match). */
+private fun isNoticeDoc(doc: TenderDoc): Boolean {
+    val haystack = listOfNotNull(doc.type, doc.title).joinToString(" ").lowercase()
+    return "notice" in haystack || "advertisement" in haystack
+}
+
+/** True when [doc] looks like the TOR / specification / scope of work. */
+private fun isSpecDoc(doc: TenderDoc): Boolean {
+    val haystack = listOfNotNull(doc.type, doc.title).joinToString(" ").lowercase()
+    return listOf("spec", "tor", "terms of reference", "scope of work", "brief").any { it in haystack }
+}
+
+fun DocumentFilter.passes(t: Tender): Boolean = when (this) {
+    DocumentFilter.ANY -> true
+    DocumentFilter.HAS_DOCS -> t.documents.isNotEmpty()
+    DocumentFilter.HAS_NOTICE -> t.documents.any { isNoticeDoc(it) }
+    DocumentFilter.HAS_SPEC -> t.documents.any { isSpecDoc(it) }
+}
+
 data class SearchFilters(
     val query: String = "",
     val provinces: List<String> = emptyList(),
@@ -62,14 +99,20 @@ data class SearchFilters(
     val closingAfter: String? = null,
     val closingBefore: String? = null,
     val sources: List<String> = emptyList(),
-    val sort: SortOption = SortOption.NEWEST
+    val sort: SortOption = SortOption.NEWEST,
+    /** Substring match on procuring organisation (server-side param). */
+    val organisation: String? = null,
+    /** On-device refinement: which documents a row must offer. */
+    val docs: DocumentFilter = DocumentFilter.ANY
 ) {
 
     /** Number of active facet filters (query excluded) — drives the badge. */
     fun activeFilterCount(): Int =
         provinces.size + categories.size + sources.size +
             (if (status != null) 1 else 0) +
-            (if (dateFilter != DateFilter.ANY) 1 else 0)
+            (if (dateFilter != DateFilter.ANY) 1 else 0) +
+            (if (!organisation.isNullOrBlank()) 1 else 0) +
+            (if (docs != DocumentFilter.ANY) 1 else 0)
 
     fun hasActiveFilters(): Boolean = activeFilterCount() > 0
 
@@ -86,6 +129,10 @@ data class SearchFilters(
         if (provinces.isNotEmpty()) params["province"] = provinces.joinToString(",")
         if (categories.isNotEmpty()) params["category"] = categories.joinToString(",")
         if (sources.isNotEmpty()) params["source"] = sources.joinToString(",")
+        if (organisation != null && organisation.isNotBlank()) {
+            params["organisation"] = organisation.trim()
+        }
+
         status?.let { params["status"] = it.key }
         when (dateFilter) {
             DateFilter.PUBLISHED_TODAY -> {
@@ -110,6 +157,18 @@ data class SearchFilters(
             }
             DateFilter.ANY -> Unit
         }
+        when (docs) {
+            DocumentFilter.ANY -> Unit
+            DocumentFilter.HAS_DOCS -> params["has_documents"] = "true"
+            DocumentFilter.HAS_NOTICE -> {
+                params["has_documents"] = "true"
+                params["document_type"] = "notice"
+            }
+            DocumentFilter.HAS_SPEC -> {
+                params["has_documents"] = "true"
+                params["document_type"] = "specification"
+            }
+        }
         // Relevance without a query is meaningless — the API falls back to
         // newest, so say that honestly instead of pretending to rank.
         val sortKey = if (sort == SortOption.RELEVANCE && query.isBlank()) SortOption.NEWEST.key else sort.key
@@ -130,6 +189,8 @@ data class SearchFilters(
         closingBefore?.let { o.put("cb", it) }
         o.put("sources", JSONArray(sources))
         o.put("sort", sort.key)
+        if (!organisation.isNullOrBlank()) o.put("org", organisation)
+        if (docs != DocumentFilter.ANY) o.put("docs", docs.key)
         return o.toString()
     }
 
@@ -169,8 +230,19 @@ data class SearchFilters(
                 }
             )
         }
+        if (filtersHasOrg()) parts.add("org: $organisation")
+        if (docs != DocumentFilter.ANY) parts.add(docsLabel())
         if (dateFilter != DateFilter.ANY) parts.add(dateLabel())
         return parts.joinToString(" · ")
+    }
+
+    private fun filtersHasOrg() = organisation != null && organisation.isNotBlank()
+
+    private fun docsLabel(): String = when (docs) {
+        DocumentFilter.ANY -> ""
+        DocumentFilter.HAS_DOCS -> "Has documents"
+        DocumentFilter.HAS_NOTICE -> "Has notice"
+        DocumentFilter.HAS_SPEC -> "Has TOR/spec"
     }
 
     private fun dateLabel(): String = when (dateFilter) {
@@ -198,7 +270,9 @@ data class SearchFilters(
                     closingAfter = o.optString("ca").ifEmpty { null },
                     closingBefore = o.optString("cb").ifEmpty { null },
                     sources = o.optJSONArray("sources").toStringList(),
-                    sort = SortOption.fromKey(o.optString("sort").ifEmpty { SortOption.NEWEST.key })
+                    sort = SortOption.fromKey(o.optString("sort").ifEmpty { SortOption.NEWEST.key }),
+                    organisation = o.optString("org").ifEmpty { null },
+                    docs = DocumentFilter.fromKey(o.optString("docs").ifEmpty { null })
                 )
             } catch (_: Exception) {
                 SearchFilters()
@@ -222,6 +296,12 @@ data class SearchFilters(
             if (dateFilter == DateFilter.ANY && (closingAfter != null || closingBefore != null)) {
                 dateFilter = DateFilter.CLOSING_CUSTOM
             }
+            val docs = when {
+                payload.optString("document_type").contains("notice", true) -> DocumentFilter.HAS_NOTICE
+                payload.optString("document_type").isNotEmpty() -> DocumentFilter.HAS_SPEC
+                payload.optBoolean("has_documents", false) -> DocumentFilter.HAS_DOCS
+                else -> DocumentFilter.ANY
+            }
             return SearchFilters(
                 query = payload.optString("search"),
                 provinces = list("province"),
@@ -230,7 +310,9 @@ data class SearchFilters(
                 status = StatusFilter.fromKey(payload.optString("status").ifEmpty { null }),
                 dateFilter = dateFilter,
                 closingAfter = closingAfter,
-                closingBefore = closingBefore
+                closingBefore = closingBefore,
+                organisation = payload.optString("organisation").ifEmpty { null },
+                docs = docs
             )
         }
 

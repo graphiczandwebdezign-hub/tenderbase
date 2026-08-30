@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!--
-      Base window theme. The Compose screens draw all app surfaces themselves
-      (see ui/theme/TbTheme.kt); this theme only needs to give the window the
-      right background + transparent system bars so edge-to-edge looks
-      intentional in both light and dark.
-    -->
+    <!-- Night window theme: dark window background + light-on-dark system bars. -->
     <style name="AppTheme" parent="Theme.Material3.DayNight.NoActionBar">
         <item name="colorPrimary">@color/primary</item>
         <item name="colorPrimaryDark">@color/primaryDark</item>
@@ -16,7 +11,7 @@
         <item name="android:windowBackground">@color/windowBackground</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
         <item name="android:navigationBarColor">@android:color/transparent</item>
-        <item name="android:windowLightStatusBar">true</item>
-        <item name="android:windowLightNavigationBar">true</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowLightNavigationBar">false</item>
     </style>
 </resources>

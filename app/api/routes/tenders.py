@@ -75,6 +75,13 @@ def list_tenders(
     closing_after: Optional[date] = Query(None),
     advertised_after: Optional[date] = Query(None),
     advertised_before: Optional[date] = Query(None),
+    has_documents: Optional[bool] = Query(
+        None, description="Only tenders with attached documents (true) or without (false)"
+    ),
+    document_type: Optional[str] = Query(
+        None,
+        description="Substring match on attached document type/title, e.g. 'notice' or 'specification'",
+    ),
 ):
     """List active tenders by default. Supply `status` to include others.
 
@@ -89,6 +96,7 @@ def list_tenders(
             source=source, search=search, closing_within=closing_within,
             closing_before=closing_before, closing_after=closing_after,
             advertised_after=advertised_after, advertised_before=advertised_before,
+            has_documents=has_documents, document_type=document_type,
             order=sort or "newest",
         )
     except InvalidParameter as exc:
@@ -103,6 +111,7 @@ def list_tenders(
                 ("closing_within", closing_within), ("closing_before", closing_before),
                 ("closing_after", closing_after), ("advertised_after", advertised_after),
                 ("advertised_before", advertised_before),
+                ("has_documents", has_documents), ("document_type", document_type),
             ) if value is not None
         },
         total,

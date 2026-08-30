@@ -3,6 +3,7 @@ package com.tenderbase.app
 import android.content.Context
 import android.content.SharedPreferences
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.map
 import org.json.JSONObject
 
 class TenderRepository(context: Context) {
@@ -107,6 +108,37 @@ class TenderRepository(context: Context) {
         prefs.getStringSet("reminded_tender_ids", emptySet())
             ?.mapNotNull { it.toIntOrNull() }?.toSet() ?: emptySet()
 
+    // -------------------------------------------------- recent searches (1.2)
+
+    fun recentSearches(): List<String> =
+        RecentSearches.decode(prefs.getString("recent_searches", null))
+
+    fun addRecentSearch(query: String) {
+        if (query.isBlank()) return
+        prefs.edit()
+            .putString("recent_searches", RecentSearches.add(prefs.getString("recent_searches", null), query))
+            .apply()
+    }
+
+    fun removeRecentSearch(query: String) {
+        prefs.edit()
+            .putString("recent_searches", RecentSearches.remove(prefs.getString("recent_searches", null), query))
+            .apply()
+    }
+
+    fun clearRecentSearches() {
+        prefs.edit().putString("recent_searches", RecentSearches.clear()).apply()
+    }
+
+    // ------------------------------------------------ last feed update (1.2)
+
+    /** Timestamp of the last successful live fetch ("Updated 12 min ago"). */
+    fun lastFeedUpdate(): Long = prefs.getLong("last_feed_update", 0L)
+
+    fun setLastFeedUpdate(ts: Long) {
+        prefs.edit().putLong("last_feed_update", ts).apply()
+    }
+
     fun markReminded(id: Int) {
         prefs.edit()
             .putStringSet(
@@ -121,6 +153,30 @@ class TenderRepository(context: Context) {
     fun noteFlow(tenderId: Int): Flow<TenderNoteEntity?> = dao.noteFlow(tenderId)
 
     fun checklistFlow(tenderId: Int): Flow<List<ChecklistItemEntity>> = dao.checklistFlow(tenderId)
+
+    /** Checklist totals per tender for the saved list (live Room flow). */
+    fun checklistStatsFlow(): Flow<List<ChecklistStats>> = dao.checklistStatsFlow()
+
+    /** Ids of tenders with a workspace note. */
+    fun notedTenderIdsFlow(): Flow<Set<Int>> =
+        dao.notedTenderIdsFlow().map { it.toSet() }
+
+    suspend fun renameChecklistItem(id: Long, label: String) {
+        if (label.isNotBlank()) dao.renameChecklistItem(id, label.trim())
+    }
+
+    /** Swap an item with its neighbour (up = toward the top). No-op at edges. */
+    suspend fun moveChecklistItem(tenderId: Int, id: Long, up: Boolean) {
+        val items = dao.checklistItems(tenderId)
+        val idx = items.indexOfFirst { it.id == id }
+        if (idx < 0) return
+        val swapWith = if (up) idx - 1 else idx + 1
+        if (swapWith !in items.indices) return
+        val a = items[idx]
+        val b = items[swapWith]
+        dao.setChecklistPosition(a.id, b.position)
+        dao.setChecklistPosition(b.id, a.position)
+    }
 
     suspend fun saveNote(tenderId: Int, text: String) {
         if (text.isBlank()) {

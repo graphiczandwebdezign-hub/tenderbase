@@ -135,4 +135,48 @@ class FiltersTest {
         assertEquals("2025-12-31", SearchFilters.minusDays("2026-01-01", 1))
         assertEquals("2026-08-01", SearchFilters.minusDays("2026-08-30", 29))
     }
+
+    @Test
+    fun `organisation and document filters reach the API query`() {
+        val f = SearchFilters(organisation = "  City of Tshwane  ", docs = DocumentFilter.HAS_DOCS)
+        val q = f.toQueryParams("2026-08-30")
+        assertEquals("City of Tshwane", q["organisation"])
+        assertEquals("true", q["has_documents"])
+        assertFalse(q.containsKey("document_type"))
+
+        val notice = SearchFilters(docs = DocumentFilter.HAS_NOTICE).toQueryParams("2026-08-30")
+        assertEquals("true", notice["has_documents"])
+        assertEquals("notice", notice["document_type"])
+
+        val spec = SearchFilters(docs = DocumentFilter.HAS_SPEC).toQueryParams("2026-08-30")
+        assertEquals("specification", spec["document_type"])
+
+        // ANY adds nothing.
+        val any = SearchFilters().toQueryParams("2026-08-30")
+        assertFalse(any.containsKey("has_documents"))
+        assertFalse(any.containsKey("organisation"))
+    }
+
+    @Test
+    fun `document filter counts as an active filter chip source`() {
+        assertTrue(SearchFilters(docs = DocumentFilter.HAS_DOCS).hasActiveFilters())
+        assertFalse(SearchFilters(docs = DocumentFilter.ANY).hasActiveFilters())
+        assertEquals(1, SearchFilters(organisation = "NHLS").activeFilterCount())
+    }
+
+    @Test
+    fun `saved search payload round-trips the new filters`() {
+        val f = SearchFilters(
+            query = "security",
+            organisation = "SAPS",
+            docs = DocumentFilter.HAS_NOTICE,
+            status = StatusFilter.CLOSING_SOON,
+        )
+        val back = SearchFilters.fromSavedSearchPayload(f.toSavedSearchPayload())
+        assertEquals(f.query, back.query)
+        assertEquals(f.organisation, back.organisation)
+        assertEquals(f.docs, back.docs)
+        assertEquals(f.status, back.status)
+    }
 }
+

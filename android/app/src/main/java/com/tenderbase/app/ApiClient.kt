@@ -92,6 +92,15 @@ object ApiClient {
         Tender.fromJson(JSONObject(body))
     }
 
+    /** Lightweight health probe (settings screen status pill). */
+    suspend fun healthOk(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            get("$BASE_URL/api/v1/health").isNotEmpty()
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     /** GET /api/v1/categories -> list of {slug,name} as display names. */
     suspend fun fetchCategories(): List<String> = withContext(Dispatchers.IO) {
         try {
