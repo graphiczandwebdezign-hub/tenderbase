@@ -9,7 +9,7 @@ from __future__ import annotations
 import os
 import secrets
 
-from fastapi import APIRouter, Depends, Form, Request, status
+from fastapi import APIRouter, BackgroundTasks, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
@@ -78,9 +78,10 @@ def dashboard_page(request: Request, db: Session = Depends(get_db)):
 
 
 @router.post("/sync")
-def dashboard_sync(request: Request):
+def dashboard_sync(request: Request, background_tasks: BackgroundTasks):
     if not _authed(request):
         return RedirectResponse(url="/admin/login", status_code=status.HTTP_303_SEE_OTHER)
     if not sync_worker.is_running():
-        sync_worker.run_once(trigger="manual")
+        # Run in the background so the dashboard responds immediately.
+        background_tasks.add_task(sync_worker.run_once, trigger="manual")
     return RedirectResponse(url="/admin", status_code=status.HTTP_303_SEE_OTHER)

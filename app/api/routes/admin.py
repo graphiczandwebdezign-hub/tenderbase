@@ -8,7 +8,7 @@ from __future__ import annotations
 from datetime import date, datetime, timedelta, timezone
 from typing import List, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
@@ -100,14 +100,23 @@ def sync_status(db: Session = Depends(get_db)):
 
 
 @router.post("/sync", summary="Trigger a manual sync")
-def trigger_sync(db: Session = Depends(get_db)):
+def trigger_sync(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+    """Start a sync in the background and return immediately.
+
+    Ingestion can take a while (network fetch + normalization), so the request
+    does not block on it. Poll ``GET /api/v1/admin/sync-status`` or
+    ``GET /api/v1/admin/sync-runs`` to follow progress and see the result.
+    """
     if sync_worker.is_running():
         raise HTTPException(
             status_code=status.HTTP_409_CONFLICT,
             detail={"code": "SYNC_IN_PROGRESS", "message": "A sync is already running"},
         )
-    run = sync_worker.run_once(trigger="manual")
-    return SyncRunOut.model_validate(run)
+    background_tasks.add_task(sync_worker.run_once, trigger="manual")
+    return {
+        "status": "STARTED",
+        "message": "Sync started in the background. Check /api/v1/admin/sync-runs for the result.",
+    }
 
 
 @router.get("/sync-runs", response_model=List[SyncRunOut], summary="Sync run history")

@@ -110,7 +110,11 @@ class ETendersSourceAdapter(TenderSourceAdapter):
             "Accept": "application/json, text/plain, */*",
         }
 
-        with httpx.Client(timeout=self.timeout, follow_redirects=True, headers=headers) as client:
+        # Fast-fail on connect so a blocked/unreachable host errors quickly
+        # instead of hanging the request for the full read timeout.
+        timeout = httpx.Timeout(self.timeout, connect=10.0)
+
+        with httpx.Client(timeout=timeout, follow_redirects=True, headers=headers) as client:
             for page in range(1, max_pages + 1):
                 params = dict(params_base, PageNumber=page)
                 resp = client.get(self.base_url, params=params)
