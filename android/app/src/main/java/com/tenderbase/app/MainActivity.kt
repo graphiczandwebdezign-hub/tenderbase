@@ -681,7 +681,9 @@ class MainActivity : AppCompatActivity() {
             text = getString(R.string.clear_all)
             isCloseIconVisible = false
             setOnClickListener {
-                filters = filters.copy(
+                // `filters` on the Chip receiver (TextView.getFilters) shadows
+                // the activity property — qualify explicitly.
+                this@MainActivity.filters = this@MainActivity.filters.copy(
                     provinces = emptyList(), categories = emptyList(), sources = emptyList(),
                     status = null, dateFilter = DateFilter.ANY,
                     closingAfter = null, closingBefore = null

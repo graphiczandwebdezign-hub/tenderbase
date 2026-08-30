@@ -220,7 +220,7 @@ class DeadlinesActivity : AppCompatActivity() {
             }
         }
 
-        class HeaderVH(v: View) : RecyclerView.ViewHolder(v) {
+        inner class HeaderVH(v: View) : RecyclerView.ViewHolder(v) {
             val title: TextView = v.findViewById(R.id.sectionTitle)
         }
 
