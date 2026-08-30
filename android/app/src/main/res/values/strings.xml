@@ -131,7 +131,7 @@
     <string name="workspace_restore_body">Replaces the note and checklist on this device with the server backup for tenders you have saved. Anything newer on this device will be overwritten.</string>
     <string name="workspace_restore_confirm">Restore</string>
     <string name="workspace_restore_done">%1$d workspaces restored</string>
-    <string name="workspace_restore_failed">Couldn't reach the server — nothing was changed</string>
+    <string name="workspace_restore_failed">Couldn\'t reach the server — nothing was changed</string>
     <string name="workspace_restore_none">Nothing to restore yet</string>
     <string name="reminder_title">Tender closing soon</string>
     <string name="reminder_body">%1$s — %2$s</string>
