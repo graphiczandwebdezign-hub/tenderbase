@@ -9,33 +9,73 @@ import com.google.android.material.chip.Chip
 import com.google.android.material.chip.ChipGroup
 
 class TenderAdapter(
-    private var items: List<Tender>,
+    initialItems: List<Tender>,
     private val onClick: (Tender) -> Unit
-) : RecyclerView.Adapter<TenderAdapter.VH>() {
+) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
+
+    private val items = initialItems.toMutableList()
+    private var showFooter = false
+
+    companion object {
+        private const val TYPE_ITEM = 0
+        private const val TYPE_FOOTER = 1
+    }
 
     fun submit(newItems: List<Tender>) {
-        items = newItems
+        items.clear()
+        items.addAll(newItems)
+        showFooter = false
         notifyDataSetChanged()
     }
 
-    class VH(v: View) : RecyclerView.ViewHolder(v) {
-        val title: TextView = v.findViewById(R.id.tvTitle)
-        val org: TextView = v.findViewById(R.id.tvOrg)
-        val province: TextView = v.findViewById(R.id.tvProvince)
-        val closes: TextView = v.findViewById(R.id.tvCloses)
-        val chips: ChipGroup = v.findViewById(R.id.chipGroup)
+    fun append(newItems: List<Tender>) {
+        val start = items.size
+        items.addAll(newItems)
+        if (showFooter) {
+            showFooter = false
+            notifyItemRangeInserted(start, newItems.size)
+            notifyItemRemoved(start + newItems.size)
+        } else {
+            notifyItemRangeInserted(start, newItems.size)
+        }
     }
 
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
-        val v = LayoutInflater.from(parent.context)
-            .inflate(R.layout.item_tender, parent, false)
-        return VH(v)
+    fun showFooter() {
+        if (showFooter) return
+        showFooter = true
+        notifyItemInserted(items.size)
     }
 
-    override fun getItemCount() = items.size
+    fun hideFooter() {
+        if (!showFooter) return
+        showFooter = false
+        notifyItemRemoved(items.size)
+    }
 
-    override fun onBindViewHolder(holder: VH, position: Int) {
-        val t = items[position]
+    override fun getItemCount() = items.size + if (showFooter) 1 else 0
+
+    override fun getItemViewType(position: Int): Int =
+        if (position >= items.size) TYPE_FOOTER else TYPE_ITEM
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
+        return if (viewType == TYPE_FOOTER) {
+            val v = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_load_more, parent, false)
+            FooterVH(v)
+        } else {
+            val v = LayoutInflater.from(parent.context)
+                .inflate(R.layout.item_tender, parent, false)
+            VH(v)
+        }
+    }
+
+    override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
+        if (holder is VH) {
+            bindItem(holder, items[position])
+        }
+    }
+
+    private fun bindItem(holder: VH, t: Tender) {
         holder.title.text = t.title
         holder.org.text = t.organisation ?: "Unknown organisation"
 
@@ -66,4 +106,14 @@ class TenderAdapter(
 
         holder.itemView.setOnClickListener { onClick(t) }
     }
+
+    class VH(v: View) : RecyclerView.ViewHolder(v) {
+        val title: TextView = v.findViewById(R.id.tvTitle)
+        val org: TextView = v.findViewById(R.id.tvOrg)
+        val province: TextView = v.findViewById(R.id.tvProvince)
+        val closes: TextView = v.findViewById(R.id.tvCloses)
+        val chips: ChipGroup = v.findViewById(R.id.chipGroup)
+    }
+
+    class FooterVH(v: View) : RecyclerView.ViewHolder(v)
 }
