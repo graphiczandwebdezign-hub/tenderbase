@@ -7,12 +7,10 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from app.core import normalization as norm
 from app.core.security import require_api_key
 from app.database.database import get_db
 from app.database.models import (
     User,
-    UserPreference,
     NotificationToken,
     Category,
     Province,
@@ -23,9 +21,6 @@ from app.schemas.notifications import (
     DeviceRegisterIn,
     DeviceUnregisterIn,
     DeviceOut,
-    PreferencesIn,
-    PreferencesOut,
-    PreferenceItem,
     SaveTenderIn,
     ChecklistItem,
     WorkspaceIn,
