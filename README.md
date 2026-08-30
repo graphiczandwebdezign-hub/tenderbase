@@ -230,6 +230,23 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Ingestion hardening & alert digests — Sprint 8
+- **Closing-date recovery**: when a source publishes no structured deadline,
+  the pipeline extracts it from title/description text ("Closing date:
+  12 September 2026 at 11:00"; ISO, day-month-year and dd/mm/yyyy formats;
+  keyword-proximate dates win; date-only means 23:59 SAST).
+- **Municipality detection**: ~35 SA municipalities (metros + notable locals,
+  with aliases) are recognised in org/region/title/description — filling the
+  municipality field and serving as a province fallback.
+- `POST /admin/re-enrich[?dry_run=true]`: backfills those heuristics over
+  existing incomplete tenders (never overwrites; sets expiry on recovered
+  deadlines), shrinking the gaps surfaced by `/admin/data-quality`.
+- **Alert digests**: a sync run's alerts collapse into ONE push per
+  (user, type) — "3 new tenders match your alerts — Including: …, …, and 1
+  more". Single alerts keep the classic per-tender message with its deep
+  link; per-(user, tender) events still exist for dedup/audit.
+  Disable with `DIGEST_NOTIFICATIONS=false`.
+
 ### Admin analytics & data quality — Sprint 6+1
 - `GET /admin/analytics/searches?days=&top=` — anonymous discovery telemetry
   from the public list endpoint: totals, zero-result searches, daily series,

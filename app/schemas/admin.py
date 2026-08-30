@@ -90,6 +90,14 @@ class DataQualityOut(BaseModel):
     sources: List[SourceQualityOut]
 
 
+class ReEnrichOut(BaseModel):
+    scanned: int
+    province_filled: int
+    municipality_filled: int
+    closing_filled: int
+    dry_run: bool
+
+
 class TenderUpdateIn(BaseModel):
     status: Optional[str] = None
     title: Optional[str] = None

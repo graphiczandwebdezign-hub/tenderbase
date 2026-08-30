@@ -14,6 +14,7 @@ from sqlalchemy import func, select
 from sqlalchemy.orm import Session
 
 from app.api.serializers import serialize_tender
+from app.core.config import settings
 from app.core.security import require_admin, generate_api_key, hash_key
 from app.core.timeutils import utcnow
 from app.database.database import get_db
@@ -41,10 +42,13 @@ from app.schemas.admin import (
     SourceQualityOut,
     TermStat,
     DailyCount,
+    ReEnrichOut,
 )
 from app.schemas.common import Paginated, paginate
 from app.schemas.tender import TenderOut
 from app.services.tender_service import TenderService
+from app.core import normalization as norm
+from app.core.date_extraction import extract_closing
 from app.workers import sync_worker
 
 router = APIRouter(prefix="/admin", tags=["admin"], dependencies=[Depends(require_admin)])
@@ -427,3 +431,64 @@ def data_quality(db: Session = Depends(get_db)):
     ]
     sources.sort(key=lambda s: (s.completeness, -s.total))
     return DataQualityOut(overall=_source_quality("(all)", tenders), sources=sources)
+
+@router.post(
+    "/re-enrich",
+    response_model=ReEnrichOut,
+    summary="Re-run extraction heuristics on incomplete tenders",
+)
+def re_enrich(
+    dry_run: bool = Query(False, description="Count fixes without applying them"),
+    db: Session = Depends(get_db),
+):
+    """Sprint 8 backfill: re-run the province/municipality/closing-date
+    heuristics over tenders that are missing those fields. Existing values are
+    never overwritten; the goal is to shrink the gaps surfaced by
+    ``/admin/data-quality`` without waiting for sources to republish."""
+    tenders = db.execute(select(Tender)).scalars().all()
+    scanned = province_filled = municipality_filled = closing_filled = 0
+
+    for t in tenders:
+        needs_province = not t.province
+        needs_municipality = not t.municipality
+        needs_closing = t.closing_at is None
+        if not (needs_province or needs_municipality or needs_closing):
+            continue
+        scanned += 1
+
+        municipality = norm.detect_municipality(t.organisation, t.title, t.description)
+        province = None
+        if needs_province:
+            province = norm.normalize_province(t.organisation, t.title, t.description)
+            if province is None and municipality:
+                province = municipality[1]
+
+        closing = (
+            extract_closing(t.title, t.description) if needs_closing else None
+        )
+
+        if municipality and needs_municipality:
+            municipality_filled += 1
+            if not dry_run:
+                t.municipality = municipality[0]
+        if province:
+            province_filled += 1
+            if not dry_run:
+                t.province = norm.province_name(province)
+        if closing:
+            closing_filled += 1
+            if not dry_run:
+                t.closing_date = closing.date()
+                t.closing_time = closing.timetz().replace(tzinfo=None)
+                t.closing_at = closing
+                t.expires_at = closing + timedelta(days=settings.tender_retention_days)
+
+    if not dry_run:
+        db.commit()
+    return ReEnrichOut(
+        scanned=scanned,
+        province_filled=province_filled,
+        municipality_filled=municipality_filled,
+        closing_filled=closing_filled,
+        dry_run=dry_run,
+    )

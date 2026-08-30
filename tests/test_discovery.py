@@ -247,8 +247,10 @@ def test_facets_exclude_closed_tenders(client, db):
 
 
 def test_municipality_substring_filter(client, db):
+    # Sprint 8: ingestion auto-detects municipality from the org name, so the
+    # ingested record already carries eThekwini; the manual row uses another.
     _seed([make_release("MUN1", closing_iso=_future())])
-    _insert(db, title="Municipal works", municipality="eThekwini")
+    _insert(db, title="Municipal works", municipality="uMhlathuze")
     assert client.get(f"{API}/tenders?municipality=ethekwini").json()["pagination"]["total"] == 1
 
 
