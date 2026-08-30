@@ -10,6 +10,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.webkit.MimeTypeMap
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
@@ -21,6 +22,8 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tenderbase.app.databinding.ActivityDetailBinding
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
@@ -112,7 +115,7 @@ class DetailActivity : AppCompatActivity() {
     private fun renderWorkspaceNote() {
         val note = workspaceNote
         b.workspaceNote.text = note?.takeIf { it.isNotBlank() } ?: getString(R.string.note_empty)
-        b.workspaceNote.paint.isItalic = note.isNullOrBlank()
+        b.workspaceNote.paint.textSkewX = if (note.isNullOrBlank()) 0f else -0.25f
     }
 
     private fun renderChecklist() {

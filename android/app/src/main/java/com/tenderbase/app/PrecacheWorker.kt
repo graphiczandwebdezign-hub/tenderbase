@@ -44,7 +44,7 @@ class PrecacheWorker(
         }
     }
 
-    private fun remindClosingDeadlines(repo: TenderRepository) {
+    private suspend fun remindClosingDeadlines(repo: TenderRepository) {
         val saved = repo.getSavedTenders().map { it.toTender() }
         val reminded = repo.remindedTenderIds()
         val due = DeadlineReminders.due(saved, reminded)
@@ -80,7 +80,7 @@ class PrecacheWorker(
                     )
                 )
                 .setStyle(
-                    NotificationCompat.BigTextStyle.bigText(
+                    NotificationCompat.BigTextStyle().bigText(
                         applicationContext.getString(
                             R.string.reminder_body,
                             tender.title,
