@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Simple self-contained launcher icon: a blue rounded square with a white
+     document/tender glyph. Vector art means no PNG mipmap folders to manage. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <path
+        android:fillColor="#1F6FEB"
+        android:pathData="M0,20a20,20 0 0,1 20,-20h68a20,20 0 0,1 20,20v68a20,20 0 0,1 -20,20h-68a20,20 0 0,1 -20,-20z" />
+
+    <!-- Document body -->
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M38,26h24l14,14v42a4,4 0 0,1 -4,4h-34a4,4 0 0,1 -4,-4v-52a4,4 0 0,1 4,-4z" />
+
+    <!-- Folded corner -->
+    <path
+        android:fillColor="#CBD9F5"
+        android:pathData="M62,26l14,14h-14z" />
+
+    <!-- Text lines -->
+    <path
+        android:fillColor="#1F6FEB"
+        android:pathData="M42,50h28v4h-28z" />
+    <path
+        android:fillColor="#1F6FEB"
+        android:pathData="M42,60h28v4h-28z" />
+    <path
+        android:fillColor="#1F6FEB"
+        android:pathData="M42,70h18v4h-18z" />
+</vector>

@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TenderBase</string>
+    <string name="error_title">Can\'t reach TenderBase</string>
+    <string name="load_error">Could not load %1$s.\n\nCheck your connection. If the server has been idle it may take up to a minute to wake up — tap Retry.</string>
+    <string name="retry">Retry</string>
+</resources>

@@ -1,0 +1,40 @@
+plugins {
+    id 'com.android.application'
+}
+
+android {
+    namespace 'com.tenderbase.app'
+    compileSdk 34
+
+    defaultConfig {
+        applicationId "com.tenderbase.app"
+        minSdk 24
+        targetSdk 34
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        debug {
+            // Debug builds are automatically signed with the Android debug
+            // keystore, so `assembleDebug` produces an installable, signed APK
+            // with no extra configuration.
+            applicationIdSuffix ".debug"
+            debuggable true
+        }
+        release {
+            minifyEnabled false
+        }
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_17
+        targetCompatibility JavaVersion.VERSION_17
+    }
+}
+
+// No third-party dependencies on purpose: this app uses only the Android
+// framework (WebView + Activity), which keeps the build fast and dependency
+// resolution trivial.
+dependencies {
+}
