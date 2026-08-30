@@ -308,7 +308,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun fetchPage(page: Int): ApiClient.Page = ApiClient.fetchTenders(
+    private suspend fun fetchPage(page: Int): ApiClient.Page = ApiClient.fetchTenders(
         page = page, limit = 100,
         search = currentSearch,
         category = categoriesFilter(),
