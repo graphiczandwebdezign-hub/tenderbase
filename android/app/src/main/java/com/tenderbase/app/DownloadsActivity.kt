@@ -92,7 +92,7 @@ class DownloadsActivity : AppCompatActivity() {
     }
 
     class DownloadAdapter(
-        private var files: List<File>,
+        private var files: List<File> = emptyList(),
         private val onOpen: (File) -> Unit,
         private val onShare: (File) -> Unit,
         private val onDelete: (File) -> Unit
