@@ -230,6 +230,21 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Admin analytics & data quality — Sprint 6+1
+- `GET /admin/analytics/searches?days=&top=` — anonymous discovery telemetry
+  from the public list endpoint: totals, zero-result searches, daily series,
+  top terms (normalised, with avg results) and facet usage. Zero-result terms
+  are the data-quality to-do list.
+- `GET /admin/analytics/saved-searches` — volume, alert uptake, distinct
+  users, top embedded terms/filters.
+- `GET /admin/data-quality` — per-source completeness: missing closing dates,
+  provinces, categories, organisation, description, documents, plus tenders
+  still open past their deadline; sorted worst-first.
+- `/admin/dashboard` gains `saved_searches` + `searches_last_7d` counters.
+- Telemetry is anonymous (no user/device ids), written off-request via a
+  background task on its own session, and never fails a discovery request.
+  Migration `f5c9d1e8b3a4` adds `search_events`.
+
 ### Workspace backup & offline reliability — Sprint 6
 - `GET /api/v1/notifications/saved?client_id=…` — the caller's saved tenders
   with their backed-up workspace (note + checklist).

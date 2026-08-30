@@ -4,13 +4,15 @@ from __future__ import annotations
 from datetime import date
 from typing import Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+import json as _json
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.api.serializers import serialize_tender, serialize_tender_detail
 from app.core.config import settings
 from app.core.security import require_api_key
-from app.database.database import get_db
+from app.database.database import SessionLocal, get_db
 from app.schemas.common import Paginated, paginate
 from app.schemas.tender import TenderOut, TenderDetailOut
 from app.services.tender_service import SORT_OPTIONS, InvalidParameter, TenderService
@@ -31,8 +33,32 @@ def _bad_request(exc: InvalidParameter) -> HTTPException:
     )
 
 
+def _record_search_event(
+    endpoint: str, search: Optional[str], filters: dict, results_count: int
+) -> None:
+    """Anonymous telemetry write on its own session; never fails a request."""
+    import logging
+
+    from app.database.models import SearchEvent
+
+    try:
+        with SessionLocal() as db:
+            db.add(
+                SearchEvent(
+                    endpoint=endpoint,
+                    query_text=(search or "").strip() or None,
+                    filters_json=_json.dumps(filters) if filters else None,
+                    results_count=results_count,
+                )
+            )
+            db.commit()
+    except Exception:  # noqa: BLE001 - telemetry must never break discovery
+        logging.getLogger(__name__).debug("search event write failed", exc_info=True)
+
+
 @router.get("", response_model=Paginated[TenderOut], summary="List/search/filter tenders")
 def list_tenders(
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
     page: int = Query(1, ge=1, description="1-based page number"),
     limit: int = Query(25, ge=1, le=100, description="Items per page (max 100)"),
@@ -67,6 +93,20 @@ def list_tenders(
         )
     except InvalidParameter as exc:
         raise _bad_request(exc) from None
+    background_tasks.add_task(
+        _record_search_event, "list", search,
+        {
+            key: str(value) for key, value in (
+                ("category", category), ("province", province),
+                ("municipality", municipality), ("organisation", organisation),
+                ("source", source), ("status", status_),
+                ("closing_within", closing_within), ("closing_before", closing_before),
+                ("closing_after", closing_after), ("advertised_after", advertised_after),
+                ("advertised_before", advertised_before),
+            ) if value is not None
+        },
+        total,
+    )
     return paginate([serialize_tender(t) for t in rows], page, limit, total)
 
 
