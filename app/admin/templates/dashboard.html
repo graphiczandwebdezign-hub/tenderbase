@@ -43,6 +43,104 @@
   </div>
 </div>
 
+{% if enrich_summary %}
+<div class="flash" style="margin-top:20px;">
+  Re-enrichment: {{ enrich_summary }}
+</div>
+{% endif %}
+
+<div class="section" id="discovery">
+  <h2>Discovery &mdash; last {{ analytics.days }} days</h2>
+  <div class="grid">
+    <div class="card"><div class="k">Searches</div><div class="v">{{ analytics.total_searches }}</div></div>
+    <div class="card"><div class="k">Zero-result searches</div><div class="v">{{ analytics.zero_result_searches }}</div></div>
+    <div class="card"><div class="k">Avg results</div><div class="v">{{ analytics.avg_results if analytics.avg_results is not none else '—' }}</div></div>
+    <div class="card"><div class="k">Saved searches</div><div class="v">{{ saved.total }}</div></div>
+    <div class="card"><div class="k">Alerts enabled</div><div class="v">{{ saved.alerts_enabled }}</div></div>
+    <div class="card"><div class="k">Distinct users</div><div class="v">{{ saved.distinct_users }}</div></div>
+  </div>
+  <div class="card" style="margin-top:16px;">
+    <div class="k">Searches per day</div>
+    <div class="bars" aria-hidden="true">
+      {% for b in bars %}<div class="bar" style="height:{{ b.h }}px" title="{{ b.date }}: {{ b.count }}"></div>{% endfor %}
+    </div>
+  </div>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:16px;">
+    <div class="card">
+      <div class="k">Top search terms</div>
+      <table style="border-radius:0;">
+        <tbody>
+        {% for t in analytics.top_terms %}
+          <tr><td>{{ t.term }}</td><td style="color:var(--muted);">{{ t.count }}&times; &middot; &oslash;{{ t.avg_results }}</td></tr>
+        {% else %}
+          <tr><td style="color:#94a3b8;">No searches recorded yet.</td></tr>
+        {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <div class="k">Zero-result terms (data-quality to-do)</div>
+      <div style="margin-top:10px;">
+        {% for t in analytics.top_zero_result_terms %}
+          <span class="chip">{{ t.term }} <b>{{ t.count }}</b></span>
+        {% else %}
+          <span class="chip ok">None <b>&#10003;</b></span>
+        {% endfor %}
+      </div>
+      <div class="k" style="margin-top:14px;">Filter usage</div>
+      <div style="margin-top:10px;">
+        {% for facet, count in analytics.facet_usage.items() %}
+          <span class="chip">{{ facet }} <b>{{ count }}</b></span>
+        {% else %}
+          <span style="color:#94a3b8;font-size:13px;">No filters used yet.</span>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" id="quality">
+  <h2>Data quality by source</h2>
+  <form method="post" action="/admin/re-enrich" style="margin-bottom:12px;">
+    <button type="submit" name="dry_run" value="true" class="btn btn-ghost">Dry-run backfill</button>
+    <button type="submit" name="dry_run" value="false" style="margin-left:8px;">Fill gaps now</button>
+  </form>
+  <table>
+    <thead>
+      <tr><th>Source</th><th>Tenders</th><th>Completeness</th><th>No closing</th>
+          <th>No province</th><th>No category</th><th>No org</th><th>No docs</th><th>Stale open</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><b>{{ quality.overall.source }}</b></td>
+        <td>{{ quality.overall.total }}</td>
+        <td><div class="meter"><div class="meter-fill" style="width:{{ (quality.overall.completeness * 100)|round }}%;"></div></div></td>
+        <td>{{ quality.overall.missing_closing_date }}</td>
+        <td>{{ quality.overall.missing_province }}</td>
+        <td>{{ quality.overall.missing_category }}</td>
+        <td>{{ quality.overall.missing_organisation }}</td>
+        <td>{{ quality.overall.without_documents }}</td>
+        <td>{{ quality.overall.open_past_deadline }}</td>
+      </tr>
+      {% for s in quality.sources %}
+      <tr>
+        <td>{{ s.source }}</td>
+        <td>{{ s.total }}</td>
+        <td><div class="meter"><div class="meter-fill" style="width:{{ (s.completeness * 100)|round }}%;"></div></div></td>
+        <td>{{ s.missing_closing_date }}</td>
+        <td>{{ s.missing_province }}</td>
+        <td>{{ s.missing_category }}</td>
+        <td>{{ s.missing_organisation }}</td>
+        <td>{{ s.without_documents }}</td>
+        <td>{{ s.open_past_deadline }}</td>
+      </tr>
+      {% else %}
+      <tr><td colspan="9" style="color:#94a3b8;">No tenders ingested yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
 <div class="section">
   <h2>Recent synchronizations</h2>
   <table>

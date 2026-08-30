@@ -230,6 +230,19 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Admin console analytics view — Sprint 9
+The existing cookie-authenticated web console (`/admin`) now surfaces
+everything the analytics sprints produce, server-rendered with zero JS:
+- **Discovery (30 days)**: search/zero-result/avg-result cards, a daily
+  searches bar chart, top terms with average result counts, zero-result
+  terms as the data-quality to-do list, and filter-usage chips; saved-search
+  volume, alert uptake and distinct users.
+- **Data quality by source**: completeness meters plus per-source missing
+  counts (closing/province/category/org/docs) and stale-open counts, worst
+  first — with **Dry-run backfill** / **Fill gaps now** buttons that drive
+  `re-enrich` via a POST-redirect-GET form and a result flash.
+- KPI cards for saved searches and 7-day search volume.
+
 ### Ingestion hardening & alert digests — Sprint 8
 - **Closing-date recovery**: when a source publishes no structured deadline,
   the pipeline extracts it from title/description text ("Closing date:
