@@ -6,8 +6,14 @@
             android:id="@+id/nav_latest"
             android:title="Latest Tenders" />
         <item
+            android:id="@+id/nav_closing_week"
+            android:title="Closing This Week" />
+        <item
             android:id="@+id/nav_notifications"
             android:title="Notifications" />
+        <item
+            android:id="@+id/nav_saved_searches"
+            android:title="Saved Searches" />
         <item
             android:id="@+id/nav_saved"
             android:title="Saved Tenders" />

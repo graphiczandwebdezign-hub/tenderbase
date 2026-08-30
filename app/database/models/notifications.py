@@ -61,6 +61,9 @@ class User(Base):
     saved_tenders: Mapped[List["SavedTender"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
+    saved_searches: Mapped[List["SavedSearch"]] = relationship(
+        back_populates="user", cascade="all, delete-orphan"
+    )
 
 
 class UserPreference(Base):

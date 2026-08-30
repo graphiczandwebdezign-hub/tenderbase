@@ -55,6 +55,12 @@
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
+        <!-- Saved Searches Activity (Sprint 2 alerts) -->
+        <activity
+            android:name=".SavedSearchesActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
         <!-- Downloaded Documents Activity -->
         <activity
             android:name=".DownloadsActivity"

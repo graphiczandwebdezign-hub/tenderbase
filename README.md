@@ -230,6 +230,21 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Saved searches (require `X-API-Key`) — Sprint 2
+```
+GET    /api/v1/saved-searches?client_id=…          # list
+POST   /api/v1/saved-searches                      # {client_id, name, filters{…}}
+PATCH  /api/v1/saved-searches/{id}/alerts           # {client_id, alerts_enabled}
+DELETE /api/v1/saved-searches/{id}?client_id=…
+```
+`filters` uses the same parameter names as `GET /tenders` (search, province,
+category, source, status, closing_within, closing_after/before,
+advertised_after/before — no `sort`). After each ingestion pass, newly created
+tenders are matched against every alert-enabled saved search; matches create a
+`NEW_TENDER` notification event (deduplicated per user+tender by the existing
+constraint, so preference alerts and saved-search alerts never double-notify)
+and push via FCM to registered devices.
+
 ### Tenders (require `X-API-Key`)
 ```
 GET  /api/v1/tenders                 # list + search + filter + sort (default: active only)
@@ -476,7 +491,11 @@ LIKE-wildcard escaping), sorting (newest / closing / updated / weighted
 relevance), derived statuses (open / closing_soon / closed), combined filters,
 facets, pagination metadata, empty results and invalid parameters. Android
 unit tests (`android/app/src/test/`) cover filter → query-param mapping, JSON
-round-trips, closing-date urgency tiers and tender parsing. Tests use an
+round-trips, closing-date urgency tiers, tender parsing and saved-search
+payload round-trips. The Sprint 2 suite (`tests/test_saved_searches.py`)
+covers saved-search CRUD, ownership isolation, duplicate names, invalid
+filters, matcher parity with the discovery endpoint, derived status/date
+matching, ingestion alerting, dedup and alert muting. Tests use an
 isolated temporary SQLite DB and a `MockSourceAdapter` (no network,
 deterministic).
 

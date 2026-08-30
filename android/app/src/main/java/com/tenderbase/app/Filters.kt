@@ -135,6 +135,55 @@ data class SearchFilters(
 
     override fun toString(): String = toJson()
 
+    /**
+     * Canonical saved-search payload for the server: the same filter params
+     * GET /tenders accepts (no `sort` — alerts don't care about ordering).
+     * `date_key` is a client hint for lossless round-tripping; the server
+     * ignores it when matching.
+     */
+    fun toSavedSearchPayload(): JSONObject {
+        val params = toQueryParams(todayIso())
+        val o = JSONObject()
+        for ((k, v) in params) {
+            if (k != "sort") o.put(k, v)
+        }
+        o.put("date_key", dateFilter.key)
+        return o
+    }
+
+    // -------------------------------------------------------------- summary
+
+    /** Short human summary for chips/lists, e.g. "construction · KZN · < 7d". */
+    fun summary(): String {
+        val parts = mutableListOf<String>()
+        if (query.isNotBlank()) parts.add("“$query”")
+        parts.addAll(provinces)
+        parts.addAll(categories)
+        parts.addAll(sources)
+        status?.let {
+            parts.add(
+                when (it) {
+                    StatusFilter.OPEN -> "Open"
+                    StatusFilter.CLOSING_SOON -> "Closing soon"
+                    StatusFilter.CLOSED -> "Closed"
+                }
+            )
+        }
+        if (dateFilter != DateFilter.ANY) parts.add(dateLabel())
+        return parts.joinToString(" · ")
+    }
+
+    private fun dateLabel(): String = when (dateFilter) {
+        DateFilter.ANY -> ""
+        DateFilter.PUBLISHED_TODAY -> "Published today"
+        DateFilter.PUBLISHED_7D -> "Published 7d"
+        DateFilter.PUBLISHED_30D -> "Published 30d"
+        DateFilter.CLOSING_7D -> "Closing < 7d"
+        DateFilter.CLOSING_14D -> "Closing < 14d"
+        DateFilter.CLOSING_30D -> "Closing < 30d"
+        DateFilter.CLOSING_CUSTOM -> "Closes ${listOfNotNull(closingAfter, closingBefore).joinToString("–")}"
+    }
+
     companion object {
         fun fromJson(json: String?): SearchFilters {
             if (json.isNullOrBlank()) return SearchFilters()
@@ -155,6 +204,39 @@ data class SearchFilters(
                 SearchFilters()
             }
         }
+
+        /** Rebuild discovery state from a saved-search payload (server echo). */
+        fun fromSavedSearchPayload(payload: JSONObject): SearchFilters {
+            fun list(key: String): List<String> =
+                payload.optString(key).split(",").map { it.trim() }.filter { it.isNotEmpty() }
+
+            val dateKey = payload.optString("date_key")
+            var dateFilter = when (payload.optString("closing_within")) {
+                "7d" -> DateFilter.CLOSING_7D
+                "14d" -> DateFilter.CLOSING_14D
+                "30d" -> DateFilter.CLOSING_30D
+                else -> null
+            } ?: DateFilter.fromKey(dateKey.ifEmpty { DateFilter.ANY.key })
+            val closingAfter = payload.optString("closing_after").ifEmpty { null }
+            val closingBefore = payload.optString("closing_before").ifEmpty { null }
+            if (dateFilter == DateFilter.ANY && (closingAfter != null || closingBefore != null)) {
+                dateFilter = DateFilter.CLOSING_CUSTOM
+            }
+            return SearchFilters(
+                query = payload.optString("search"),
+                provinces = list("province"),
+                categories = list("category"),
+                sources = list("source"),
+                status = StatusFilter.fromKey(payload.optString("status").ifEmpty { null }),
+                dateFilter = dateFilter,
+                closingAfter = closingAfter,
+                closingBefore = closingBefore
+            )
+        }
+
+        /** Deadline-intelligence preset: everything open, closing this week. */
+        fun closingWeekPreset(sort: SortOption = SortOption.CLOSING): SearchFilters =
+            SearchFilters(dateFilter = DateFilter.CLOSING_7D, sort = sort)
 
         private fun org.json.JSONArray?.toStringList(): List<String> {
             if (this == null) return emptyList()

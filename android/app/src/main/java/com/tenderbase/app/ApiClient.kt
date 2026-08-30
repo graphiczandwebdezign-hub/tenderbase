@@ -109,12 +109,110 @@ object ApiClient {
 
     private fun enc(s: String) = URLEncoder.encode(s, "UTF-8")
 
-    private fun get(urlStr: String): String {
+    // ------------------------------------------------------ saved searches
+
+    data class SavedSearchInfo(
+        val id: Int,
+        val name: String,
+        val alertsEnabled: Boolean,
+        val payload: JSONObject,
+        val createdAt: String?
+    )
+
+    /** GET /api/v1/saved-searches?client_id=… */
+    suspend fun fetchSavedSearches(clientId: String): List<SavedSearchInfo> =
+        withContext(Dispatchers.IO) {
+            val root = JSONObject(get("$BASE_URL/api/v1/saved-searches?client_id=${enc(clientId)}"))
+            val arr = root.optJSONArray("searches") ?: org.json.JSONArray()
+            val out = ArrayList<SavedSearchInfo>(arr.length())
+            for (i in 0 until arr.length()) {
+                val o = arr.optJSONObject(i) ?: continue
+                out.add(
+                    SavedSearchInfo(
+                        id = o.optInt("id"),
+                        name = o.optString("name"),
+                        alertsEnabled = o.optBoolean("alerts_enabled", true),
+                        payload = o.optJSONObject("filters") ?: JSONObject(),
+                        createdAt = o.optString("created_at").ifEmpty { null }
+                    )
+                )
+            }
+            out
+        }
+
+    /** POST /api/v1/saved-searches — throws on 409 duplicate name. */
+    suspend fun createSavedSearch(
+        clientId: String,
+        name: String,
+        payload: JSONObject
+    ): SavedSearchInfo = withContext(Dispatchers.IO) {
+        val body = JSONObject()
+            .put("client_id", clientId)
+            .put("name", name)
+            .put("filters", payload)
+        val root = JSONObject(
+            request("POST", "$BASE_URL/api/v1/saved-searches", body)
+        )
+        SavedSearchInfo(
+            id = root.optInt("id"),
+            name = root.optString("name"),
+            alertsEnabled = root.optBoolean("alerts_enabled", true),
+            payload = root.optJSONObject("filters") ?: JSONObject(),
+            createdAt = root.optString("created_at").ifEmpty { null }
+        )
+    }
+
+    /** PATCH /api/v1/saved-searches/{id}/alerts */
+    suspend fun setSavedSearchAlerts(clientId: String, id: Int, enabled: Boolean) {
+        withContext(Dispatchers.IO) {
+            request(
+                "PATCH",
+                "$BASE_URL/api/v1/saved-searches/$id/alerts",
+                JSONObject().put("client_id", clientId).put("alerts_enabled", enabled)
+            )
+        }
+    }
+
+    /** DELETE /api/v1/saved-searches/{id} */
+    suspend fun deleteSavedSearch(clientId: String, id: Int) {
+        withContext(Dispatchers.IO) {
+            request(
+                "DELETE",
+                "$BASE_URL/api/v1/saved-searches/$id?client_id=${enc(clientId)}",
+                null
+            )
+        }
+    }
+
+    /** POST /api/v1/notifications/register-device (for saved-search alerts). */
+    suspend fun registerDevice(clientId: String, deviceToken: String) {
+        withContext(Dispatchers.IO) {
+            request(
+                "POST",
+                "$BASE_URL/api/v1/notifications/register-device",
+                JSONObject()
+                    .put("client_id", clientId)
+                    .put("device_token", deviceToken)
+                    .put("platform", "android")
+            )
+        }
+    }
+
+    // ------------------------------------------------------------ transport
+
+    private fun get(urlStr: String): String = request("GET", urlStr, null)
+
+    private fun request(method: String, urlStr: String, body: JSONObject?): String {
         val url = URL(urlStr)
         val conn = url.openConnection() as HttpURLConnection
-        conn.requestMethod = "GET"
+        conn.requestMethod = method
         conn.setRequestProperty("X-API-Key", API_KEY)
         conn.setRequestProperty("Accept", "application/json")
+        if (body != null) {
+            conn.doOutput = true
+            conn.setRequestProperty("Content-Type", "application/json")
+            conn.outputStream.use { it.write(body.toString().toByteArray(Charsets.UTF_8)) }
+        }
         // The free Render tier cold-starts (~50s), so allow a generous timeout.
         conn.connectTimeout = 20000
         conn.readTimeout = 70000
@@ -123,11 +221,15 @@ object ApiClient {
             val stream = if (code in 200..299) conn.inputStream else conn.errorStream
             val text = stream?.bufferedReader()?.use { it.readText() } ?: ""
             if (code !in 200..299) {
-                throw RuntimeException("HTTP $code: $text")
+                throw ApiException(code, text)
             }
             return text
         } finally {
             conn.disconnect()
         }
     }
+
+    /** HTTP error with its status code so callers can react (e.g. 409 dup). */
+    class ApiException(val statusCode: Int, detail: String) :
+        RuntimeException("HTTP $statusCode: $detail")
 }

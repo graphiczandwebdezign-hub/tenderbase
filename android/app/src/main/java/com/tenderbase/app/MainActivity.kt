@@ -54,6 +54,12 @@ class MainActivity : AppCompatActivity() {
         private const val PAGE_SIZE = 20
         private const val PREFS = "tenderbase_prefs"
         private const val PREF_SORT = "last_sort"
+
+        /** Intent extra: a saved-search filters JSON to apply on open. */
+        const val EXTRA_APPLY_FILTERS = "apply_filters_json"
+        /** Intent extra: a named discovery preset ("closing_week"). */
+        const val EXTRA_PRESET = "discovery_preset"
+        const val PRESET_CLOSING_WEEK = "closing_week"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -75,6 +81,11 @@ class MainActivity : AppCompatActivity() {
         val restored = savedInstanceState?.getString(STATE_FILTERS)
         if (restored != null) {
             filters = SearchFilters.fromJson(restored)
+        } else if (intent?.hasExtra(EXTRA_APPLY_FILTERS) == true) {
+            // Opened by tapping a saved search.
+            filters = SearchFilters.fromJson(intent.getStringExtra(EXTRA_APPLY_FILTERS))
+        } else if (intent?.hasExtra(EXTRA_PRESET) == true) {
+            filters = presetFilters(intent.getStringExtra(EXTRA_PRESET))
         } else {
             filters = filters.copy(
                 sort = SortOption.fromKey(
@@ -124,6 +135,32 @@ class MainActivity : AppCompatActivity() {
 
     // ------------------------------------------------------------- setup
 
+    /** Map a named preset onto discovery state (deadline intelligence). */
+    private fun presetFilters(preset: String?): SearchFilters = when (preset) {
+        PRESET_CLOSING_WEEK -> SearchFilters.closingWeekPreset(sort = filters.sort)
+        else -> SearchFilters()
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Launched from SavedSearchesActivity / notifications while alive.
+        val applyJson = intent.getStringExtra(EXTRA_APPLY_FILTERS)
+        val preset = intent.getStringExtra(EXTRA_PRESET)
+        if (applyJson != null) {
+            filters = SearchFilters.fromJson(applyJson)
+            b.searchInput.setText(filters.query)
+            updateSortButtonLabel()
+            load()
+            renderFilterChips()
+        } else if (preset != null) {
+            filters = presetFilters(preset)
+            b.searchInput.setText("")
+            updateSortButtonLabel()
+            load()
+            renderFilterChips()
+        }
+    }
+
     private fun setupNavigation() {
         b.navigationView.setNavigationItemSelectedListener { menuItem ->
             b.drawerLayout.closeDrawer(GravityCompat.START)
@@ -133,8 +170,16 @@ class MainActivity : AppCompatActivity() {
                     b.searchInput.setText("")
                     load()
                 }
+                R.id.nav_closing_week -> {
+                    filters = SearchFilters.closingWeekPreset(sort = filters.sort)
+                    b.searchInput.setText("")
+                    updateSortButtonLabel()
+                    renderFilterChips()
+                    load()
+                }
                 R.id.nav_notifications -> startActivity(Intent(this, NotificationsActivity::class.java))
                 R.id.nav_saved -> startActivity(Intent(this, SavedTendersActivity::class.java))
+                R.id.nav_saved_searches -> startActivity(Intent(this, SavedSearchesActivity::class.java))
                 R.id.nav_downloads -> startActivity(Intent(this, DownloadsActivity::class.java))
                 R.id.nav_categories -> {
                     val i = Intent(this, PreferencesActivity::class.java)
@@ -240,6 +285,64 @@ class MainActivity : AppCompatActivity() {
                 .show(supportFragmentManager, FilterBottomSheet::class.java.simpleName)
         }
         b.sortButton.setOnClickListener { showSortDialog() }
+        b.saveSearchButton.setOnClickListener { showSaveSearchDialog() }
+    }
+
+    /** Save the current discovery state as a server-side alert. */
+    private fun showSaveSearchDialog() {
+        if (filters.isDefault()) {
+            android.widget.Toast.makeText(
+                this, R.string.save_search_needs_filters, android.widget.Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+        val input = android.widget.EditText(this).apply {
+            hint = getString(R.string.save_search_hint)
+            setText(defaultSearchName())
+            setSelectAllOnFocus(true)
+            maxLines = 1
+            inputType = android.text.InputType.TYPE_CLASS_TEXT
+        }
+        val pad = (20 * resources.displayMetrics.density).toInt()
+        val container = android.widget.FrameLayout(this).apply {
+            setPadding(pad, pad, pad, 0)
+            addView(input)
+        }
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.save_search_title))
+            .setMessage(filters.summary())
+            .setView(container)
+            .setPositiveButton(getString(R.string.save_search_action)) { _, _ ->
+                val name = input.text?.toString()?.trim().orEmpty()
+                if (name.isNotEmpty()) saveSearch(name)
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun defaultSearchName(): String =
+        filters.query.takeIf { it.isNotBlank() } ?: filters.summary().take(40)
+
+    private fun saveSearch(name: String) {
+        val clientId = repo.clientId()
+        val payload = filters.toSavedSearchPayload()
+        lifecycleScope.launch {
+            try {
+                ApiClient.createSavedSearch(clientId, name, payload)
+                android.widget.Toast.makeText(
+                    this@MainActivity, R.string.save_search_done, android.widget.Toast.LENGTH_LONG
+                ).show()
+            } catch (e: ApiClient.ApiException) {
+                val msg = if (e.statusCode == 409) R.string.save_search_duplicate
+                else R.string.save_search_failed
+                android.widget.Toast.makeText(this@MainActivity, msg, android.widget.Toast.LENGTH_LONG)
+                    .show()
+            } catch (_: Exception) {
+                android.widget.Toast.makeText(
+                    this@MainActivity, R.string.save_search_failed, android.widget.Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     // ------------------------------------------------------------- actions

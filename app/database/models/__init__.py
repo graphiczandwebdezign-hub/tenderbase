@@ -15,6 +15,7 @@ from app.database.models.notifications import (
     NotificationEvent,
     SavedTender,
 )
+from app.database.models.saved_search import SavedSearch
 
 __all__ = [
     "Tender",
@@ -32,4 +33,5 @@ __all__ = [
     "NotificationToken",
     "NotificationEvent",
     "SavedTender",
+    "SavedSearch",
 ]

@@ -70,6 +70,25 @@
     <string name="cd_save">Save tender</string>
     <string name="cd_unsave">Remove from saved tenders</string>
     <string name="cd_chip_remove">Remove filter %1$s</string>
+    <string name="cd_save_search">Save this search for alerts</string>
+    <string name="cd_delete_search">Delete saved search</string>
+    <string name="cd_search_alerts">Alerts for this saved search</string>
+    <string name="cd_apply_search">Apply this saved search</string>
+
+    <string name="save_search_title">Save this search</string>
+    <string name="save_search_hint">Search name</string>
+    <string name="save_search_action">Save</string>
+    <string name="save_search_done">Saved — you\'ll be alerted when new tenders match</string>
+    <string name="save_search_duplicate">A saved search with this name already exists</string>
+    <string name="save_search_failed">Couldn\'t save the search — check your connection</string>
+    <string name="save_search_needs_filters">Search or set filters first, then save the search</string>
+    <string name="saved_searches_title">Saved Searches</string>
+    <string name="saved_searches_empty_title">No saved searches yet</string>
+    <string name="saved_searches_empty_body">Search, filter, then tap the bookmark to get alerts for new matching tenders.</string>
+    <string name="saved_search_deleted">Search deleted</string>
+    <string name="saved_search_delete_failed">Couldn\'t delete the search</string>
+    <string name="saved_searches_load_failed">Couldn\'t load saved searches</string>
+    <string name="closing_week_title">Closing this week</string>
     <string name="ref_prefix">REF: %1$s</string>
     <string name="closing_on">Closing on %1$s</string>
     <string name="label_type">Type</string>
@@ -86,5 +105,9 @@
     <plurals name="tenders_found">
         <item quantity="one">%d tender found</item>
         <item quantity="other">%d tenders found</item>
+    </plurals>
+    <plurals name="saved_searches_count">
+        <item quantity="one">%d saved search</item>
+        <item quantity="other">%d saved searches</item>
     </plurals>
 </resources>

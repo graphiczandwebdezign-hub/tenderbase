@@ -57,6 +57,28 @@ class TenderRepository(context: Context) {
     fun isOnboarded(): Boolean = prefs.getBoolean("is_onboarded", false)
     fun setOnboarded(onboarded: Boolean) = prefs.edit().putBoolean("is_onboarded", onboarded).apply()
 
+    /**
+     * Stable per-install id (created on first use). Identifies this install to
+     * the backend for saved searches and push notifications.
+     */
+    fun clientId(): String {
+        var id = prefs.getString("install_id", null)
+        if (id == null) {
+            id = java.util.UUID.randomUUID().toString()
+            prefs.edit().putString("install_id", id).apply()
+        }
+        return id
+    }
+
+    /** Register this install's FCM token so saved-search alerts can reach it. */
+    suspend fun registerDevice(token: String) {
+        try {
+            ApiClient.registerDevice(clientId(), token)
+        } catch (_: Exception) {
+            // Registration is best-effort; retried on the next token refresh.
+        }
+    }
+
     // Offline Cache
     suspend fun cacheTenders(tenders: List<Tender>) {
         val entities = tenders.map { t ->

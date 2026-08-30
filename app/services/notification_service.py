@@ -98,6 +98,31 @@ class NotificationService:
     def notify_amended_tenders(self, tender_ids: List[int]) -> int:
         return self._notify(tender_ids, NotificationType.TENDER_AMENDED)
 
+    def notify_saved_search_matches(self, tender_ids: List[int]) -> int:
+        """Alert users whose saved searches match newly ingested tenders.
+
+        Reuses the NEW_TENDER event type, so the (user, tender, type) unique
+        constraint guarantees one alert per tender even when preference
+        matching already notified the same user.
+        """
+        from app.services.saved_search_service import SavedSearchService
+
+        svc = SavedSearchService(self.db)
+        sent = 0
+        for tid in tender_ids:
+            tender = self.db.get(Tender, tid)
+            if not tender or tender.status in (TenderStatus.EXPIRED, TenderStatus.CANCELLED):
+                continue
+            per_user: dict = {}
+            for search in svc.matching_searches(tender):
+                per_user.setdefault(search.user_id, []).append(search.name)
+            for uid, names in per_user.items():
+                detail = f"saved search: {names[0]}"
+                if self._create_event(uid, tender, NotificationType.NEW_TENDER, detail=detail):
+                    sent += 1
+        self.db.commit()
+        return sent
+
     def _notify(self, tender_ids: List[int], ntype: NotificationType) -> int:
         sent = 0
         for tid in tender_ids:
@@ -111,7 +136,9 @@ class NotificationService:
         self.db.commit()
         return sent
 
-    def _create_event(self, user_id: int, tender: Tender, ntype: NotificationType) -> bool:
+    def _create_event(
+        self, user_id: int, tender: Tender, ntype: NotificationType, detail: Optional[str] = None
+    ) -> bool:
         """Create a NotificationEvent unless one already exists (dedup)."""
         existing = self.db.execute(
             select(NotificationEvent).where(
@@ -128,6 +155,7 @@ class NotificationService:
             tender_id=tender.id,
             notification_type=ntype,
             status=NotificationEventStatus.PENDING,
+            detail=detail,
         )
         self.db.add(event)
         try:
@@ -148,7 +176,8 @@ class NotificationService:
         ).scalars().all()
         if not tokens:
             event.status = NotificationEventStatus.SKIPPED
-            event.detail = "no active device tokens"
+            if not event.detail:
+                event.detail = "no active device tokens"
             return
 
         title, body = self._compose(tender, ntype)
@@ -166,7 +195,8 @@ class NotificationService:
             event.sent_at = utcnow()
         else:
             event.status = NotificationEventStatus.FAILED
-            event.detail = "fcm dispatch failed or disabled"
+            if not event.detail:
+                event.detail = "fcm dispatch failed or disabled"
 
     @staticmethod
     def _compose(tender: Tender, ntype: NotificationType):

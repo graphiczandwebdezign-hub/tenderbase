@@ -33,6 +33,7 @@ from app.api.routes import (
     provinces,
     notifications,
     preferences,
+    saved_searches,
     health,
     admin,
 )
@@ -166,6 +167,7 @@ app.include_router(categories.router, prefix=API_V1)
 app.include_router(provinces.router, prefix=API_V1)
 app.include_router(notifications.router, prefix=API_V1)
 app.include_router(preferences.router, prefix=API_V1)
+app.include_router(saved_searches.router, prefix=API_V1)
 app.include_router(admin.router, prefix=API_V1)
 
 # Web admin dashboard (server-rendered, cookie auth).

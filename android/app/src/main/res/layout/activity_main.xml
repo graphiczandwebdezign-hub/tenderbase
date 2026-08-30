@@ -142,6 +142,16 @@
                         app:cornerRadius="20dp"
                         android:contentDescription="@string/cd_sort" />
 
+                    <ImageButton
+                        android:id="@+id/saveSearchButton"
+                        android:layout_width="44dp"
+                        android:layout_height="44dp"
+                        android:layout_marginStart="6dp"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@drawable/ic_bookmark"
+                        app:tint="@color/onPrimary"
+                        android:contentDescription="@string/cd_save_search" />
+
                     <TextView
                         android:id="@+id/countText"
                         android:layout_width="0dp"
