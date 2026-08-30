@@ -2,13 +2,11 @@ package com.tenderbase.app
 
 import android.content.Intent
 import android.os.Bundle
-import android.text.InputType
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
-import android.widget.EditText
-import android.widget.FrameLayout
+import android.view.inputmethod.InputMethodManager
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
@@ -19,9 +17,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tenderbase.app.databinding.ActivityMainBinding
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
+/**
+ * Tender discovery screen: search → filter → sort → find.
+ *
+ * All list state lives in [filters] ([SearchFilters]); every reload is a
+ * single server-side query (search + filters + sort + pagination), so state
+ * composes predictably and survives detail-screen navigation and rotation.
+ */
 class MainActivity : AppCompatActivity() {
 
     private lateinit var b: ActivityMainBinding
@@ -29,15 +36,25 @@ class MainActivity : AppCompatActivity() {
     private lateinit var repo: TenderRepository
     private lateinit var toggle: ActionBarDrawerToggle
 
-    private var currentSearch: String? = null
-    private var currentCategory: String? = null
-    private var filterClosingSoon: Boolean = false
-    private var filterMyCategories: Boolean = false
+    /** The single source of truth for the discovery query. */
+    private var filters = SearchFilters()
 
-    private var currentPage: Int = 1
-    private var hasMore: Boolean = false
-    private var isLoadingMore: Boolean = false
-    private var isRefreshing: Boolean = false
+    private var currentPage = 1
+    private var totalCount = 0
+    private var hasMore = false
+    private var isLoadingMore = false
+    private var isRefreshing = false
+    private var facetsJson: String? = null
+
+    private var searchJob: Job? = null
+
+    companion object {
+        private const val STATE_FILTERS = "discovery_filters"
+        private const val SEARCH_DEBOUNCE_MS = 350L
+        private const val PAGE_SIZE = 20
+        private const val PREFS = "tenderbase_prefs"
+        private const val PREF_SORT = "last_sort"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,13 +71,66 @@ class MainActivity : AppCompatActivity() {
         b.drawerLayout.addDrawerListener(toggle)
         toggle.syncState()
 
+        // Restore discovery state after rotation (search + filters + sort).
+        val restored = savedInstanceState?.getString(STATE_FILTERS)
+        if (restored != null) {
+            filters = SearchFilters.fromJson(restored)
+        } else {
+            filters = filters.copy(
+                sort = SortOption.fromKey(
+                    getSharedPreferences(PREFS, MODE_PRIVATE).getString(PREF_SORT, null)
+                )
+            )
+        }
+
+        setupNavigation()
+        setupList()
+        setupSearch()
+        setupControls()
+
+        // Filter sheet results come back through the fragment result API.
+        supportFragmentManager.setFragmentResultListener(
+            FilterBottomSheet.REQUEST_KEY, this
+        ) { _, bundle ->
+            val json = bundle.getString(FilterBottomSheet.RESULT_FILTERS) ?: return@setFragmentResultListener
+            val applied = SearchFilters.fromJson(json)
+            filters = applied.copy(query = appliedQuery(), sort = filters.sort)
+            load()
+        }
+
+        // Saved tender ids drive the card star state.
+        lifecycleScope.launch {
+            repo.savedTendersFlow.collectLatest { saved ->
+                adapter.setSavedIds(saved.map { it.id }.toSet())
+            }
+        }
+
+        // Observe unread notifications count for badge
+        lifecycleScope.launch {
+            repo.unreadCountFlow.collectLatest { count ->
+                val menu = b.navigationView.menu
+                val notifItem = menu.findItem(R.id.nav_notifications)
+                if (notifItem != null) {
+                    notifItem.title = if (count > 0) "Notifications ($count)" else "Notifications"
+                }
+            }
+        }
+
+        b.searchInput.setText(filters.query)
+        updateSortButtonLabel()
+        load()
+        loadFacets()
+    }
+
+    // ------------------------------------------------------------- setup
+
+    private fun setupNavigation() {
         b.navigationView.setNavigationItemSelectedListener { menuItem ->
             b.drawerLayout.closeDrawer(GravityCompat.START)
             when (menuItem.itemId) {
                 R.id.nav_latest -> {
-                    currentCategory = null
-                    filterClosingSoon = false
-                    filterMyCategories = false
+                    filters = SearchFilters(sort = filters.sort)
+                    b.searchInput.setText("")
                     load()
                 }
                 R.id.nav_notifications -> startActivity(Intent(this, NotificationsActivity::class.java))
@@ -80,45 +150,386 @@ class MainActivity : AppCompatActivity() {
             }
             true
         }
+    }
 
-        adapter = TenderAdapter(emptyList()) { tender ->
-            val i = Intent(this, DetailActivity::class.java)
-            i.putExtra(DetailActivity.EXTRA_ID, tender.id)
-            startActivity(i)
-        }
+    private fun setupList() {
+        adapter = TenderAdapter(
+            onTenderClick = { tender ->
+                val i = Intent(this, DetailActivity::class.java)
+                i.putExtra(DetailActivity.EXTRA_ID, tender.id)
+                startActivity(i)
+            },
+            onSaveToggle = { tender ->
+                lifecycleScope.launch { repo.toggleSave(tender) }
+            },
+            onRetry = { loadMore() }
+        )
         b.recycler.layoutManager = LinearLayoutManager(this)
         b.recycler.adapter = adapter
 
         b.swipe.setColorSchemeResources(R.color.primary)
-        b.swipe.setOnRefreshListener { load() }
+        b.swipe.setOnRefreshListener {
+            // Pull-to-refresh keeps current state; only data reloads.
+            load()
+            // Refresh facet counts opportunistically on manual refresh only.
+            loadFacets()
+        }
 
         b.recycler.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(rv: RecyclerView, dx: Int, dy: Int) {
                 val lm = rv.layoutManager as? LinearLayoutManager ?: return
                 val lastVisible = lm.findLastVisibleItemPosition()
                 if (hasMore && !isLoadingMore && !isRefreshing &&
-                    lastVisible >= lm.itemCount - 4) {
+                    lastVisible >= lm.itemCount - 4
+                ) {
                     loadMore()
                 }
             }
         })
 
         b.retryButton.setOnClickListener { load() }
+        b.clearFiltersButton.setOnClickListener {
+            filters = filters.copy(
+                provinces = emptyList(), categories = emptyList(), sources = emptyList(),
+                status = null, dateFilter = DateFilter.ANY,
+                closingAfter = null, closingBefore = null
+            )
+            load()
+        }
+        b.resetSearchButton.setOnClickListener {
+            filters = filters.copy(query = "")
+            b.searchInput.setText("")
+            load()
+        }
+    }
 
-        setupQuickFilters()
-        loadCategories()
-        load()
-
-        // Observe unread notifications count for badge
-        lifecycleScope.launch {
-            repo.unreadCountFlow.collectLatest { count ->
-                val menu = b.navigationView.menu
-                val notifItem = menu.findItem(R.id.nav_notifications)
-                if (notifItem != null) {
-                    notifItem.title = if (count > 0) "Notifications ($count)" else "Notifications"
+    private fun setupSearch() {
+        b.searchInput.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
+                searchJob?.cancel()
+                applyQueryNow()
+                hideKeyboard()
+                true
+            } else false
+        }
+        b.searchInput.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, a: Int, b2: Int, c: Int) {}
+            override fun onTextChanged(s: CharSequence?, a: Int, b2: Int, c: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                val text = s?.toString().orEmpty()
+                b.clearSearch.visibility = if (text.isNotEmpty()) View.VISIBLE else View.GONE
+                // Debounce: fire only once typing pauses.
+                searchJob?.cancel()
+                searchJob = lifecycleScope.launch {
+                    delay(SEARCH_DEBOUNCE_MS)
+                    if (appliedQuery() != text.trim()) applyQueryNow()
                 }
             }
+        })
+        b.clearSearch.setOnClickListener {
+            b.searchInput.setText("")
+            searchJob?.cancel()
+            applyQueryNow()
+            b.searchInput.requestFocus()
         }
+    }
+
+    private fun setupControls() {
+        b.filterButton.setOnClickListener {
+            FilterBottomSheet.create(filters, facetsJson)
+                .show(supportFragmentManager, FilterBottomSheet::class.java.simpleName)
+        }
+        b.sortButton.setOnClickListener { showSortDialog() }
+    }
+
+    // ------------------------------------------------------------- actions
+
+    private fun appliedQuery(): String = filters.query.trim()
+
+    /** Commit the typed text as the active search query and reload. */
+    private fun applyQueryNow() {
+        val text = b.searchInput.text?.toString()?.trim().orEmpty()
+        if (filters.query == text) return
+        filters = filters.copy(query = text)
+        load()
+    }
+
+    private fun showSortDialog() {
+        val searching = appliedQuery().isNotBlank()
+        // Relevance is only offered when the backend has a query to rank.
+        val options = mutableListOf(
+            SortOption.NEWEST to getString(R.string.sort_newest),
+            SortOption.CLOSING to getString(R.string.sort_closing),
+            SortOption.UPDATED to getString(R.string.sort_updated)
+        )
+        if (searching) {
+            options.add(SortOption.RELEVANCE to getString(R.string.sort_relevance))
+        }
+        val labels = options.map { it.second }.toTypedArray()
+        val selected = options.indexOfFirst { it.first == filters.sort }.takeIf { it >= 0 } ?: 0
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.sort_title))
+            .setSingleChoiceItems(labels, selected) { dialog, which ->
+                filters = filters.copy(sort = options[which].first)
+                getSharedPreferences(PREFS, MODE_PRIVATE)
+                    .edit().putString(PREF_SORT, filters.sort.key).apply()
+                updateSortButtonLabel()
+                dialog.dismiss()
+                load()
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun updateSortButtonLabel() {
+        // Compact labels on the button; full labels in the dialog.
+        b.sortButton.text = when (filters.sort) {
+            SortOption.NEWEST -> getString(R.string.sort_short_newest)
+            SortOption.CLOSING -> getString(R.string.sort_closing)
+            SortOption.UPDATED -> getString(R.string.sort_short_updated)
+            SortOption.RELEVANCE -> getString(R.string.sort_relevance)
+        }
+    }
+
+    private fun hideKeyboard() {
+        val imm = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager ?: return
+        imm.hideSoftInputFromWindow(b.searchInput.windowToken, 0)
+    }
+
+    // ------------------------------------------------------------ data flow
+
+    private fun load() {
+        if (isRefreshing) return
+        isRefreshing = true
+        currentPage = 1
+        hasMore = false
+        isLoadingMore = false
+        b.offlineBanner.visibility = View.GONE
+
+        // First page: skeletons unless a list is already on screen (refresh).
+        if (adapter.tenderCount == 0) {
+            adapter.showSkeletons()
+            showList()
+        }
+
+        lifecycleScope.launch {
+            try {
+                val page = ApiClient.fetchTenders(page = 1, limit = PAGE_SIZE, filters = filters)
+                totalCount = page.total
+                currentPage = page.page
+                hasMore = currentPage < page.totalPages
+                val footer = when {
+                    hasMore -> TenderAdapter.FooterState.LOADING
+                    page.items.isEmpty() -> null
+                    else -> TenderAdapter.FooterState.END
+                }
+                adapter.submitTenders(page.items, footer)
+                repo.cacheTenders(page.items)
+
+                if (page.items.isEmpty()) showEmpty() else showList()
+                updateCountText()
+                renderFilterChips()
+            } catch (e: Exception) {
+                // Offline fallback: cached tenders keep the app usable.
+                val cached = repo.getCachedTenders()
+                if (cached.isNotEmpty()) {
+                    totalCount = cached.size
+                    hasMore = false
+                    adapter.submitTenders(cached, null)
+                    showList()
+                    b.offlineBanner.visibility = View.VISIBLE
+                    updateCountText(offline = true)
+                    renderFilterChips()
+                } else {
+                    showError()
+                }
+            } finally {
+                isRefreshing = false
+                b.swipe.isRefreshing = false
+            }
+        }
+    }
+
+    private fun loadMore() {
+        if (isRefreshing || isLoadingMore || !hasMore) return
+        isLoadingMore = true
+        adapter.submitFooter(TenderAdapter.FooterState.LOADING)
+        val nextPage = currentPage + 1
+        lifecycleScope.launch {
+            try {
+                val page = ApiClient.fetchTenders(page = nextPage, limit = PAGE_SIZE, filters = filters)
+                totalCount = page.total
+                currentPage = page.page
+                hasMore = currentPage < page.totalPages
+                val more = page.items.filter { !adapter.contains(it.id) }
+                val footer = if (hasMore) TenderAdapter.FooterState.LOADING else TenderAdapter.FooterState.END
+                adapter.appendTenders(more, footer)
+                repo.cacheTenders(more)
+                updateCountText()
+            } catch (_: Exception) {
+                // Keep hasMore so the retry footer can attempt again.
+                adapter.submitFooter(TenderAdapter.FooterState.RETRY)
+            } finally {
+                isLoadingMore = false
+            }
+        }
+    }
+
+    private fun loadFacets() {
+        lifecycleScope.launch {
+            try {
+                val facets = ApiClient.fetchFacets()
+                facetsJson = FilterBottomSheet.facetsToJson(facets)
+            } catch (_: Exception) {
+                // Filters still open; option lists just stay empty until online.
+            }
+        }
+    }
+
+    // ------------------------------------------------------------- rendering
+
+    private fun updateCountText(offline: Boolean = false) {
+        val total = if (offline) adapter.tenderCount else totalCount
+        if (total == 0) {
+            b.countText.text = ""
+            return
+        }
+        if (offline) {
+            b.countText.text = resources.getQuantityString(R.plurals.tenders_count, total, total)
+            return
+        }
+        val shown = adapter.tenderCount
+        b.countText.text = if (shown in 1 until total) {
+            getString(R.string.showing_range, 1, shown, total)
+        } else {
+            resources.getQuantityString(R.plurals.tenders_found, total, total)
+        }
+    }
+
+    /** Active-filter chips with per-chip removal + Clear all. */
+    private fun renderFilterChips() {
+        val group = b.filterChips
+        group.removeAllViews()
+        val active = mutableListOf<Pair<String, () -> Unit>>()
+
+        filters.provinces.forEach { p ->
+            active.add(p to { filters = filters.copy(provinces = filters.provinces - p) })
+        }
+        filters.categories.forEach { c ->
+            active.add(c to { filters = filters.copy(categories = filters.categories - c) })
+        }
+        filters.sources.forEach { s ->
+            active.add(s to { filters = filters.copy(sources = filters.sources - s) })
+        }
+        filters.status?.let { st ->
+            val label = when (st) {
+                StatusFilter.OPEN -> getString(R.string.status_open)
+                StatusFilter.CLOSING_SOON -> getString(R.string.status_closing_soon)
+                StatusFilter.CLOSED -> getString(R.string.status_closed)
+            }
+            active.add(label to { filters = filters.copy(status = null) })
+        }
+        if (filters.dateFilter != DateFilter.ANY) {
+            val label = dateFilterLabel(filters.dateFilter, filters.closingAfter, filters.closingBefore)
+            active.add(label to {
+                filters = filters.copy(
+                    dateFilter = DateFilter.ANY, closingAfter = null, closingBefore = null
+                )
+            })
+        }
+
+        if (active.isEmpty()) {
+            b.chipsScroll.visibility = View.GONE
+            updateFilterBadge()
+            return
+        }
+
+        active.forEach { (label, remove) ->
+            val chip = Chip(this).apply {
+                text = label
+                isCloseIconVisible = true
+                closeIconContentDescription = getString(R.string.cd_chip_remove, label)
+                setOnCloseIconClickListener {
+                    remove()
+                    load()
+                }
+            }
+            group.addView(chip)
+        }
+        // Clear all
+        val clear = Chip(this).apply {
+            text = getString(R.string.clear_all)
+            isCloseIconVisible = false
+            setOnClickListener {
+                filters = filters.copy(
+                    provinces = emptyList(), categories = emptyList(), sources = emptyList(),
+                    status = null, dateFilter = DateFilter.ANY,
+                    closingAfter = null, closingBefore = null
+                )
+                load()
+            }
+        }
+        group.addView(clear)
+        b.chipsScroll.visibility = View.VISIBLE
+        updateFilterBadge()
+    }
+
+    private fun dateFilterLabel(d: DateFilter, start: String?, end: String?): String =
+        when (d) {
+            DateFilter.PUBLISHED_TODAY -> getString(R.string.published_today)
+            DateFilter.PUBLISHED_7D -> getString(R.string.published_7d)
+            DateFilter.PUBLISHED_30D -> getString(R.string.published_30d)
+            DateFilter.CLOSING_7D -> getString(R.string.closing_7d)
+            DateFilter.CLOSING_14D -> getString(R.string.closing_14d)
+            DateFilter.CLOSING_30D -> getString(R.string.closing_30d)
+            DateFilter.CLOSING_CUSTOM ->
+                if (start != null || end != null)
+                    listOfNotNull(start, end).joinToString(" – ")
+                else getString(R.string.closing_custom)
+            DateFilter.ANY -> ""
+        }
+
+    private fun updateFilterBadge() {
+        val n = filters.activeFilterCount()
+        b.filterButton.text =
+            if (n > 0) "${getString(R.string.filter_button)} ($n)" else getString(R.string.filter_button)
+    }
+
+    // ----------------------------------------------------------- view states
+
+    private fun showList() {
+        b.recycler.visibility = View.VISIBLE
+        b.emptyView.visibility = View.GONE
+        b.errorView.visibility = View.GONE
+    }
+
+    private fun showEmpty() {
+        b.recycler.visibility = View.GONE
+        b.errorView.visibility = View.GONE
+        b.emptyView.visibility = View.VISIBLE
+        val filtered = filters.hasActiveFilters() || appliedQuery().isNotBlank()
+        b.emptyTitle.setText(
+            if (filtered) R.string.no_results_title else R.string.no_tenders_title
+        )
+        b.emptyBody.setText(
+            if (filtered) R.string.no_results_body else R.string.no_tenders_body
+        )
+        b.clearFiltersButton.visibility = if (filters.hasActiveFilters()) View.VISIBLE else View.GONE
+        b.resetSearchButton.visibility = if (appliedQuery().isNotBlank()) View.VISIBLE else View.GONE
+    }
+
+    private fun showError() {
+        b.recycler.visibility = View.GONE
+        b.emptyView.visibility = View.GONE
+        b.errorView.visibility = View.VISIBLE
+        b.errorText.setText(R.string.error_body_generic)
+    }
+
+    // ------------------------------------------------------------- lifecycle
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+        outState.putString(STATE_FILTERS, filters.toJson())
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -132,230 +543,20 @@ class MainActivity : AppCompatActivity() {
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_search -> {
-                showSearchDialog()
+                b.searchInput.requestFocus()
+                val imm = getSystemService(INPUT_METHOD_SERVICE) as? InputMethodManager
+                imm?.showSoftInput(b.searchInput, InputMethodManager.SHOW_IMPLICIT)
                 true
             }
             else -> super.onOptionsItemSelected(item)
         }
     }
 
-    private fun showSearchDialog() {
-        val input = EditText(this).apply {
-            hint = getString(R.string.search_hint)
-            setText(currentSearch.orEmpty())
-            imeOptions = EditorInfo.IME_ACTION_SEARCH
-            inputType = InputType.TYPE_CLASS_TEXT
-            isSingleLine = true
-            setSelectAllOnFocus(true)
+    override fun onBackPressed() {
+        if (b.drawerLayout.isDrawerOpen(GravityCompat.START)) {
+            b.drawerLayout.closeDrawer(GravityCompat.START)
+        } else {
+            super.onBackPressed()
         }
-        val pad = (16 * resources.displayMetrics.density).toInt()
-        val container = FrameLayout(this).apply {
-            setPadding(pad, pad, pad, 0)
-            addView(input)
-        }
-
-        val dialog = MaterialAlertDialogBuilder(this)
-            .setTitle(getString(R.string.search_dialog_title))
-            .setView(container)
-            .setPositiveButton(getString(R.string.search_action_search)) { _, _ ->
-                applySearch(input.text?.toString()?.trim())
-            }
-            .setNegativeButton(
-                if (currentSearch == null) getString(R.string.cancel)
-                else getString(R.string.search_action_clear)
-            ) { d, _ ->
-                if (currentSearch != null) {
-                    currentSearch = null
-                    load()
-                }
-                d.dismiss()
-            }
-            .create()
-
-        input.setOnEditorActionListener { _, actionId, _ ->
-            if (actionId == EditorInfo.IME_ACTION_SEARCH) {
-                applySearch(input.text?.toString()?.trim())
-                dialog.dismiss()
-                true
-            } else false
-        }
-
-        dialog.show()
-    }
-
-    private fun applySearch(query: String?) {
-        currentSearch = query?.takeIf { it.isNotEmpty() }
-        load()
-    }
-
-    private fun setupQuickFilters() {
-        b.categoryChips.removeAllViews()
-        addFilterChip("All", isAll = true, checked = true) {
-            currentCategory = null
-            filterClosingSoon = false
-            filterMyCategories = false
-            load()
-        }
-        addFilterChip("My Categories", isAll = false, checked = false) {
-            currentCategory = null
-            filterClosingSoon = false
-            filterMyCategories = true
-            load()
-        }
-        addFilterChip("Closing Soon", isAll = false, checked = false) {
-            currentCategory = null
-            filterClosingSoon = true
-            filterMyCategories = false
-            load()
-        }
-    }
-
-    private fun loadCategories() {
-        lifecycleScope.launch {
-            val cats = try { ApiClient.fetchCategories() } catch (e: Exception) { emptyList() }
-            if (cats.isEmpty()) return@launch
-            for (c in cats) {
-                addFilterChip(c, isAll = false, checked = false) {
-                    currentCategory = c
-                    filterClosingSoon = false
-                    filterMyCategories = false
-                    load()
-                }
-            }
-        }
-    }
-
-    private fun addFilterChip(label: String, isAll: Boolean, checked: Boolean, onClick: () -> Unit) {
-        val chip = Chip(this).apply {
-            text = label
-            isCheckable = true
-            isChecked = checked
-            setOnClickListener {
-                for (i in 0 until b.categoryChips.childCount) {
-                    (b.categoryChips.getChildAt(i) as? Chip)?.isChecked = false
-                }
-                this.isChecked = true
-                onClick()
-            }
-        }
-        b.categoryChips.addView(chip)
-    }
-
-    private fun load() {
-        if (isRefreshing) return
-        isRefreshing = true
-        currentPage = 1
-        hasMore = false
-        isLoadingMore = false
-        adapter.hideFooter()
-        showLoading()
-        b.offlineBanner.visibility = View.GONE
-        lifecycleScope.launch {
-            try {
-                val page = fetchPage(1)
-                val items = filterItems(page.items)
-                currentPage = page.page
-                hasMore = currentPage < page.totalPages
-
-                // Cache tenders for offline use
-                repo.cacheTenders(items)
-
-                adapter.submit(items)
-                if (items.isEmpty()) {
-                    showEmpty()
-                } else {
-                    showList()
-                    updateSubtitle(page.total, items.size)
-                }
-            } catch (e: Exception) {
-                // Fallback to offline cache
-                val cached = repo.getCachedTenders()
-                if (cached.isNotEmpty()) {
-                    val items = filterItems(cached)
-                    adapter.submit(items)
-                    showList()
-                    b.offlineBanner.visibility = View.VISIBLE
-                    b.subtitle.text = "${items.size} tenders (offline cache)"
-                } else {
-                    showError(e.message ?: "Connection failed")
-                }
-            } finally {
-                isRefreshing = false
-                b.swipe.isRefreshing = false
-            }
-        }
-    }
-
-    private fun loadMore() {
-        if (isRefreshing || isLoadingMore || !hasMore) return
-        isLoadingMore = true
-        adapter.showFooter()
-        val nextPage = currentPage + 1
-        lifecycleScope.launch {
-            try {
-                val page = fetchPage(nextPage)
-                val more = filterItems(page.items)
-                adapter.append(more)
-                currentPage = page.page
-                hasMore = currentPage < page.totalPages
-                repo.cacheTenders(more)
-            } catch (_: Exception) {
-                // Network hiccup — keep hasMore so scrolling again will retry.
-            } finally {
-                isLoadingMore = false
-                adapter.hideFooter()
-            }
-        }
-    }
-
-    private suspend fun fetchPage(page: Int): ApiClient.Page = ApiClient.fetchTenders(
-        page = page, limit = 100,
-        search = currentSearch,
-        category = categoriesFilter(),
-        province = null
-    )
-
-    private fun categoriesFilter(): String? =
-        if (filterMyCategories) repo.getSelectedCategories().firstOrNull() else currentCategory
-
-    private fun filterItems(items: List<Tender>): List<Tender> {
-        if (!filterClosingSoon) return items
-        return items.filter { DateUtils.isUrgent(it.closingAt, it.closingDate, 7) }
-            .sortedBy { it.closingAt ?: it.closingDate ?: "" }
-    }
-
-    private fun updateSubtitle(total: Int, shown: Int) {
-        val count = if (filterClosingSoon) shown else total
-        b.subtitle.text = resources.getQuantityString(
-            R.plurals.tenders_count, count, count
-        )
-    }
-
-    private fun showLoading() {
-        if (!b.swipe.isRefreshing) b.progress.visibility = View.VISIBLE
-        b.errorView.visibility = View.GONE
-        b.emptyView.visibility = View.GONE
-    }
-
-    private fun showList() {
-        b.progress.visibility = View.GONE
-        b.errorView.visibility = View.GONE
-        b.emptyView.visibility = View.GONE
-        b.recycler.visibility = View.VISIBLE
-    }
-
-    private fun showEmpty() {
-        b.progress.visibility = View.GONE
-        b.errorView.visibility = View.GONE
-        b.recycler.visibility = View.GONE
-        b.emptyView.visibility = View.VISIBLE
-    }
-
-    private fun showError(msg: String) {
-        b.progress.visibility = View.GONE
-        b.recycler.visibility = View.GONE
-        b.emptyView.visibility = View.GONE
-        b.errorText.text = getString(R.string.error_body, msg)
-        b.errorView.visibility = View.VISIBLE
     }
 }

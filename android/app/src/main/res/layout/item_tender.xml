@@ -3,12 +3,13 @@
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/tenderCard"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginStart="12dp"
     android:layout_marginEnd="12dp"
     android:layout_marginTop="8dp"
-    app:cardCornerRadius="16dp"
+    app:cardCornerRadius="14dp"
     app:cardElevation="1dp"
     app:strokeColor="@color/cardStroke"
     app:strokeWidth="1dp"
@@ -20,69 +21,156 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="14dp"
+        android:paddingEnd="14dp"
+        android:paddingTop="12dp"
+        android:paddingBottom="10dp">
+
+        <!-- Status badge + source -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:id="@+id/statusBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_badge_open"
+                android:textColor="@color/badgeOpenText"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.08"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                tools:text="OPEN" />
+
+            <TextView
+                android:id="@+id/sourceText"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:textColor="@color/textMuted"
+                android:textSize="11sp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="eTenders" />
+        </LinearLayout>
 
         <TextView
             android:id="@+id/tvTitle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:maxLines="2"
             android:ellipsize="end"
             android:textColor="@color/text"
             android:textSize="16sp"
             android:textStyle="bold"
+            android:lineSpacingMultiplier="1.1"
             tools:text="Supply and Delivery of ICT Hardware" />
 
         <TextView
             android:id="@+id/tvOrg"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
+            android:layout_marginTop="3dp"
             android:maxLines="1"
             android:ellipsize="end"
             android:textColor="@color/textMuted"
             android:textSize="13sp"
-            tools:text="City of Cape Town" />
+            tools:text="KwaZulu-Natal Department of Transport" />
 
-        <LinearLayout
+        <TextView
+            android:id="@+id/tvRef"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="3dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:textColor="@color/textMuted"
+            android:textSize="12sp"
+            tools:text="REF: KZN-2026-00124" />
+
+        <!-- Location + category tags -->
+        <LinearLayout
+            android:id="@+id/tagRow"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
             android:orientation="horizontal"
+            android:layout_marginTop="10dp"
             android:gravity="center_vertical">
 
             <TextView
-                android:id="@+id/tvProvince"
-                android:layout_width="0dp"
+                android:id="@+id/locationTag"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:drawablePadding="4dp"
-                app:drawableStartCompat="@drawable/ic_place"
-                android:gravity="center_vertical"
+                android:background="@drawable/bg_tag"
+                android:textColor="@color/tagText"
+                android:textSize="11sp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
                 android:maxLines="1"
                 android:ellipsize="end"
-                android:textColor="@color/textMuted"
-                android:textSize="12sp"
-                tools:text="Western Cape" />
+                tools:text="KwaZulu-Natal" />
+
+            <TextView
+                android:id="@+id/categoryTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="6dp"
+                android:background="@drawable/bg_tag"
+                android:textColor="@color/tagText"
+                android:textSize="11sp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                android:paddingTop="3dp"
+                android:paddingBottom="3dp"
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Construction" />
+        </LinearLayout>
+
+        <!-- Closing info + save -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical">
 
             <TextView
                 android:id="@+id/tvCloses"
-                android:layout_width="wrap_content"
+                android:layout_width="0dp"
                 android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:drawablePadding="5dp"
+                app:drawableStartCompat="@drawable/ic_calendar"
+                android:gravity="center_vertical"
                 android:textColor="@color/primary"
-                android:textSize="12sp"
+                android:textSize="13sp"
                 android:textStyle="bold"
-                tools:text="Closes in 12 days" />
-        </LinearLayout>
+                android:maxLines="1"
+                android:ellipsize="end"
+                tools:text="Closes 4 Sep 2026" />
 
-        <com.google.android.material.chip.ChipGroup
-            android:id="@+id/chipGroup"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            app:chipSpacingVertical="0dp"
-            app:chipSpacingHorizontal="6dp"
-            app:singleLine="false" />
+            <ImageButton
+                android:id="@+id/saveButton"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_marginStart="4dp"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:padding="10dp"
+                android:src="@drawable/ic_star_border"
+                app:tint="@color/textMuted"
+                android:contentDescription="@string/cd_save" />
+        </LinearLayout>
 
     </LinearLayout>
 

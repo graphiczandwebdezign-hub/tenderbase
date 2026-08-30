@@ -37,11 +37,11 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Activity (Flyout Navigation Drawer, Latest Tenders) -->
+        <!-- Main Activity (Tender discovery: search, filters, sort) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan" />
+            android:windowSoftInputMode="adjustResize" />
 
         <!-- Tender Detail Activity -->
         <activity

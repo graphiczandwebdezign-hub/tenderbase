@@ -232,7 +232,8 @@ GET  /api/v1/health
 
 ### Tenders (require `X-API-Key`)
 ```
-GET  /api/v1/tenders                 # list + filter (default: active only)
+GET  /api/v1/tenders                 # list + search + filter + sort (default: active only)
+GET  /api/v1/tenders/facets          # filter options with live counts
 GET  /api/v1/tenders/latest
 GET  /api/v1/tenders/closing-soon
 GET  /api/v1/tenders/search?q=...
@@ -245,13 +246,29 @@ GET  /api/v1/tenders/{id}            # detail incl. documents + amendments
 ?province=KwaZulu-Natal
 ?category=construction&province=KwaZulu-Natal
 ?organisation=eThekwini
+?municipality=eThekwini
 ?status=CLOSED
+?status=open|closing_soon|closed    # lifecycle aliases derived from stored dates
+?source=eTenders                     # comma-separated for multiple
 ?closing_within=24h            # or 7d
 ?closing_after=2026-09-01&closing_before=2026-09-30
 ?advertised_after=2026-08-01
-?search=software
+?search=software               # all terms must match; title/description/reference/org/category/province/municipality
+?sort=newest|closing|updated|relevance
 ?page=1&limit=25
 ```
+
+Notes:
+- `category`/`province`/`source` accept comma-separated lists (OR within a facet).
+- `sort=relevance` ranks weighted field matches (title > reference > issuer >
+  classification > description) and is meaningful only with `search`; without
+  a query it falls back to `newest`.
+- `sort=closing` never surfaces already-closed tenders unless you explicitly
+  ask for closed statuses.
+- Invalid `status`/`sort`/`closing_within` return `400 INVALID_PARAMETER`.
+- `/tenders/facets` returns distinct provinces/categories/sources present on
+  currently open tenders, with counts — the client filter UI never invents
+  values.
 
 **Paginated response envelope:**
 ```json
@@ -430,7 +447,9 @@ local/dev (default). Schema highlights:
 Timezone-safe: `closing_at` is stored in UTC (`TIMESTAMPTZ`); split
 `closing_date`/`closing_time` are kept for display. Indexes exist on
 `external_id`, `ocid`, `status`, `category`, `province`, `closing_at`,
-`advertised_date`, `organisation`, `first_seen_at`.
+`closing_date`, `advertised_date`, `organisation`, `first_seen_at`,
+`updated_at` (the last two added by the `b7c4e9f1a2d3` discovery migration for
+`sort=updated` and closing-date window filters).
 
 ```bash
 alembic upgrade head        # create / migrate
@@ -447,12 +466,19 @@ pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ```
 
-The suite (29 tests) covers API-key auth, tender retrieval, pagination, search,
+The suite covers API-key auth, tender retrieval, pagination, search,
 category/province/closing filters, deduplication, updates, **running ingestion
 twice creates no duplicates**, expiry, amendment detection, notification
 matching (positive + negative), duplicate-notification prevention, device
-registration, preferences, and the admin API. Tests use an isolated temporary
-SQLite DB and a `MockSourceAdapter` (no network, deterministic).
+registration, preferences, and the admin API. The Sprint 1 discovery suite
+(`tests/test_discovery.py`) additionally covers multi-field search (AND terms,
+LIKE-wildcard escaping), sorting (newest / closing / updated / weighted
+relevance), derived statuses (open / closing_soon / closed), combined filters,
+facets, pagination metadata, empty results and invalid parameters. Android
+unit tests (`android/app/src/test/`) cover filter → query-param mapping, JSON
+round-trips, closing-date urgency tiers and tender parsing. Tests use an
+isolated temporary SQLite DB and a `MockSourceAdapter` (no network,
+deterministic).
 
 ---
 

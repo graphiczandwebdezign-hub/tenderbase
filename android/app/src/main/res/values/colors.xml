@@ -9,7 +9,27 @@
     <color name="text">#0F1520</color>
     <color name="textMuted">#37414F</color>
     <color name="urgent">#D93B3B</color>
+    <!-- Amber tier for "closing soon" (7–14 days). -->
+    <color name="warning">#B45309</color>
     <color name="cardStroke">#E4E8EF</color>
     <color name="ripple">#1A1F6FEB</color>
     <color name="iconBackground">#1F6FEB</color>
+
+    <!-- Status badge palette: tinted background + dark foreground (AA contrast,
+         never colour-only — badges always carry a text label). -->
+    <color name="badgeOpenBg">#E3F3E9</color>
+    <color name="badgeOpenText">#175E38</color>
+    <color name="badgeSoonBg">#FCF0DA</color>
+    <color name="badgeSoonText">#7A4F00</color>
+    <color name="badgeClosedBg">#E9ECF1</color>
+    <color name="badgeClosedText">#4A5462</color>
+    <color name="badgeCancelledBg">#F3E8E8</color>
+    <color name="badgeCancelledText">#8C3A3A</color>
+
+    <!-- Compact meta tags (province / category). -->
+    <color name="tagBg">#EDF1F7</color>
+    <color name="tagText">#3D4854</color>
+
+    <!-- Skeleton placeholders. -->
+    <color name="skeleton">#E7EAF0</color>
 </resources>

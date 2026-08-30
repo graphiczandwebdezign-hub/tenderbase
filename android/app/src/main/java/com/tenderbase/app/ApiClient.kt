@@ -21,21 +21,37 @@ object ApiClient {
     // rotate/replace with per-user keys when you add accounts.
     private const val API_KEY = "22phzXr7bunJ3r2gzgrynej4I71rf+kGIeu43NLsABM="
 
-    data class Page(val items: List<Tender>, val total: Int, val page: Int, val totalPages: Int)
+    data class Page(
+        val items: List<Tender>,
+        val total: Int,
+        val page: Int,
+        val totalPages: Int
+    )
 
-    /** GET /api/v1/tenders with optional search + category + province filters. */
+    data class FacetItem(val name: String, val count: Int)
+    data class Facets(
+        val provinces: List<FacetItem>,
+        val categories: List<FacetItem>,
+        val sources: List<FacetItem>
+    )
+
+    /**
+     * GET /api/v1/tenders with the full discovery state (search, facet
+     * filters, date window, sort) and server-side pagination.
+     */
     suspend fun fetchTenders(
         page: Int = 1,
         limit: Int = 25,
-        search: String? = null,
-        category: String? = null,
-        province: String? = null
+        filters: SearchFilters = SearchFilters()
     ): Page = withContext(Dispatchers.IO) {
-        val sb = StringBuilder("$BASE_URL/api/v1/tenders?page=$page&limit=$limit")
-        if (!search.isNullOrBlank()) sb.append("&search=").append(enc(search))
-        if (!category.isNullOrBlank()) sb.append("&category=").append(enc(category))
-        if (!province.isNullOrBlank()) sb.append("&province=").append(enc(province))
-        val body = get(sb.toString())
+        val params = filters.toQueryParams(SearchFilters.todayIso()).toMutableList()
+        params.add("page" to page.toString())
+        params.add("limit" to limit.toString())
+        if (filters.query.isNotBlank()) params.add("search" to filters.query.trim())
+        val url = "$BASE_URL/api/v1/tenders?" + params.joinToString("&") { (k, v) ->
+            "$k=${enc(v)}"
+        }
+        val body = get(url)
         val root = JSONObject(body)
         val arr = root.optJSONArray("data") ?: org.json.JSONArray()
         val pg = root.optJSONObject("pagination")
@@ -45,6 +61,27 @@ object ApiClient {
             page = pg?.optInt("page") ?: page,
             totalPages = pg?.optInt("total_pages") ?: 1
         )
+    }
+
+    /** GET /api/v1/tenders/facets — filter options with live counts. */
+    suspend fun fetchFacets(): Facets = withContext(Dispatchers.IO) {
+        val root = JSONObject(get("$BASE_URL/api/v1/tenders/facets"))
+        Facets(
+            provinces = facetList(root, "provinces"),
+            categories = facetList(root, "categories"),
+            sources = facetList(root, "sources")
+        )
+    }
+
+    private fun facetList(root: JSONObject, key: String): List<FacetItem> {
+        val arr = root.optJSONArray(key) ?: return emptyList()
+        val out = ArrayList<FacetItem>(arr.length())
+        for (i in 0 until arr.length()) {
+            val o = arr.optJSONObject(i) ?: continue
+            val name = o.optString("name")
+            if (name.isNotEmpty()) out.add(FacetItem(name, o.optInt("count")))
+        }
+        return out
     }
 
     /** GET /api/v1/tenders/{id} -> a single tender with full detail. */

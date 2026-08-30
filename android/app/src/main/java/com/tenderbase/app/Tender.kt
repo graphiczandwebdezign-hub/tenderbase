@@ -12,15 +12,37 @@ data class Tender(
     val description: String?,
     val organisation: String?,
     val province: String?,
+    val municipality: String? = null,
     val category: String?,
     val categories: List<String>,
     val tenderType: String?,
+    val reference: String? = null,
     val status: String?,
+    /** Server-computed lifecycle state: ACTIVE|CLOSING_SOON|CLOSED|EXPIRED|CANCELLED. */
+    val deadlineState: String? = null,
+    val source: String? = null,
     val closingDate: String?,
     val closingAt: String?,
     val sourceUrl: String?,
     val documents: List<TenderDoc>
 ) {
+    /**
+     * Badge label from the *server's* deadline state (never the device clock).
+     * Falls back to date arithmetic for offline-cached rows without state.
+     */
+    fun badgeLabel(): String = when (deadlineState) {
+        "CLOSING_SOON" -> "CLOSING SOON"
+        "ACTIVE", "AMENDED" -> "OPEN"
+        "CLOSED", "EXPIRED" -> "CLOSED"
+        "CANCELLED" -> "CANCELLED"
+        else -> when {
+            status.equals("CANCELLED", true) -> "CANCELLED"
+            status.equals("CLOSED", true) || status.equals("EXPIRED", true) -> "CLOSED"
+            DateUtils.isClosed(closingAt, closingDate) -> "CLOSED"
+            else -> "OPEN"
+        }
+    }
+
     companion object {
         fun fromJson(o: JSONObject): Tender {
             val cats = mutableListOf<String>()
@@ -49,10 +71,14 @@ data class Tender(
                 description = o.optString("description", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 organisation = o.optString("organisation", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 province = o.optString("province", null)?.takeIf { it.isNotEmpty() && it != "null" },
+                municipality = o.optString("municipality", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 category = o.optString("category", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 categories = cats,
                 tenderType = o.optString("tender_type", null)?.takeIf { it.isNotEmpty() && it != "null" },
+                reference = o.optString("tender_number", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 status = o.optString("status", null),
+                deadlineState = o.optString("deadline_state", null)?.takeIf { it.isNotEmpty() && it != "null" },
+                source = o.optString("source", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 closingDate = o.optString("closing_date", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 closingAt = o.optString("closing_at", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 sourceUrl = o.optString("source_url", null)?.takeIf { it.isNotEmpty() && it != "null" },

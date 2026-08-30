@@ -2,7 +2,9 @@
 <resources>
     <string name="app_name">TenderBase</string>
     <string name="loading">Loading tenders…</string>
+    <string name="tagline">Find your next opportunity</string>
     <string name="search_hint">Search tenders</string>
+    <string name="search_hint_full">Search tenders, organisations, references or keywords…</string>
     <string name="search_dialog_title">Search tenders</string>
     <string name="search_action_search">Search</string>
     <string name="search_action_clear">Clear</string>
@@ -10,13 +12,65 @@
     <string name="loading_more">Loading more tenders…</string>
     <string name="detail_title">Tender details</string>
 
-    <string name="retry">Retry</string>
-    <string name="error_title">Couldn\'t load tenders</string>
+    <string name="retry">Try again</string>
+    <string name="error_title">Unable to load tenders</string>
+    <string name="error_body_generic">Check your connection and try again. If the server was idle it may take up to a minute to wake up.</string>
     <string name="error_body">%1$s\n\nIf the server was idle it may take up to a minute to wake up. Pull down or tap Retry.</string>
 
-    <string name="empty_title">No tenders found</string>
-    <string name="empty_body">Try a different search term or category filter.</string>
+    <string name="no_results_title">No tenders found</string>
+    <string name="no_results_body">Try changing your keywords or filters.</string>
+    <string name="no_tenders_title">No tenders available yet</string>
+    <string name="no_tenders_body">New opportunities are published continuously and will appear here automatically.</string>
+    <string name="clear_filters">Clear filters</string>
+    <string name="reset_search">Reset search</string>
 
+    <string name="filter_button">Filters</string>
+    <string name="sort_button">Sort</string>
+    <string name="clear_all">Clear all</string>
+    <string name="show_results">Show results</string>
+    <string name="reset">Reset</string>
+    <string name="filter_sheet_title">Filter tenders</string>
+
+    <string name="section_status">Status</string>
+    <string name="section_date">Dates</string>
+    <string name="section_province">Province</string>
+    <string name="section_category">Category</string>
+    <string name="section_source">Source</string>
+    <string name="status_any">Any status</string>
+    <string name="status_open">Open</string>
+    <string name="status_closing_soon">Closing soon</string>
+    <string name="status_closed">Closed</string>
+    <string name="date_any">Any time</string>
+    <string name="published_today">Published today</string>
+    <string name="published_7d">Published: last 7 days</string>
+    <string name="published_30d">Published: last 30 days</string>
+    <string name="closing_7d">Closing within 7 days</string>
+    <string name="closing_14d">Closing within 14 days</string>
+    <string name="closing_30d">Closing within 30 days</string>
+    <string name="closing_custom">Custom closing range</string>
+    <string name="start_date">Start date</string>
+    <string name="end_date">End date</string>
+
+    <string name="sort_title">Sort tenders</string>
+    <string name="sort_newest">Newest first</string>
+    <string name="sort_closing">Closing soon</string>
+    <string name="sort_updated">Recently updated</string>
+    <string name="sort_relevance">Relevance</string>
+    <string name="sort_short_newest">Newest</string>
+    <string name="sort_short_updated">Updated</string>
+
+    <string name="showing_range">Showing %1$d–%2$d of %3$d</string>
+    <string name="end_of_results">You\'ve reached the end</string>
+    <string name="retry_load_more">Couldn\'t load more — tap to retry</string>
+
+    <string name="cd_search">Search tenders</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_filter">Filter tenders</string>
+    <string name="cd_sort">Sort tenders</string>
+    <string name="cd_save">Save tender</string>
+    <string name="cd_unsave">Remove from saved tenders</string>
+    <string name="cd_chip_remove">Remove filter %1$s</string>
+    <string name="ref_prefix">REF: %1$s</string>
     <string name="closing_on">Closing on %1$s</string>
     <string name="label_type">Type</string>
     <string name="label_status">Status</string>
@@ -28,5 +82,9 @@
     <plurals name="tenders_count">
         <item quantity="one">%d tender</item>
         <item quantity="other">%d tenders</item>
+    </plurals>
+    <plurals name="tenders_found">
+        <item quantity="one">%d tender found</item>
+        <item quantity="other">%d tenders found</item>
     </plurals>
 </resources>

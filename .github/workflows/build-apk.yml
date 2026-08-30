@@ -1,23 +1,9 @@
-# ============================================================================
-# COPY THIS FILE INTO YOUR REPO AT:  .github/workflows/build-apk.yml
-#
-# GitHub blocks automation bots from creating workflow files, so you must add
-# this one manually (GitHub web UI: Add file -> Create new file -> paste path
-# ".github/workflows/build-apk.yml" -> paste this content -> Commit).
-#
-# What it does: builds a SIGNED DEBUG APK in the cloud (GitHub's runners can
-# reach the Android SDK/Gradle/Maven that the dev sandbox could not) and:
-#   1. uploads it as a downloadable "Artifact" on every run, AND
-#   2. attaches it to a GitHub Release tagged "apk-latest" so you get a stable
-#      download link you can open on your phone.
-# Run it from the Actions tab -> "Build Android APK" -> Run workflow.
-# ============================================================================
 name: Build Android APK
 
 on:
   workflow_dispatch: {}
   push:
-    branches: [ "arena/01a04c59-tenderbase", "main" ]
+    branches: [ "main", "arena/*" ]
     paths: [ "android/**", ".github/workflows/build-apk.yml" ]
 
 permissions:
@@ -42,6 +28,10 @@ jobs:
       - name: Grant execute permission for gradlew
         working-directory: android
         run: chmod +x gradlew || true
+
+      - name: Unit tests (discovery logic: filters, dates, parsing)
+        working-directory: android
+        run: ./gradlew --no-daemon testDebugUnitTest
 
       - name: Build signed debug APK
         working-directory: android
