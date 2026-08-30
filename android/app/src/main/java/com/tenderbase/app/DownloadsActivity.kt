@@ -7,6 +7,7 @@ import android.os.Environment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.webkit.MimeTypeMap
 import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
@@ -43,7 +44,9 @@ class DownloadsActivity : AppCompatActivity() {
 
     private fun loadDownloads() {
         val dir = getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS) ?: filesDir
-        val files = dir.listFiles { f -> f.isFile && f.name.endsWith(".pdf", true) }?.toList() ?: emptyList()
+        val docExt = setOf("pdf", "doc", "docx", "xls", "xlsx", "zip", "txt", "rtf")
+        val files = dir.listFiles { f -> f.isFile && f.extension.lowercase() in docExt }?.toList()
+            ?: emptyList()
         adapter.submit(files)
 
         if (files.isEmpty()) {
@@ -59,16 +62,22 @@ class DownloadsActivity : AppCompatActivity() {
         }
     }
 
+    private fun mimeFor(file: File): String {
+        val ext = file.extension.lowercase()
+        return MimeTypeMap.getSingleton().getMimeTypeFromExtension(ext)
+            ?: if (ext == "pdf") "application/pdf" else "application/octet-stream"
+    }
+
     private fun openFile(file: File) {
         try {
             val uri: Uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/pdf")
+                setDataAndType(uri, mimeFor(file))
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
             startActivity(intent)
-        } catch (e: Exception) {
-            // No PDF viewer
+        } catch (_: Exception) {
+            // No viewer available
         }
     }
 
@@ -76,7 +85,7 @@ class DownloadsActivity : AppCompatActivity() {
         try {
             val uri: Uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
             val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "application/pdf"
+                type = mimeFor(file)
                 putExtra(Intent.EXTRA_STREAM, uri)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }

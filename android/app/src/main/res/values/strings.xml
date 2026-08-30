@@ -3,6 +3,11 @@
     <string name="app_name">TenderBase</string>
     <string name="loading">Loading tenders…</string>
     <string name="search_hint">Search tenders</string>
+    <string name="search_dialog_title">Search tenders</string>
+    <string name="search_action_search">Search</string>
+    <string name="search_action_clear">Clear</string>
+    <string name="cancel">Cancel</string>
+    <string name="loading_more">Loading more tenders…</string>
     <string name="detail_title">Tender details</string>
 
     <string name="retry">Retry</string>

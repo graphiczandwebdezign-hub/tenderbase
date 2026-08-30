@@ -1,21 +1,17 @@
 package com.tenderbase.app
 
-import android.app.DownloadManager
-import android.content.BroadcastReceiver
-import android.content.Context
 import android.content.Intent
-import android.content.IntentFilter
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
+import android.webkit.MimeTypeMap
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.FileProvider
-import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.chip.Chip
 import com.tenderbase.app.databinding.ActivityDetailBinding
@@ -23,6 +19,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
+import java.io.FileOutputStream
+import java.net.HttpURLConnection
+import java.net.URL
 
 class DetailActivity : AppCompatActivity() {
 
@@ -163,11 +162,11 @@ class DetailActivity : AppCompatActivity() {
                 titleTv.text = d.title
                 
                 // Check if already downloaded
-                val fileName = "${t.id}_${d.title.take(20).replace(Regex("[^a-zA-Z0-9]"), "_")}.pdf"
+                val fileName = fileNameFor(t.id, d.title, d.url, d.mime)
                 val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
                 if (file.exists()) {
                     (actionBtn as? TextView)?.text = "✓ Open PDF"
-                    docView.setOnClickListener { openPdfFile(file) }
+                    docView.setOnClickListener { openFile(file) }
                 } else {
                     (actionBtn as? TextView)?.text = "Download"
                     docView.setOnClickListener { downloadDocument(d.title, d.url, fileName, docView) }
@@ -186,39 +185,92 @@ class DetailActivity : AppCompatActivity() {
     }
 
     private fun downloadDocument(title: String, urlStr: String, fileName: String, view: View) {
-        try {
-            val request = DownloadManager.Request(Uri.parse(urlStr))
-                .setTitle(title)
-                .setDescription("Downloading tender document...")
-                .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                .setDestinationInExternalFilesDir(this, Environment.DIRECTORY_DOWNLOADS, fileName)
+        val actionBtn = view.findViewById<TextView>(R.id.docAction)
+        val target = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
+        target.parentFile?.mkdirs()
 
-            val dm = getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager
-            dm.enqueue(request)
-            Toast.makeText(this, "Download started...", Toast.LENGTH_SHORT).show()
+        actionBtn?.text = "Downloading…"
+        view.setOnClickListener(null)
 
-            view.postDelayed({
-                val file = File(getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS), fileName)
-                if (file.exists()) {
-                    (view.findViewById<TextView>(R.id.docAction))?.text = "✓ Open PDF"
-                    view.setOnClickListener { openPdfFile(file) }
+        lifecycleScope.launch {
+            try {
+                val ok = withContext(Dispatchers.IO) { downloadToFile(urlStr, target) }
+                if (ok && target.exists() && target.length() > 0) {
+                    actionBtn?.text = "✓ Open PDF"
+                    view.setOnClickListener { openFile(target) }
+                    Toast.makeText(this@DetailActivity, "Downloaded ✓", Toast.LENGTH_SHORT).show()
+                } else {
+                    target.delete()
+                    resetDownloadAction(actionBtn, view, title, urlStr, fileName)
+                    Toast.makeText(this@DetailActivity, "Download failed", Toast.LENGTH_SHORT).show()
                 }
-            }, 2000)
-        } catch (e: Exception) {
-            Toast.makeText(this, "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            } catch (e: Exception) {
+                target.delete()
+                resetDownloadAction(actionBtn, view, title, urlStr, fileName)
+                Toast.makeText(this@DetailActivity, "Download failed: ${e.message}", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
-    private fun openPdfFile(file: File) {
+    /** Restores the row to a tappable "Download" state after a failure. */
+    private fun resetDownloadAction(
+        actionBtn: TextView?,
+        view: View,
+        title: String,
+        urlStr: String,
+        fileName: String
+    ) {
+        actionBtn?.text = "Download"
+        view.setOnClickListener { downloadDocument(title, urlStr, fileName, view) }
+    }
+
+    /** Downloads the file with a browser-like UA and follows redirects. */
+    private fun downloadToFile(urlStr: String, target: File): Boolean {
+        val conn = URL(urlStr).openConnection() as HttpURLConnection
+        try {
+            conn.requestMethod = "GET"
+            conn.connectTimeout = 20000
+            conn.readTimeout = 60000
+            conn.instanceFollowRedirects = true
+            conn.setRequestProperty(
+                "User-Agent",
+                "Mozilla/5.0 (Linux; Android; TenderBase) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36"
+            )
+            conn.setRequestProperty("Accept", "*/*")
+            if (conn.responseCode !in 200..299) return false
+            conn.inputStream.use { input ->
+                FileOutputStream(target).use { out -> input.copyTo(out) }
+            }
+            return true
+        } finally {
+            conn.disconnect()
+        }
+    }
+
+    /** Sensible, extension-correct file name derived from the source document. */
+    private fun fileNameFor(tenderId: Int, title: String, url: String, mime: String?): String {
+        val safeTitle = title.take(20).replace(Regex("[^a-zA-Z0-9]"), "_")
+        val base = "${tenderId}_$safeTitle"
+        val urlExt = url.substringBefore('?').substringAfterLast('.', "")
+            .lowercase().takeIf { it.isNotEmpty() && it.length <= 5 }
+        val mimeExt = mime?.substringAfter('/')?.takeWhile { it.isLetterOrDigit() }?.lowercase()
+        val ext = urlExt ?: mimeExt ?: "pdf"
+        return "$base.$ext"
+    }
+
+    private fun openFile(file: File) {
         try {
             val uri = FileProvider.getUriForFile(this, "${packageName}.fileprovider", file)
+            val mime = MimeTypeMap.getSingleton().getMimeTypeFromExtension(file.extension.lowercase())
+                ?: if (file.extension.lowercase() == "pdf") "application/pdf"
+                   else "application/octet-stream"
             val intent = Intent(Intent.ACTION_VIEW).apply {
-                setDataAndType(uri, "application/pdf")
+                setDataAndType(uri, mime)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
-            startActivity(intent)
+            startActivity(Intent.createChooser(intent, "Open document"))
         } catch (_: Exception) {
-            Toast.makeText(this, "No PDF viewer installed", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "No app available to open this file", Toast.LENGTH_SHORT).show()
         }
     }
 

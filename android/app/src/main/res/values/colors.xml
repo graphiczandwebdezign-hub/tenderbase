@@ -6,8 +6,8 @@
     <color name="onPrimaryMuted">#D6E4FF</color>
     <color name="background">#F5F7FA</color>
     <color name="surface">#FFFFFF</color>
-    <color name="text">#1A2233</color>
-    <color name="textMuted">#5B6675</color>
+    <color name="text">#0F1520</color>
+    <color name="textMuted">#37414F</color>
     <color name="urgent">#D93B3B</color>
     <color name="cardStroke">#E4E8EF</color>
     <color name="ripple">#1A1F6FEB</color>
