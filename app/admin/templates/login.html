@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block title %}Admin Login{% endblock %}
+{% block content %}
+<div style="max-width:380px;margin:8vh auto;">
+  <div class="card">
+    <h2 style="margin-top:0;">Admin sign in</h2>
+    {% if error %}<p style="color:#ef4444;">{{ error }}</p>{% endif %}
+    <form method="post" action="/admin/login">
+      <label class="k">Admin secret</label>
+      <input type="password" name="secret" autofocus />
+      <div style="margin-top:16px;">
+        <button type="submit">Sign in</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

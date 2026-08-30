@@ -1,0 +1,74 @@
+# ============================================================================
+# COPY THIS FILE INTO YOUR REPO AT:  .github/workflows/build-apk.yml
+#
+# GitHub blocks automation bots from creating workflow files, so you must add
+# this one manually (GitHub web UI: Add file -> Create new file -> paste path
+# ".github/workflows/build-apk.yml" -> paste this content -> Commit).
+#
+# What it does: builds a SIGNED DEBUG APK in the cloud (GitHub's runners can
+# reach the Android SDK/Gradle/Maven that the dev sandbox could not) and:
+#   1. uploads it as a downloadable "Artifact" on every run, AND
+#   2. attaches it to a GitHub Release tagged "apk-latest" so you get a stable
+#      download link you can open on your phone.
+# Run it from the Actions tab -> "Build Android APK" -> Run workflow.
+# ============================================================================
+name: Build Android APK
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ "arena/01a04c59-tenderbase", "main" ]
+    paths: [ "android/**", ".github/workflows/build-apk.yml" ]
+
+permissions:
+  contents: write   # needed to publish the Release
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Grant execute permission for gradlew
+        working-directory: android
+        run: chmod +x gradlew || true
+
+      - name: Build signed debug APK
+        working-directory: android
+        run: ./gradlew --no-daemon assembleDebug
+
+      - name: Rename APK
+        working-directory: android
+        run: |
+          mkdir -p ../out
+          cp app/build/outputs/apk/debug/app-debug.apk ../out/TenderBase-debug.apk
+          ls -la ../out
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TenderBase-debug-apk
+          path: out/TenderBase-debug.apk
+          if-no-files-found: error
+
+      - name: Publish APK to a Release (stable download link)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-latest
+          name: TenderBase debug APK (latest)
+          body: |
+            Latest installable debug build of the TenderBase Android app.
+            Download **TenderBase-debug.apk** below and open it on your phone
+            (enable "Install unknown apps" for your browser/file manager).
+          files: out/TenderBase-debug.apk
+          make_latest: true

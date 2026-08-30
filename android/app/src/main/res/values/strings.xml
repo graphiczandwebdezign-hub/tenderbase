@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TenderBase</string>
+    <string name="loading">Loading tenders…</string>
+    <string name="search_hint">Search tenders</string>
+    <string name="detail_title">Tender details</string>
+
+    <string name="retry">Retry</string>
+    <string name="error_title">Couldn\'t load tenders</string>
+    <string name="error_body">%1$s\n\nIf the server was idle it may take up to a minute to wake up. Pull down or tap Retry.</string>
+
+    <string name="empty_title">No tenders found</string>
+    <string name="empty_body">Try a different search term or category filter.</string>
+
+    <string name="closing_on">Closing on %1$s</string>
+    <string name="label_type">Type</string>
+    <string name="label_status">Status</string>
+    <string name="label_description">Description</string>
+    <string name="label_documents">Documents</string>
+    <string name="no_documents">No documents attached.</string>
+    <string name="open_on_etenders">Open on eTenders</string>
+
+    <plurals name="tenders_count">
+        <item quantity="one">%d tender</item>
+        <item quantity="other">%d tenders</item>
+    </plurals>
+</resources>
