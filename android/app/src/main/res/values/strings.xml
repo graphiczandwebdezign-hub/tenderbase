@@ -136,6 +136,8 @@
     <string name="reminder_title">Tender closing soon</string>
     <string name="reminder_body">%1$s — %2$s</string>
     <string name="reminder_channel_name">Tender Alerts</string>
+    <string name="whats_new_title">What\'s new in %1$s</string>
+    <string name="whats_new_got_it">Got it</string>
     <string name="reminder_channel_desc">Notifications for new matching tenders and deadlines</string>
     <string name="ref_prefix">REF: %1$s</string>
     <string name="closing_on">Closing on %1$s</string>

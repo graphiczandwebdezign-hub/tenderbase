@@ -230,6 +230,24 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Android polish & release prep — Sprint 11
+- **Release build hardened**: `minifyEnabled` + `shrinkResources` on, the
+  previously missing `proguard-rules.pro` added (readable stack traces,
+  manifest entry points, Room entities), debug-signed release so CI can
+  produce installable APKs without secrets. Version 1.1 (code 2).
+- **"What's new" dialog** on app updates (`Changelog.kt`): version notes via
+  Material dialog — fresh installs stay silent (onboarding covers them),
+  same-version restarts show nothing.
+- **Worker reliability**: the pre-cache/deadline-reminder job now retries
+  with exponential backoff (30 min) and gives up after 5 attempts instead of
+  retrying forever.
+- **Release CI template**: `docs/ci-android-release.yml` (copy into
+  `.github/workflows/` — GitHub blocks bots from creating workflow files):
+  runs JVM tests, builds the minified APK, publishes a versioned artifact +
+  Release.
+- **Play listing copy**: `docs/play-listing.md` (title/short/full
+  descriptions + graphics checklist).
+
 ### Production readiness — Sprint 10
 - **Liveness/readiness split**: `/health` is a cheap liveness probe (no DB
   access, so a DB outage can't cause restart loops) reporting version +

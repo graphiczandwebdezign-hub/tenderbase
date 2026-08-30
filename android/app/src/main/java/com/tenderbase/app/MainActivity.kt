@@ -164,6 +164,7 @@ class MainActivity : AppCompatActivity() {
         updateSortButtonLabel()
         maybeRequestNotificationPermission()
         load()
+        maybeShowWhatsNew()
         loadFacets()
     }
 
@@ -560,6 +561,36 @@ class MainActivity : AppCompatActivity() {
                 isLoadingMore = false
             }
         }
+    }
+
+
+    // ---------------------------------------------------- what's new (Sprint 11)
+
+    /**
+     * Show "What's new" after an UPDATE only. Fresh installs record their
+     * version silently (onboarding already introduces the app); same-version
+     * restarts show nothing.
+     */
+    private fun maybeShowWhatsNew() {
+        val current = try {
+            packageManager.getPackageInfo(packageName, 0).versionName ?: return
+        } catch (_: Exception) {
+            return
+        }
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        val lastSeen = prefs.getString("last_seen_version", null)
+        if (lastSeen == null) {
+            prefs.edit().putString("last_seen_version", current).apply()
+            return
+        }
+        if (!Changelog.shouldShow(current, lastSeen)) return
+        val notes = Changelog.notesFor(current) ?: return
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.whats_new_title, notes.version))
+            .setMessage(notes.highlights.joinToString("\n"))
+            .setPositiveButton(R.string.whats_new_got_it, null)
+            .show()
+        prefs.edit().putString("last_seen_version", current).apply()
     }
 
     private fun loadFacets() {

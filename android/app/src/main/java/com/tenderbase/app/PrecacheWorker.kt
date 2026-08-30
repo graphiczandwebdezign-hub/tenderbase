@@ -38,8 +38,9 @@ class PrecacheWorker(
             remindClosingDeadlines(repo)
             Result.success()
         } catch (_: Exception) {
-            // Network unavailable — retry with WorkManager's backoff.
-            Result.retry()
+            // Network unavailable — retry with backoff, but stop after a few
+            // attempts so a persistent failure can't retry forever.
+            if (runAttemptCount >= 4) Result.failure() else Result.retry()
         }
     }
 

@@ -1,6 +1,7 @@
 package com.tenderbase.app
 
 import android.app.Application
+import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.NetworkType
@@ -18,6 +19,7 @@ class TenderBaseApp : Application() {
             .build()
         val request = PeriodicWorkRequestBuilder<PrecacheWorker>(12, TimeUnit.HOURS)
             .setConstraints(constraints)
+            .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 30, TimeUnit.MINUTES)
             .build()
         WorkManager.getInstance(this).enqueueUniquePeriodicWork(
             PrecacheWorker.UNIQUE_WORK_NAME,
