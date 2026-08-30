@@ -230,6 +230,14 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Android deep links & tender actions — Sprint 3
+The Android app registers the `tenderbase://tender/{id}` URI scheme:
+- Tender detail is deep-linkable (`tenderbase://tender/42`); malformed links
+  never resolve to a tender.
+- Share sheet text includes the deep link plus the official source URL.
+- The deadline card offers "Add to calendar" (exact closing instant when
+  known, all-day event when only a date exists).
+
 ### Saved searches (require `X-API-Key`) — Sprint 2
 ```
 GET    /api/v1/saved-searches?client_id=…          # list

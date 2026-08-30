@@ -4,7 +4,15 @@ import org.json.JSONArray
 import org.json.JSONObject
 
 /** A single tender, mapped from the TenderBase JSON API. */
-data class TenderDoc(val title: String, val url: String, val mime: String?)
+data class TenderDoc(val title: String, val url: String, val mime: String?, val fileSize: Long? = null)
+
+/** An amendment recorded for a tender (detail endpoint only). */
+data class TenderAmendment(
+    val fieldChanged: String,
+    val oldValue: String?,
+    val newValue: String?,
+    val detectedAt: String?
+)
 
 data class Tender(
     val id: Int,
@@ -24,7 +32,10 @@ data class Tender(
     val closingDate: String?,
     val closingAt: String?,
     val sourceUrl: String?,
-    val documents: List<TenderDoc>
+    val documents: List<TenderDoc>,
+    val amendments: List<TenderAmendment> = emptyList(),
+    val advertisedDate: String? = null,
+    val submissionMethod: String? = null
 ) {
     /**
      * Badge label from the *server's* deadline state (never the device clock).
@@ -59,7 +70,8 @@ data class Tender(
                             TenderDoc(
                                 title = d.optString("title").ifEmpty { "Document" },
                                 url = url,
-                                mime = d.optString("mime_type", null)
+                                mime = d.optString("mime_type", null),
+                                fileSize = d.optLong("file_size", -1).takeIf { it >= 0 }
                             )
                         )
                     }
@@ -82,8 +94,28 @@ data class Tender(
                 closingDate = o.optString("closing_date", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 closingAt = o.optString("closing_at", null)?.takeIf { it.isNotEmpty() && it != "null" },
                 sourceUrl = o.optString("source_url", null)?.takeIf { it.isNotEmpty() && it != "null" },
-                documents = docs
+                documents = docs,
+                amendments = amendmentsFrom(o.optJSONArray("amendments")),
+                advertisedDate = o.optString("advertised_date", null)?.takeIf { it.isNotEmpty() && it != "null" },
+                submissionMethod = o.optString("submission_method", null)?.takeIf { it.isNotEmpty() && it != "null" }
             )
+        }
+
+        private fun amendmentsFrom(arr: JSONArray?): List<TenderAmendment> {
+            if (arr == null) return emptyList()
+            val out = mutableListOf<TenderAmendment>()
+            for (i in 0 until arr.length()) {
+                val a = arr.optJSONObject(i) ?: continue
+                out.add(
+                    TenderAmendment(
+                        fieldChanged = a.optString("field_changed"),
+                        oldValue = a.optString("old_value", null)?.takeIf { it.isNotEmpty() && it != "null" },
+                        newValue = a.optString("new_value", null)?.takeIf { it.isNotEmpty() && it != "null" },
+                        detectedAt = a.optString("detected_at", null)?.takeIf { it.isNotEmpty() && it != "null" }
+                    )
+                )
+            }
+            return out
         }
 
         fun listFromArray(arr: JSONArray): List<Tender> {

@@ -84,6 +84,10 @@ object DateUtils {
         return prettyDate(d)
     }
 
+    /** The closing instant as epoch milliseconds, or null when unknown. */
+    fun toMillis(closingAt: String?, closingDate: String?): Long? =
+        parse(closingAt)?.time ?: parseDate(closingDate)?.time
+
     private fun prettyDate(d: Date): String =
         SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(d)
 

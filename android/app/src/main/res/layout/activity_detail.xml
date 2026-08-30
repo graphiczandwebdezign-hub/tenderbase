@@ -2,6 +2,7 @@
 <androidx.coordinatorlayout.widget.CoordinatorLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/background">
@@ -52,7 +53,15 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:gravity="center"
+            android:text="@string/error_body_generic"
             android:textColor="@color/textMuted" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/errorRetry"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="18dp"
+            android:text="@string/retry" />
     </LinearLayout>
 
     <androidx.core.widget.NestedScrollView
@@ -66,65 +75,179 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="20dp">
+            android:paddingStart="16dp"
+            android:paddingEnd="16dp"
+            android:paddingTop="12dp"
+            android:paddingBottom="24dp">
+
+            <!-- Status badge + source -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical">
+
+                <TextView
+                    android:id="@+id/statusBadge"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_badge_open"
+                    android:textColor="@color/badgeOpenText"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.08"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    tools:text="OPEN" />
+
+                <TextView
+                    android:id="@+id/sourceText"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:gravity="end"
+                    android:textColor="@color/textMuted"
+                    android:textSize="11sp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="eTenders" />
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/title"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
                 android:textColor="@color/text"
                 android:textSize="20sp"
-                android:textStyle="bold" />
+                android:textStyle="bold"
+                android:lineSpacingMultiplier="1.1"
+                tools:text="Construction of a Community Health Centre" />
 
             <TextView
                 android:id="@+id/org"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="6dp"
+                android:layout_marginTop="4dp"
                 android:textColor="@color/textMuted"
-                android:textSize="14sp" />
+                android:textSize="14sp"
+                tools:text="KwaZulu-Natal Department of Health" />
 
             <TextView
-                android:id="@+id/province"
+                android:id="@+id/refText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:drawablePadding="6dp"
-                app:drawableStartCompat="@drawable/ic_place"
-                android:gravity="center_vertical"
+                android:layout_marginTop="3dp"
                 android:textColor="@color/textMuted"
-                android:textSize="13sp" />
+                android:textSize="12sp"
+                tools:text="REF: KZN-2026-00124" />
 
-            <TextView
-                android:id="@+id/closes"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="12dp"
-                android:textColor="@color/primary"
-                android:textSize="16sp"
-                android:textStyle="bold" />
-
-            <TextView
-                android:id="@+id/closingDate"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:textColor="@color/textMuted"
-                android:textSize="13sp" />
-
-            <com.google.android.material.chip.ChipGroup
-                android:id="@+id/chipGroup"
+            <!-- Deadline card: the single most important fact -->
+            <com.google.android.material.card.MaterialCardView
+                android:id="@+id/deadlineCard"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="14dp"
-                app:chipSpacingHorizontal="6dp" />
+                app:cardCornerRadius="14dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="@color/surface"
+                app:strokeColor="@color/cardStroke"
+                app:strokeWidth="1dp">
 
-            <View
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="14dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/label_closing_date"
+                        android:textColor="@color/textMuted"
+                        android:textSize="11sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.08"
+                        android:textAllCaps="true" />
+
+                    <TextView
+                        android:id="@+id/closingDateBig"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="4dp"
+                        android:textColor="@color/text"
+                        android:textSize="19sp"
+                        android:textStyle="bold"
+                        tools:text="Friday, 4 September 2026" />
+
+                    <TextView
+                        android:id="@+id/closingCountdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="2dp"
+                        android:textColor="@color/primary"
+                        android:textSize="13sp"
+                        android:textStyle="bold"
+                        tools:text="Closing in 5 days · 11:00" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/addToCalendar"
+                        style="?attr/materialButtonOutlinedStyle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="10dp"
+                        android:minHeight="44dp"
+                        android:text="@string/add_to_calendar"
+                        android:textSize="13sp"
+                        app:icon="@drawable/ic_calendar"
+                        app:cornerRadius="20dp"
+                        android:contentDescription="@string/cd_add_to_calendar" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <!-- Location + category tags -->
+            <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="1dp"
-                android:layout_marginTop="16dp"
-                android:background="@color/cardStroke" />
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical">
 
-            <!-- Meta row -->
+                <TextView
+                    android:id="@+id/locationTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/bg_tag"
+                    android:textColor="@color/tagText"
+                    android:textSize="11sp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="KwaZulu-Natal" />
+
+                <TextView
+                    android:id="@+id/categoryTag"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="6dp"
+                    android:background="@drawable/bg_tag"
+                    android:textColor="@color/tagText"
+                    android:textSize="11sp"
+                    android:paddingStart="8dp"
+                    android:paddingEnd="8dp"
+                    android:paddingTop="3dp"
+                    android:paddingBottom="3dp"
+                    android:maxLines="1"
+                    android:ellipsize="end"
+                    tools:text="Construction" />
+            </LinearLayout>
+
+            <!-- Meta grid -->
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -137,17 +260,12 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_type"
-                        android:textColor="@color/textMuted"
-                        android:textSize="12sp" />
+                        style="@style/MetaLabel"
+                        android:text="@string/label_type" />
                     <TextView
-                        android:id="@+id/tenderType"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text"
-                        android:textSize="14sp" />
+                        android:id="@+id/metaType"
+                        style="@style/MetaValue"
+                        tools:text="Open Tender" />
                 </LinearLayout>
 
                 <LinearLayout
@@ -156,20 +274,71 @@
                     android:layout_weight="1"
                     android:orientation="vertical">
                     <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="@string/label_status"
-                        android:textColor="@color/textMuted"
-                        android:textSize="12sp" />
+                        style="@style/MetaLabel"
+                        android:text="@string/label_status" />
                     <TextView
-                        android:id="@+id/status"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/text"
-                        android:textSize="14sp" />
+                        android:id="@+id/metaStatus"
+                        style="@style/MetaValue"
+                        tools:text="Open" />
                 </LinearLayout>
             </LinearLayout>
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        style="@style/MetaLabel"
+                        android:text="@string/label_published" />
+                    <TextView
+                        android:id="@+id/metaPublished"
+                        style="@style/MetaValue"
+                        tools:text="28 Aug 2026" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical">
+                    <TextView
+                        style="@style/MetaLabel"
+                        android:text="@string/label_submission" />
+                    <TextView
+                        android:id="@+id/metaSubmission"
+                        style="@style/MetaValue"
+                        tools:text="Electronic" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <!-- Amendments -->
+            <TextView
+                android:id="@+id/amendmentsLabel"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:text="@string/label_amendments"
+                android:textColor="@color/text"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:visibility="gone" />
+
+            <LinearLayout
+                android:id="@+id/amendmentsContainer"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="vertical"
+                android:visibility="gone" />
+
+            <!-- Description -->
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -188,6 +357,7 @@
                 android:textColor="@color/textMuted"
                 android:textSize="14sp" />
 
+            <!-- Documents -->
             <TextView
                 android:id="@+id/docsLabel"
                 android:layout_width="match_parent"
