@@ -230,6 +230,25 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Production readiness — Sprint 10
+- **Liveness/readiness split**: `/health` is a cheap liveness probe (no DB
+  access, so a DB outage can't cause restart loops) reporting version +
+  uptime; `/ready` checks the database, scheduler wiring and data state and
+  returns **503** with the failing checks when the instance can't serve.
+  Compose healthcheck and the Render blueprint now use `/ready` (and the
+  blueprint deploys from `main` instead of a stale branch).
+- **Request-id correlation**: every request gets an `X-Request-ID` (honoured
+  when supplied, sanitised, else generated), echoed as a response header,
+  embedded in error payloads, and logged in a structured `http_request` line
+  with method/path/status/duration — orchestrator probes log at DEBUG so
+  healthchecks don't flood INFO.
+- **Load-test smoke**: `scripts/loadtest_smoke.py` fires concurrent
+  read-only traffic at the discovery endpoints and reports p50/p95/p99/rps
+  per scenario; exits non-zero on any error so it can gate deploys.
+  Complements the in-process `scripts/benchmark_discovery.py`.
+- `docker compose --profile worker up` now starts the dedicated scheduler
+  container (entrypoint `worker` role) alongside the api.
+
 ### Admin console analytics view — Sprint 9
 The existing cookie-authenticated web console (`/admin`) now surfaces
 everything the analytics sprints produce, server-rendered with zero JS:
