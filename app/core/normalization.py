@@ -158,6 +158,67 @@ def normalize_province(*fields: Optional[str]) -> Optional[str]:
     return best
 
 
+# ----------------------------------------------------------------------------
+# Municipalities (Sprint 8): canonical name -> province, with aliases.
+# Used to recover a province (and a useful municipality field) when a source
+# publishes no explicit region but names the municipality in its text.
+# ----------------------------------------------------------------------------
+MUNICIPALITIES: List[tuple[str, str, List[str]]] = [
+    # (canonical, province slug, aliases)
+    ("City of Johannesburg", "gauteng", ["city of johannesburg", "johannesburg"]),
+    ("City of Tshwane", "gauteng", ["city of tshwane", "tshwane", "pretoria"]),
+    ("Ekurhuleni", "gauteng", ["ekurhuleni"]),
+    ("Emfuleni", "gauteng", ["emfuleni", "vereeniging", "vanderbijlpark"]),
+    ("Merafong City", "gauteng", ["merafong", "carletonville"]),
+    ("Mogale City", "gauteng", ["mogale city", "krugersdorp"]),
+    ("City of Cape Town", "western-cape", ["city of cape town", "cape town", "kaapstad"]),
+    ("Stellenbosch", "western-cape", ["stellenbosch"]),
+    ("George", "western-cape", ["george municipality", "george local municipality"]),
+    ("Drakenstein", "western-cape", ["drakenstein", "paarl"]),
+    ("Buffalo City", "eastern-cape", ["buffalo city", "east london"]),
+    ("Nelson Mandela Bay", "eastern-cape", ["nelson mandela bay", "gqeberha", "port elizabeth"]),
+    ("Mnquma", "eastern-cape", ["mnquma", "butterworth"]),
+    ("Mangaung", "free-state", ["mangaung", "bloemfontein"]),
+    ("Matjhabeng", "free-state", ["matjhabeng", "welkom"]),
+    ("Dihlabeng", "free-state", ["dihlabeng", "bethlehem"]),
+    ("eThekwini", "kwazulu-natal", ["ethekwini", "durban"]),
+    ("Msunduzi", "kwazulu-natal", ["msunduzi", "pietermaritzburg"]),
+    ("uMhlathuze", "kwazulu-natal", ["umhlathuze", "richards bay"]),
+    ("uMngeni", "kwazulu-natal", ["umngeni", "howick"]),
+    ("Alfred Duma", "kwazulu-natal", ["alfred duma", "ladysmith"]),
+    ("Newcastle", "kwazulu-natal", ["newcastle municipality", "newcastle local municipality"]),
+    ("Ray Nkonyeni", "kwazulu-natal", ["ray nkonyeni", "port shepstone"]),
+    ("Greater Kokstad", "kwazulu-natal", ["greater kokstad", "kokstad"]),
+    ("Polokwane", "limpopo", ["polokwane"]),
+    ("Thulamela", "limpopo", ["thulamela", "thohoyandou"]),
+    ("Makhado", "limpopo", ["makhado", "louis trichardt"]),
+    ("Mbombela", "mpumalanga", ["mbombela", "nelspruit"]),
+    ("Emalahleni", "mpumalanga", ["emalahleni", "witbank"]),
+    ("Govan Mbeki", "mpumalanga", ["govan mbeki", "secunda"]),
+    ("Sol Plaatje", "northern-cape", ["sol plaatje", "kimberley"]),
+    ("Dawid Kruiper", "northern-cape", ["dawid kruiper", "upington"]),
+    ("Mahikeng", "north-west", ["mahikeng", "mafikeng"]),
+    ("Rustenburg", "north-west", ["rustenburg"]),
+    ("Potchefstroom", "north-west", ["potchefstroom", "tlokwe"]),
+]
+
+
+def detect_municipality(*fields: Optional[str]) -> Optional[tuple[str, str]]:
+    """(canonical municipality name, province slug) if a known SA municipality
+    is mentioned in the given text, else None. Longer aliases win so
+    "Ray Nkonyeni" beats a bare city name."""
+    haystack = " " + " ".join(_norm_text(f) for f in fields) + " "
+    best: Optional[tuple[str, str]] = None
+    best_len = 0
+    for canonical, slug, aliases in MUNICIPALITIES:
+        for alias in aliases:
+            token = f" {alias} "
+            if token in haystack and len(alias) > best_len:
+                best = (canonical, slug)
+                best_len = len(alias)
+    return best
+
+
 def province_name(slug: Optional[str]) -> Optional[str]:
     if not slug:
         return None

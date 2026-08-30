@@ -43,9 +43,11 @@ class Tender(Base):
         Index("ix_tenders_category", "category"),
         Index("ix_tenders_province", "province"),
         Index("ix_tenders_closing_at", "closing_at"),
+        Index("ix_tenders_closing_date", "closing_date"),
         Index("ix_tenders_advertised_date", "advertised_date"),
         Index("ix_tenders_organisation", "organisation"),
         Index("ix_tenders_first_seen_at", "first_seen_at"),
+        Index("ix_tenders_updated_at", "updated_at"),
     )
 
     id: Mapped[int] = mapped_column(primary_key=True)

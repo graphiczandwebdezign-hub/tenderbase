@@ -73,6 +73,9 @@ class Settings(BaseSettings):
 
     # ----- FCM / push notifications -----
     fcm_enabled: bool = Field(default=False)
+    # Sprint 8: batch a sync run's alerts into ONE digest push per user/type
+    # instead of one push per tender.
+    digest_notifications: bool = Field(default=True)
     fcm_project_id: Optional[str] = Field(default=None)
     fcm_private_key: Optional[str] = Field(default=None)
     fcm_client_email: Optional[str] = Field(default=None)

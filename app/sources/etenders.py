@@ -46,6 +46,7 @@ import httpx
 from app.core.config import settings
 from app.core.logging import get_logger, log_event
 from app.core import normalization as norm
+from app.core.date_extraction import extract_closing
 from app.sources.base import (
     NormalizedDocument,
     NormalizedTender,
@@ -178,6 +179,10 @@ class ETendersSourceAdapter(TenderSourceAdapter):
         closing_at = self._parse_datetime(
             (tender.get("tenderPeriod") or {}).get("endDate")
         )
+        # Sprint 8: when the structured deadline is missing, recover it from
+        # the title/description ("Closing date: 12 September 2026 at 11:00").
+        if closing_at is None:
+            closing_at = extract_closing(title, description)
         closing_date = closing_at.date() if closing_at else None
         closing_time = closing_at.timetz().replace(tzinfo=None) if closing_at else None
 
@@ -187,6 +192,15 @@ class ETendersSourceAdapter(TenderSourceAdapter):
         province_slug = norm.normalize_province(
             organisation, self._entity_region(raw), title, description
         )
+
+        # Sprint 8: recover the municipality (and with it a province fallback)
+        # when the source publishes no explicit region.
+        municipality = norm.detect_municipality(
+            organisation, self._entity_region(raw), title, description
+        )
+        municipality_name = municipality[0] if municipality else None
+        if province_slug is None and municipality:
+            province_slug = municipality[1]
 
         raw_status = self._map_status(tender.get("status"))
 
@@ -209,7 +223,7 @@ class ETendersSourceAdapter(TenderSourceAdapter):
             organisation=organisation,
             organisation_identifier=org_identifier,
             province_slug=province_slug,
-            municipality=None,
+            municipality=municipality_name,
             category_slugs=category_slugs,
             tender_type=tender.get("procurementMethodDetails") or tender.get("procurementMethod"),
             raw_status=raw_status,

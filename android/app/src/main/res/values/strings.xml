@@ -2,7 +2,9 @@
 <resources>
     <string name="app_name">TenderBase</string>
     <string name="loading">Loading tenders…</string>
+    <string name="tagline">Find your next opportunity</string>
     <string name="search_hint">Search tenders</string>
+    <string name="search_hint_full">Search tenders, organisations, references or keywords…</string>
     <string name="search_dialog_title">Search tenders</string>
     <string name="search_action_search">Search</string>
     <string name="search_action_clear">Clear</string>
@@ -10,16 +12,148 @@
     <string name="loading_more">Loading more tenders…</string>
     <string name="detail_title">Tender details</string>
 
-    <string name="retry">Retry</string>
-    <string name="error_title">Couldn\'t load tenders</string>
+    <string name="retry">Try again</string>
+    <string name="error_title">Unable to load tenders</string>
+    <string name="error_body_generic">Check your connection and try again. If the server was idle it may take up to a minute to wake up.</string>
     <string name="error_body">%1$s\n\nIf the server was idle it may take up to a minute to wake up. Pull down or tap Retry.</string>
 
-    <string name="empty_title">No tenders found</string>
-    <string name="empty_body">Try a different search term or category filter.</string>
+    <string name="no_results_title">No tenders found</string>
+    <string name="no_results_body">Try changing your keywords or filters.</string>
+    <string name="no_tenders_title">No tenders available yet</string>
+    <string name="no_tenders_body">New opportunities are published continuously and will appear here automatically.</string>
+    <string name="clear_filters">Clear filters</string>
+    <string name="reset_search">Reset search</string>
 
+    <string name="filter_button">Filters</string>
+    <string name="sort_button">Sort</string>
+    <string name="clear_all">Clear all</string>
+    <string name="show_results">Show results</string>
+    <string name="reset">Reset</string>
+    <string name="filter_sheet_title">Filter tenders</string>
+
+    <string name="section_status">Status</string>
+    <string name="section_date">Dates</string>
+    <string name="section_province">Province</string>
+    <string name="section_category">Category</string>
+    <string name="section_source">Source</string>
+    <string name="status_any">Any status</string>
+    <string name="status_open">Open</string>
+    <string name="status_closing_soon">Closing soon</string>
+    <string name="status_closed">Closed</string>
+    <string name="date_any">Any time</string>
+    <string name="published_today">Published today</string>
+    <string name="published_7d">Published: last 7 days</string>
+    <string name="published_30d">Published: last 30 days</string>
+    <string name="closing_7d">Closing within 7 days</string>
+    <string name="closing_14d">Closing within 14 days</string>
+    <string name="closing_30d">Closing within 30 days</string>
+    <string name="closing_custom">Custom closing range</string>
+    <string name="start_date">Start date</string>
+    <string name="end_date">End date</string>
+
+    <string name="sort_title">Sort tenders</string>
+    <string name="sort_newest">Newest first</string>
+    <string name="sort_closing">Closing soon</string>
+    <string name="sort_updated">Recently updated</string>
+    <string name="sort_relevance">Relevance</string>
+    <string name="sort_short_newest">Newest</string>
+    <string name="sort_short_updated">Updated</string>
+
+    <string name="showing_range">Showing %1$d–%2$d of %3$d</string>
+    <string name="end_of_results">You\'ve reached the end</string>
+    <string name="retry_load_more">Couldn\'t load more — tap to retry</string>
+
+    <string name="cd_search">Search tenders</string>
+    <string name="cd_clear_search">Clear search</string>
+    <string name="cd_filter">Filter tenders</string>
+    <string name="cd_sort">Sort tenders</string>
+    <string name="cd_save">Save tender</string>
+    <string name="cd_unsave">Remove from saved tenders</string>
+    <string name="cd_chip_remove">Remove filter %1$s</string>
+    <string name="cd_save_search">Save this search for alerts</string>
+    <string name="cd_delete_search">Delete saved search</string>
+    <string name="cd_search_alerts">Alerts for this saved search</string>
+    <string name="cd_apply_search">Apply this saved search</string>
+
+    <string name="save_search_title">Save this search</string>
+    <string name="save_search_hint">Search name</string>
+    <string name="save_search_action">Save</string>
+    <string name="save_search_done">Saved — you\'ll be alerted when new tenders match</string>
+    <string name="save_search_duplicate">A saved search with this name already exists</string>
+    <string name="save_search_failed">Couldn\'t save the search — check your connection</string>
+    <string name="save_search_needs_filters">Search or set filters first, then save the search</string>
+    <string name="saved_searches_title">Saved Searches</string>
+    <string name="saved_searches_empty_title">No saved searches yet</string>
+    <string name="saved_searches_empty_body">Search, filter, then tap the bookmark to get alerts for new matching tenders.</string>
+    <string name="saved_search_deleted">Search deleted</string>
+    <string name="saved_search_delete_failed">Couldn\'t delete the search</string>
+    <string name="saved_searches_load_failed">Couldn\'t load saved searches</string>
+    <string name="closing_week_title">Closing this week</string>
+
+    <string name="deadlines_title">Deadlines</string>
+    <string name="deadlines_subtitle">%1$d closing this week · %2$d open saved tenders</string>
+    <string name="deadlines_partial_error">Live deadlines couldn\'t load — saved tenders and alerts below are up to date.</string>
+    <string name="deadlines_empty">Nothing needs your attention yet</string>
+    <string name="section_closing_week">Closing this week (%1$d)</string>
+    <string name="section_alerts">Recent alerts (%1$d)</string>
+    <string name="view_all_alerts">View all alerts</string>
+    <string name="bucket_closed">Closed (%1$d)</string>
+    <string name="bucket_today">Closes today (%1$d)</string>
+    <string name="bucket_this_week">This week (%1$d)</string>
+    <string name="bucket_two_weeks">Next two weeks (%1$d)</string>
+    <string name="bucket_later">Later (%1$d)</string>
+    <string name="bucket_no_date">No closing date (%1$d)</string>
+    <string name="tender_saved">Tender saved ★</string>
+    <string name="tender_unsaved">Removed from saved</string>
+    <string name="tender_hidden">Tender hidden</string>
+    <string name="undo">Undo</string>
+    <string name="hidden_tenders_title">Hidden tenders</string>
+    <string name="hidden_tenders_none">No hidden tenders</string>
+    <string name="hidden_tenders_count">%1$d hidden — tap to show them again</string>
+
+    <string name="workspace_title">Bid workspace</string>
+    <string name="note_empty">Tap to add a note…</string>
+    <string name="note_edit_title">Bid note</string>
+    <string name="note_hint">Contacts, site visit dates, pricing notes…</string>
+    <string name="note_clear">Clear</string>
+    <string name="save">Save</string>
+    <string name="add">Add</string>
+    <string name="checklist_add">+ Add checklist item</string>
+    <string name="checklist_add_hint">Checklist item</string>
+    <string name="checklist_delete_title">Remove checklist item?</string>
+    <string name="checklist_delete_confirm">Remove</string>
+    <string name="share_bid_pack">Share bid pack</string>
+    <string name="cd_share_bid_pack">Share a summary of this tender with notes and checklist</string>
+    <string name="doc_group_title">%1$s (%2$d)</string>
+
+    <string name="saved_search_queued">Offline — search saved and will sync when connected</string>
+    <string name="workspace_restore_title">Restore workspace from server</string>
+    <string name="workspace_restore_body">Replaces the note and checklist on this device with the server backup for tenders you have saved. Anything newer on this device will be overwritten.</string>
+    <string name="workspace_restore_confirm">Restore</string>
+    <string name="workspace_restore_done">%1$d workspaces restored</string>
+    <string name="workspace_restore_failed">Couldn't reach the server — nothing was changed</string>
+    <string name="workspace_restore_none">Nothing to restore yet</string>
+    <string name="reminder_title">Tender closing soon</string>
+    <string name="reminder_body">%1$s — %2$s</string>
+    <string name="reminder_channel_name">Tender Alerts</string>
+    <string name="whats_new_title">What\'s new in %1$s</string>
+    <string name="whats_new_got_it">Got it</string>
+    <string name="reminder_channel_desc">Notifications for new matching tenders and deadlines</string>
+    <string name="ref_prefix">REF: %1$s</string>
     <string name="closing_on">Closing on %1$s</string>
+    <string name="label_closing_date">Closing date</string>
     <string name="label_type">Type</string>
     <string name="label_status">Status</string>
+    <string name="label_published">Published</string>
+    <string name="label_submission">Submission</string>
+    <string name="label_amendments">Amendments</string>
+    <string name="amendment_change">%1$s → %2$s</string>
+    <string name="amendment_old_value">was %1$s</string>
+    <string name="add_to_calendar">Add to calendar</string>
+    <string name="cd_add_to_calendar">Add the tender deadline to your calendar</string>
+    <string name="calendar_no_app">No calendar app available</string>
+    <string name="calendar_no_deadline">This tender has no closing date to add</string>
+    <string name="share_chooser_title">Share tender</string>
     <string name="label_description">Description</string>
     <string name="label_documents">Documents</string>
     <string name="no_documents">No documents attached.</string>
@@ -28,5 +162,13 @@
     <plurals name="tenders_count">
         <item quantity="one">%d tender</item>
         <item quantity="other">%d tenders</item>
+    </plurals>
+    <plurals name="tenders_found">
+        <item quantity="one">%d tender found</item>
+        <item quantity="other">%d tenders found</item>
+    </plurals>
+    <plurals name="saved_searches_count">
+        <item quantity="one">%d saved search</item>
+        <item quantity="other">%d saved searches</item>
     </plurals>
 </resources>

@@ -230,9 +230,157 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Android polish & release prep — Sprint 11
+- **Release build hardened**: `minifyEnabled` + `shrinkResources` on, the
+  previously missing `proguard-rules.pro` added (readable stack traces,
+  manifest entry points, Room entities), debug-signed release so CI can
+  produce installable APKs without secrets. Version 1.1 (code 2).
+- **"What's new" dialog** on app updates (`Changelog.kt`): version notes via
+  Material dialog — fresh installs stay silent (onboarding covers them),
+  same-version restarts show nothing.
+- **Worker reliability**: the pre-cache/deadline-reminder job now retries
+  with exponential backoff (30 min) and gives up after 5 attempts instead of
+  retrying forever.
+- **Release CI template**: `docs/ci-android-release.yml` (copy into
+  `.github/workflows/` — GitHub blocks bots from creating workflow files):
+  runs JVM tests, builds the minified APK, publishes a versioned artifact +
+  Release.
+- **Play listing copy**: `docs/play-listing.md` (title/short/full
+  descriptions + graphics checklist).
+
+### Production readiness — Sprint 10
+- **Liveness/readiness split**: `/health` is a cheap liveness probe (no DB
+  access, so a DB outage can't cause restart loops) reporting version +
+  uptime; `/ready` checks the database, scheduler wiring and data state and
+  returns **503** with the failing checks when the instance can't serve.
+  Compose healthcheck and the Render blueprint now use `/ready` (and the
+  blueprint deploys from `main` instead of a stale branch).
+- **Request-id correlation**: every request gets an `X-Request-ID` (honoured
+  when supplied, sanitised, else generated), echoed as a response header,
+  embedded in error payloads, and logged in a structured `http_request` line
+  with method/path/status/duration — orchestrator probes log at DEBUG so
+  healthchecks don't flood INFO.
+- **Load-test smoke**: `scripts/loadtest_smoke.py` fires concurrent
+  read-only traffic at the discovery endpoints and reports p50/p95/p99/rps
+  per scenario; exits non-zero on any error so it can gate deploys.
+  Complements the in-process `scripts/benchmark_discovery.py`.
+- `docker compose --profile worker up` now starts the dedicated scheduler
+  container (entrypoint `worker` role) alongside the api.
+
+### Admin console analytics view — Sprint 9
+The existing cookie-authenticated web console (`/admin`) now surfaces
+everything the analytics sprints produce, server-rendered with zero JS:
+- **Discovery (30 days)**: search/zero-result/avg-result cards, a daily
+  searches bar chart, top terms with average result counts, zero-result
+  terms as the data-quality to-do list, and filter-usage chips; saved-search
+  volume, alert uptake and distinct users.
+- **Data quality by source**: completeness meters plus per-source missing
+  counts (closing/province/category/org/docs) and stale-open counts, worst
+  first — with **Dry-run backfill** / **Fill gaps now** buttons that drive
+  `re-enrich` via a POST-redirect-GET form and a result flash.
+- KPI cards for saved searches and 7-day search volume.
+
+### Ingestion hardening & alert digests — Sprint 8
+- **Closing-date recovery**: when a source publishes no structured deadline,
+  the pipeline extracts it from title/description text ("Closing date:
+  12 September 2026 at 11:00"; ISO, day-month-year and dd/mm/yyyy formats;
+  keyword-proximate dates win; date-only means 23:59 SAST).
+- **Municipality detection**: ~35 SA municipalities (metros + notable locals,
+  with aliases) are recognised in org/region/title/description — filling the
+  municipality field and serving as a province fallback.
+- `POST /admin/re-enrich[?dry_run=true]`: backfills those heuristics over
+  existing incomplete tenders (never overwrites; sets expiry on recovered
+  deadlines), shrinking the gaps surfaced by `/admin/data-quality`.
+- **Alert digests**: a sync run's alerts collapse into ONE push per
+  (user, type) — "3 new tenders match your alerts — Including: …, …, and 1
+  more". Single alerts keep the classic per-tender message with its deep
+  link; per-(user, tender) events still exist for dedup/audit.
+  Disable with `DIGEST_NOTIFICATIONS=false`.
+
+### Admin analytics & data quality — Sprint 6+1
+- `GET /admin/analytics/searches?days=&top=` — anonymous discovery telemetry
+  from the public list endpoint: totals, zero-result searches, daily series,
+  top terms (normalised, with avg results) and facet usage. Zero-result terms
+  are the data-quality to-do list.
+- `GET /admin/analytics/saved-searches` — volume, alert uptake, distinct
+  users, top embedded terms/filters.
+- `GET /admin/data-quality` — per-source completeness: missing closing dates,
+  provinces, categories, organisation, description, documents, plus tenders
+  still open past their deadline; sorted worst-first.
+- `/admin/dashboard` gains `saved_searches` + `searches_last_7d` counters.
+- Telemetry is anonymous (no user/device ids), written off-request via a
+  background task on its own session, and never fails a discovery request.
+  Migration `f5c9d1e8b3a4` adds `search_events`.
+
+### Workspace backup & offline reliability — Sprint 6
+- `GET /api/v1/notifications/saved?client_id=…` — the caller's saved tenders
+  with their backed-up workspace (note + checklist).
+- `PUT /api/v1/notifications/saved/{id}/workspace` — backs up a saved
+  tender's bid workspace (absent fields unchanged, null/empty clears,
+  per-user isolation; 404 unless the tender is saved). Migration
+  `d4b8c3f7a9e2` adds `note`/`checklist_json` to `saved_tenders`.
+- Android: starring a tender also saves it server-side; workspace changes
+  push to the server (debounced, best-effort); Settings offers
+  "Restore workspace from server" for reinstall/new-device recovery.
+- Offline: saved-search creation is queued locally and drains automatically
+  once connectivity returns (409 duplicates drop out of the queue).
+- A periodic WorkManager job (12h, network-constrained) pre-caches the
+  discovery feed + closing-this-week tenders and posts local deadline
+  reminders for saved tenders closing within 48h — reminders work even
+  without FCM.
+
+### Android bid workspace — Sprint 5
+The tender detail screen gains a **Bid workspace** card (local-only Room data,
+migrated in-app v1 → v2):
+- **Checklist** per tender, seeded with a sensible bid template (register,
+  briefing, documents, pricing, submit), with live progress ("2 of 5
+  complete"); items can be added, checked and long-pressed to remove.
+- **Note** per tender (contacts, site-visit dates, pricing notes).
+- **Share bid pack** — a plain-text handover summary: meta, deadline,
+  checklist state, note, grouped documents and the tender deep link.
+Documents on the detail screen are now grouped by source type (tender
+notices, addenda & amendments, annexures, other) with counts.
+
+### Android deadline command centre — Sprint 4
+The **Deadlines** screen unifies everything that needs action:
+- *Closing this week* — every open tender closing within 7 days (server-side,
+  deadline-sorted via the Sprint 1 filter model)
+- *Saved deadlines* — the device's saved tenders grouped into urgency buckets
+  (Closed / Closes today / This week / Next two weeks / Later / No date)
+- *Recent alerts* — the last saved-search and deadline notifications, with a
+  shortcut to the full history
+Discovery cards support swipe actions: swipe right to save, swipe left to hide
+(undo snackbar; hidden ids are local-only, and Settings restores them).
+Android 13+ devices are asked (once) for notification permission, which the
+existing FCM alerts require.
+
+### Android deep links & tender actions — Sprint 3
+The Android app registers the `tenderbase://tender/{id}` URI scheme:
+- Tender detail is deep-linkable (`tenderbase://tender/42`); malformed links
+  never resolve to a tender.
+- Share sheet text includes the deep link plus the official source URL.
+- The deadline card offers "Add to calendar" (exact closing instant when
+  known, all-day event when only a date exists).
+
+### Saved searches (require `X-API-Key`) — Sprint 2
+```
+GET    /api/v1/saved-searches?client_id=…          # list
+POST   /api/v1/saved-searches                      # {client_id, name, filters{…}}
+PATCH  /api/v1/saved-searches/{id}/alerts           # {client_id, alerts_enabled}
+DELETE /api/v1/saved-searches/{id}?client_id=…
+```
+`filters` uses the same parameter names as `GET /tenders` (search, province,
+category, source, status, closing_within, closing_after/before,
+advertised_after/before — no `sort`). After each ingestion pass, newly created
+tenders are matched against every alert-enabled saved search; matches create a
+`NEW_TENDER` notification event (deduplicated per user+tender by the existing
+constraint, so preference alerts and saved-search alerts never double-notify)
+and push via FCM to registered devices.
+
 ### Tenders (require `X-API-Key`)
 ```
-GET  /api/v1/tenders                 # list + filter (default: active only)
+GET  /api/v1/tenders                 # list + search + filter + sort (default: active only)
+GET  /api/v1/tenders/facets          # filter options with live counts
 GET  /api/v1/tenders/latest
 GET  /api/v1/tenders/closing-soon
 GET  /api/v1/tenders/search?q=...
@@ -245,13 +393,29 @@ GET  /api/v1/tenders/{id}            # detail incl. documents + amendments
 ?province=KwaZulu-Natal
 ?category=construction&province=KwaZulu-Natal
 ?organisation=eThekwini
+?municipality=eThekwini
 ?status=CLOSED
+?status=open|closing_soon|closed    # lifecycle aliases derived from stored dates
+?source=eTenders                     # comma-separated for multiple
 ?closing_within=24h            # or 7d
 ?closing_after=2026-09-01&closing_before=2026-09-30
 ?advertised_after=2026-08-01
-?search=software
+?search=software               # all terms must match; title/description/reference/org/category/province/municipality
+?sort=newest|closing|updated|relevance
 ?page=1&limit=25
 ```
+
+Notes:
+- `category`/`province`/`source` accept comma-separated lists (OR within a facet).
+- `sort=relevance` ranks weighted field matches (title > reference > issuer >
+  classification > description) and is meaningful only with `search`; without
+  a query it falls back to `newest`.
+- `sort=closing` never surfaces already-closed tenders unless you explicitly
+  ask for closed statuses.
+- Invalid `status`/`sort`/`closing_within` return `400 INVALID_PARAMETER`.
+- `/tenders/facets` returns distinct provinces/categories/sources present on
+  currently open tenders, with counts — the client filter UI never invents
+  values.
 
 **Paginated response envelope:**
 ```json
@@ -430,7 +594,9 @@ local/dev (default). Schema highlights:
 Timezone-safe: `closing_at` is stored in UTC (`TIMESTAMPTZ`); split
 `closing_date`/`closing_time` are kept for display. Indexes exist on
 `external_id`, `ocid`, `status`, `category`, `province`, `closing_at`,
-`advertised_date`, `organisation`, `first_seen_at`.
+`closing_date`, `advertised_date`, `organisation`, `first_seen_at`,
+`updated_at` (the last two added by the `b7c4e9f1a2d3` discovery migration for
+`sort=updated` and closing-date window filters).
 
 ```bash
 alembic upgrade head        # create / migrate
@@ -447,12 +613,23 @@ pip install -r requirements.txt -r requirements-dev.txt
 pytest
 ```
 
-The suite (29 tests) covers API-key auth, tender retrieval, pagination, search,
+The suite covers API-key auth, tender retrieval, pagination, search,
 category/province/closing filters, deduplication, updates, **running ingestion
 twice creates no duplicates**, expiry, amendment detection, notification
 matching (positive + negative), duplicate-notification prevention, device
-registration, preferences, and the admin API. Tests use an isolated temporary
-SQLite DB and a `MockSourceAdapter` (no network, deterministic).
+registration, preferences, and the admin API. The Sprint 1 discovery suite
+(`tests/test_discovery.py`) additionally covers multi-field search (AND terms,
+LIKE-wildcard escaping), sorting (newest / closing / updated / weighted
+relevance), derived statuses (open / closing_soon / closed), combined filters,
+facets, pagination metadata, empty results and invalid parameters. Android
+unit tests (`android/app/src/test/`) cover filter → query-param mapping, JSON
+round-trips, closing-date urgency tiers, tender parsing and saved-search
+payload round-trips. The Sprint 2 suite (`tests/test_saved_searches.py`)
+covers saved-search CRUD, ownership isolation, duplicate names, invalid
+filters, matcher parity with the discovery endpoint, derived status/date
+matching, ingestion alerting, dedup and alert muting. Tests use an
+isolated temporary SQLite DB and a `MockSourceAdapter` (no network,
+deterministic).
 
 ---
 

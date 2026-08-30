@@ -52,4 +52,36 @@ interface TenderDao {
 
     @Query("DELETE FROM cached_tenders")
     suspend fun clearCachedTenders()
+
+    // ------------------------------------------------- bid workspace (Sprint 5)
+
+    @Query("SELECT * FROM tender_notes WHERE tenderId = :tenderId")
+    fun noteFlow(tenderId: Int): Flow<TenderNoteEntity?>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun upsertNote(note: TenderNoteEntity)
+
+    @Query("DELETE FROM tender_notes WHERE tenderId = :tenderId")
+    suspend fun deleteNote(tenderId: Int)
+
+    @Query("SELECT * FROM checklist_items WHERE tenderId = :tenderId ORDER BY position ASC, id ASC")
+    fun checklistFlow(tenderId: Int): Flow<List<ChecklistItemEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertChecklistItem(item: ChecklistItemEntity): Long
+
+    @Query("UPDATE checklist_items SET isDone = :done WHERE id = :id")
+    suspend fun setChecklistDone(id: Long, done: Boolean)
+
+    @Query("DELETE FROM checklist_items WHERE id = :id")
+    suspend fun deleteChecklistItem(id: Long)
+
+    @Query("DELETE FROM checklist_items WHERE tenderId = :tenderId")
+    suspend fun deleteChecklistFor(tenderId: Int)
+
+    @Query("SELECT COUNT(*) FROM checklist_items WHERE tenderId = :tenderId")
+    suspend fun checklistCount(tenderId: Int): Int
+
+    @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM checklist_items WHERE tenderId = :tenderId")
+    suspend fun nextChecklistPosition(tenderId: Int): Int
 }

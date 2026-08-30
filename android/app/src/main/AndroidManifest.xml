@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
 
     <application
+        android:name=".TenderBaseApp"
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
         android:roundIcon="@mipmap/ic_launcher_round"
@@ -37,21 +38,42 @@
             </intent-filter>
         </activity>
 
-        <!-- Main Activity (Flyout Navigation Drawer, Latest Tenders) -->
+        <!-- Main Activity (Tender discovery: search, filters, sort) -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:windowSoftInputMode="adjustPan" />
+            android:launchMode="singleTop"
+            android:windowSoftInputMode="adjustResize" />
 
-        <!-- Tender Detail Activity -->
+        <!-- Tender Detail Activity (deep-linkable: tenderbase://tender/{id}) -->
         <activity
             android:name=".DetailActivity"
+            android:exported="true"
+            android:launchMode="singleTop"
+            android:parentActivityName=".MainActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="tenderbase" android:host="tender" />
+            </intent-filter>
+        </activity>
+
+        <!-- Deadline command centre (Sprint 4) -->
+        <activity
+            android:name=".DeadlinesActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 
         <!-- Saved Tenders Activity -->
         <activity
             android:name=".SavedTendersActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
+        <!-- Saved Searches Activity (Sprint 2 alerts) -->
+        <activity
+            android:name=".SavedSearchesActivity"
             android:exported="false"
             android:parentActivityName=".MainActivity" />
 

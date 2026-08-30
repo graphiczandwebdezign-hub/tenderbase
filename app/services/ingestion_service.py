@@ -154,6 +154,7 @@ class IngestionService:
         try:
             notif_sent += self.notifier.notify_new_tenders(new_tender_ids)
             notif_sent += self.notifier.notify_amended_tenders(amended_tender_ids)
+            notif_sent += self.notifier.notify_saved_search_matches(new_tender_ids)
         except Exception as exc:  # noqa: BLE001
             log_event(logger, 40, "notification_dispatch_failed", error=str(exc))
 

@@ -82,7 +82,13 @@ class TenderMessagingService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {
         super.onNewToken(token)
-        // Token received - can be registered with backend if needed
+        // Register the token so saved-search alerts reach this install.
+        scope.launch {
+            try {
+                TenderRepository(applicationContext).registerDevice(token)
+            } catch (_: Exception) {
+            }
+        }
     }
 
     override fun onDestroy() {

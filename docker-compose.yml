@@ -35,7 +35,8 @@ services:
     ports:
       - "8000:8000"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      # Readiness (db + wiring) rather than bare liveness.
+      test: ["CMD", "curl", "-f", "http://localhost:8000/ready"]
       interval: 15s
       timeout: 5s
       retries: 5
@@ -51,17 +52,20 @@ services:
       - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
     restart: unless-stopped
 
-  # Optional: a dedicated scheduler worker (set SYNC_ENABLED=false on api).
-  # worker:
-  #   build: .
-  #   command: ["worker"]
-  #   env_file: .env
-  #   environment:
-  #     DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-tender}:${POSTGRES_PASSWORD:-tender}@db:5432/${POSTGRES_DB:-tenderbase}
-  #   depends_on:
-  #     db:
-  #       condition: service_healthy
-  #   restart: unless-stopped
+  # Dedicated scheduler worker. Enable with: docker compose --profile worker up
+  # (and set SYNC_ENABLED=false on the api service to avoid double syncing).
+  worker:
+    build: .
+    command: ["worker"]
+    profiles: ["worker"]
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-tender}:${POSTGRES_PASSWORD:-tender}@db:5432/${POSTGRES_DB:-tenderbase}
+      SYNC_ENABLED: "true"
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
 
   # Optional: Redis for future caching/queues. Not required by V1.
   # redis:

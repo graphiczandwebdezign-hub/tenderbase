@@ -6,6 +6,7 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tenderbase.app.databinding.ActivitySettingsBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -16,6 +17,7 @@ import java.net.URL
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var b: ActivitySettingsBinding
+    private lateinit var repo: TenderRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +27,7 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         b.toolbar.setNavigationOnClickListener { finish() }
 
+        repo = TenderRepository(this)
         b.rowCategories.setOnClickListener {
             val i = Intent(this, PreferencesActivity::class.java)
             i.putExtra(PreferencesActivity.EXTRA_TYPE, PreferencesActivity.TYPE_CATEGORIES)
@@ -41,7 +44,58 @@ class SettingsActivity : AppCompatActivity() {
             clearDownloads()
         }
 
+        b.rowHiddenTenders.setOnClickListener {
+            repo.unhideAllTenders()
+            Toast.makeText(this, R.string.hidden_tenders_none, Toast.LENGTH_SHORT).show()
+            updateHiddenTendersStatus()
+        }
+        updateHiddenTendersStatus()
+
+        b.rowWorkspaceRestore.setOnClickListener { confirmWorkspaceRestore() }
+
         checkApiStatus()
+    }
+
+    private fun updateHiddenTendersStatus() {
+        val count = repo.hiddenTenderIds().size
+        b.hiddenTendersStatus.text = if (count == 0) {
+            getString(R.string.hidden_tenders_none)
+        } else {
+            getString(R.string.hidden_tenders_count, count)
+        }
+    }
+
+    private fun confirmWorkspaceRestore() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.workspace_restore_title))
+            .setMessage(getString(R.string.workspace_restore_body))
+            .setPositiveButton(getString(R.string.workspace_restore_confirm)) { _, _ ->
+                restoreWorkspace()
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun restoreWorkspace() {
+        lifecycleScope.launch {
+            when (val restored = repo.restoreWorkspacesFromServer()) {
+                -1 -> Toast.makeText(
+                    this@SettingsActivity,
+                    R.string.workspace_restore_failed,
+                    Toast.LENGTH_LONG
+                ).show()
+                0 -> Toast.makeText(
+                    this@SettingsActivity,
+                    R.string.workspace_restore_none,
+                    Toast.LENGTH_SHORT
+                ).show()
+                else -> Toast.makeText(
+                    this@SettingsActivity,
+                    getString(R.string.workspace_restore_done, restored),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun clearDownloads() {

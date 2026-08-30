@@ -1,0 +1,75 @@
+# ============================================================================
+# COPY THIS FILE INTO YOUR REPO AT:  .github/workflows/build-release-apk.yml
+#
+# GitHub blocks automation bots from creating workflow files, so add this one
+# manually (GitHub web UI: Add file -> Create new file ->
+# ".github/workflows/build-release-apk.yml" -> paste -> Commit).
+#
+# What it does: builds the RELEASE APK (minified + shrunk, debug-signed so it
+# installs without secrets), runs the JVM unit tests, and publishes a
+# versioned artifact + Release tag "apk-release-latest".
+# Run from Actions -> "Build Release APK" -> Run workflow.
+# ============================================================================
+name: Build Release APK
+
+on:
+  workflow_dispatch: {}
+  push:
+    branches: [ "main" ]
+    paths: [ "android/**" ]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Unit tests (JVM)
+        working-directory: android
+        run: ./gradlew --no-daemon testReleaseUnitTest
+
+      - name: Build release APK
+        working-directory: android
+        run: ./gradlew --no-daemon assembleRelease
+
+      - name: Rename APK with version
+        working-directory: android
+        run: |
+          VERSION=$(grep -oP 'versionName "\K[^"]+' app/build.gradle)
+          mkdir -p ../out
+          cp app/build/outputs/apk/release/app-release.apk "../out/TenderBase-v${VERSION}.apk"
+          echo "VERSION=${VERSION}" >> "$GITHUB_ENV"
+          ls -la ../out
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: TenderBase-release-apk
+          path: out/TenderBase-v*.apk
+          if-no-files-found: error
+
+      - name: Publish to Release (stable download link)
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: apk-release-latest
+          name: TenderBase release APK (latest)
+          body: |
+            Minified release build (v${{ env.VERSION }}), debug-signed for
+            direct installation. Download the APK below and open it on your
+            phone (enable "Install unknown apps" for your browser/file
+            manager).
+          files: out/TenderBase-v*.apk
+          make_latest: true

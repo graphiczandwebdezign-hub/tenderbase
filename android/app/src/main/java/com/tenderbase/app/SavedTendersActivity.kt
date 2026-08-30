@@ -25,11 +25,18 @@ class SavedTendersActivity : AppCompatActivity() {
         b.toolbar.setNavigationOnClickListener { finish() }
 
         repo = TenderRepository(this)
-        adapter = TenderAdapter(emptyList()) { tender ->
-            val i = Intent(this, DetailActivity::class.java)
-            i.putExtra(DetailActivity.EXTRA_ID, tender.id)
-            startActivity(i)
-        }
+        adapter = TenderAdapter(
+            onTenderClick = { tender ->
+                val i = Intent(this, DetailActivity::class.java)
+                i.putExtra(DetailActivity.EXTRA_ID, tender.id)
+                startActivity(i)
+            },
+            onSaveToggle = { tender ->
+                // Un-save straight from the list; the Room flow refreshes it.
+                lifecycleScope.launch { repo.toggleSave(tender) }
+            },
+            onRetry = { }
+        )
 
         b.recycler.layoutManager = LinearLayoutManager(this)
         b.recycler.adapter = adapter
@@ -37,7 +44,7 @@ class SavedTendersActivity : AppCompatActivity() {
         lifecycleScope.launch {
             repo.savedTendersFlow.collectLatest { savedList ->
                 val tenders = savedList.map { it.toTender() }
-                adapter.submit(tenders)
+                adapter.submitTenders(tenders, null)
                 if (tenders.isEmpty()) {
                     b.recycler.visibility = View.GONE
                     b.emptyView.visibility = View.VISIBLE

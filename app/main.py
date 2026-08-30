@@ -11,8 +11,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
-from fastapi.staticfiles import StaticFiles
-from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi import Limiter
 from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -33,6 +32,7 @@ from app.api.routes import (
     provinces,
     notifications,
     preferences,
+    saved_searches,
     health,
     admin,
 )
@@ -69,7 +69,7 @@ async def lifespan(app: FastAPI):
         ensure_bootstrap_key(db)
     finally:
         db.close()
-    scheduler = start_scheduler()
+    start_scheduler()
     log_event(logger, 20, "app_started", env=settings.app_env, postgres=settings.is_postgres)
     try:
         yield
@@ -109,6 +109,54 @@ app.add_middleware(
 )
 
 
+# ---------------------------------------------------- request context (S10)
+# Correlation id for every request: honoured when supplied (sanitised),
+# generated otherwise; echoed as a response header, attached to error bodies
+# and logged with the structured access-log line.
+import contextvars  # noqa: E402
+import time as _time  # noqa: E402
+import uuid as _uuid  # noqa: E402
+
+request_id_var: contextvars.ContextVar[str | None] = contextvars.ContextVar(
+    "request_id", default=None
+)
+
+_PROBE_PATHS = {"/health", "/ready", "/api/v1/health", "/api/v1/ready"}
+
+
+def current_request_id() -> str | None:
+    return request_id_var.get()
+
+
+def _sanitize_request_id(raw: str | None) -> str:
+    if raw and len(raw) <= 64 and all(c.isalnum() or c in "-_" for c in raw):
+        return raw
+    return _uuid.uuid4().hex[:16]
+
+
+@app.middleware("http")
+async def request_context(request: Request, call_next):
+    rid = _sanitize_request_id(request.headers.get("x-request-id"))
+    request_id_var.set(rid)
+    started = _time.perf_counter()
+    response = await call_next(request)
+    duration_ms = round((_time.perf_counter() - started) * 1000, 1)
+    response.headers["X-Request-ID"] = rid
+    # Probe endpoints log at DEBUG so orchestrator healthchecks don't flood INFO.
+    level = 10 if request.url.path in _PROBE_PATHS and response.status_code < 400 else 20
+    log_event(
+        logger,
+        level,
+        "http_request",
+        request_id=rid,
+        method=request.method,
+        path=request.url.path,
+        status=response.status_code,
+        duration_ms=duration_ms,
+    )
+    return response
+
+
 @app.middleware("http")
 async def security_headers(request: Request, call_next):
     response = await call_next(request)
@@ -123,13 +171,21 @@ async def security_headers(request: Request, call_next):
 
 # ------------------------------------------------------------ error handling
 def _error(status_code: int, code: str, message: str) -> JSONResponse:
-    return JSONResponse(status_code=status_code, content={"error": {"code": code, "message": message}})
+    # request_id links an error payload to the structured access-log line.
+    payload = {"code": code, "message": message}
+    rid = current_request_id()
+    if rid:
+        payload["request_id"] = rid
+    return JSONResponse(status_code=status_code, content={"error": payload})
 
 
 @app.exception_handler(StarletteHTTPException)
 async def http_exception_handler(request: Request, exc: StarletteHTTPException):
     detail = exc.detail
     if isinstance(detail, dict) and "code" in detail:
+        rid = current_request_id()
+        if rid:
+            detail = {**detail, "request_id": rid}
         return JSONResponse(status_code=exc.status_code, content={"error": detail})
     code = {
         400: "BAD_REQUEST", 401: "UNAUTHORIZED", 403: "FORBIDDEN",
@@ -166,6 +222,7 @@ app.include_router(categories.router, prefix=API_V1)
 app.include_router(provinces.router, prefix=API_V1)
 app.include_router(notifications.router, prefix=API_V1)
 app.include_router(preferences.router, prefix=API_V1)
+app.include_router(saved_searches.router, prefix=API_V1)
 app.include_router(admin.router, prefix=API_V1)
 
 # Web admin dashboard (server-rendered, cookie auth).
