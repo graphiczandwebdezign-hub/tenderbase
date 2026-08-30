@@ -8,7 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import com.tenderbase.app.ui.screens.SettingsScreen
-import com.tenderbase.app.ui.screens.ThemeMode
+import com.tenderbase.app.ui.vm.ThemeMode
 import com.tenderbase.app.ui.theme.TenderBaseTheme
 
 class SettingsActivity : AppCompatActivity() {
