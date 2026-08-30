@@ -89,6 +89,27 @@
     <string name="saved_search_delete_failed">Couldn\'t delete the search</string>
     <string name="saved_searches_load_failed">Couldn\'t load saved searches</string>
     <string name="closing_week_title">Closing this week</string>
+
+    <string name="deadlines_title">Deadlines</string>
+    <string name="deadlines_subtitle">%1$d closing this week · %2$d open saved tenders</string>
+    <string name="deadlines_partial_error">Live deadlines couldn\'t load — saved tenders and alerts below are up to date.</string>
+    <string name="deadlines_empty">Nothing needs your attention yet</string>
+    <string name="section_closing_week">Closing this week (%1$d)</string>
+    <string name="section_alerts">Recent alerts (%1$d)</string>
+    <string name="view_all_alerts">View all alerts</string>
+    <string name="bucket_closed">Closed (%1$d)</string>
+    <string name="bucket_today">Closes today (%1$d)</string>
+    <string name="bucket_this_week">This week (%1$d)</string>
+    <string name="bucket_two_weeks">Next two weeks (%1$d)</string>
+    <string name="bucket_later">Later (%1$d)</string>
+    <string name="bucket_no_date">No closing date (%1$d)</string>
+    <string name="tender_saved">Tender saved ★</string>
+    <string name="tender_unsaved">Removed from saved</string>
+    <string name="tender_hidden">Tender hidden</string>
+    <string name="undo">Undo</string>
+    <string name="hidden_tenders_title">Hidden tenders</string>
+    <string name="hidden_tenders_none">No hidden tenders</string>
+    <string name="hidden_tenders_count">%1$d hidden — tap to show them again</string>
     <string name="ref_prefix">REF: %1$s</string>
     <string name="closing_on">Closing on %1$s</string>
     <string name="label_closing_date">Closing date</string>

@@ -3,6 +3,9 @@
 
     <group android:checkableBehavior="single">
         <item
+            android:id="@+id/nav_deadlines"
+            android:title="Deadlines" />
+        <item
             android:id="@+id/nav_latest"
             android:title="Latest Tenders" />
         <item

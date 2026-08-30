@@ -16,6 +16,7 @@ import java.net.URL
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var b: ActivitySettingsBinding
+    private lateinit var repo: TenderRepository
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -25,6 +26,7 @@ class SettingsActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         b.toolbar.setNavigationOnClickListener { finish() }
 
+        repo = TenderRepository(this)
         b.rowCategories.setOnClickListener {
             val i = Intent(this, PreferencesActivity::class.java)
             i.putExtra(PreferencesActivity.EXTRA_TYPE, PreferencesActivity.TYPE_CATEGORIES)
@@ -41,7 +43,23 @@ class SettingsActivity : AppCompatActivity() {
             clearDownloads()
         }
 
+        b.rowHiddenTenders.setOnClickListener {
+            repo.unhideAllTenders()
+            Toast.makeText(this, R.string.hidden_tenders_none, Toast.LENGTH_SHORT).show()
+            updateHiddenTendersStatus()
+        }
+        updateHiddenTendersStatus()
+
         checkApiStatus()
+    }
+
+    private fun updateHiddenTendersStatus() {
+        val count = repo.hiddenTenderIds().size
+        b.hiddenTendersStatus.text = if (count == 0) {
+            getString(R.string.hidden_tenders_none)
+        } else {
+            getString(R.string.hidden_tenders_count, count)
+        }
     }
 
     private fun clearDownloads() {

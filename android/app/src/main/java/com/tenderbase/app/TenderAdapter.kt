@@ -4,10 +4,8 @@ import android.animation.ObjectAnimator
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageButton
 import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.google.android.material.card.MaterialCardView
 
 /**
  * Discovery list adapter. Renders tender cards plus supporting rows:
@@ -73,6 +71,29 @@ class TenderAdapter(
     /** True when the given tender id is currently displayed. */
     fun contains(id: Int): Boolean = id in visibleIds
 
+    /** The tender at a list position, or null for footer/skeleton rows. */
+    fun tenderAt(position: Int): Tender? =
+        (rows.getOrNull(position) as? Row.Item)?.tender
+
+    /** Remove one tender from the list (e.g. swiped away). Returns its position or -1. */
+    fun removeTender(id: Int): Int {
+        val index = rows.indexOfFirst { it is Row.Item && it.tender.id == id }
+        if (index < 0) return -1
+        rows.removeAt(index)
+        visibleIds.remove(id)
+        notifyItemRemoved(index)
+        return index
+    }
+
+    /** Re-insert a previously removed tender at the given position (undo). */
+    fun reinsertTender(t: Tender, position: Int) {
+        if (t.id in visibleIds) return
+        val pos = position.coerceIn(0, rows.size)
+        rows.add(pos, Row.Item(t))
+        visibleIds.add(t.id)
+        notifyItemInserted(pos)
+    }
+
     fun setSavedIds(ids: Set<Int>) {
         savedIds = ids
         notifyItemRangeChanged(0, itemCount)
@@ -135,86 +156,14 @@ class TenderAdapter(
     // ----------------------------------------------------------- view holders
 
     inner class TenderVH(v: View) : RecyclerView.ViewHolder(v) {
-        private val card: MaterialCardView = v.findViewById(R.id.tenderCard)
-        private val badge: TextView = v.findViewById(R.id.statusBadge)
-        private val source: TextView = v.findViewById(R.id.sourceText)
-        private val title: TextView = v.findViewById(R.id.tvTitle)
-        private val org: TextView = v.findViewById(R.id.tvOrg)
-        private val ref: TextView = v.findViewById(R.id.tvRef)
-        private val location: TextView = v.findViewById(R.id.locationTag)
-        private val category: TextView = v.findViewById(R.id.categoryTag)
-        private val closes: TextView = v.findViewById(R.id.tvCloses)
-        private val save: ImageButton = v.findViewById(R.id.saveButton)
-
         fun bind(t: Tender) {
-            val ctx = itemView.context
-
-            // Status badge (text + colour, never colour alone).
-            val label = t.badgeLabel()
-            badge.text = label
-            val (bg, fg) = when (label) {
-                "OPEN" -> R.drawable.bg_badge_open to R.color.badgeOpenText
-                "CLOSING SOON" -> R.drawable.bg_badge_soon to R.color.badgeSoonText
-                "CANCELLED" -> R.drawable.bg_badge_cancelled to R.color.badgeCancelledText
-                else -> R.drawable.bg_badge_closed to R.color.badgeClosedText
-            }
-            badge.setBackgroundResource(bg)
-            badge.setTextColor(ctx.getColor(fg))
-
-            title.text = t.title
-            org.text = t.organisation ?: "Unknown organisation"
-            if (t.reference != null) {
-                ref.visibility = View.VISIBLE
-                ref.text = ctx.getString(R.string.ref_prefix, t.reference)
-            } else {
-                ref.visibility = View.GONE
-            }
-
-            // Location / category tags
-            val locationText = listOfNotNull(t.province, t.municipality).joinToString(" · ")
-            if (locationText.isEmpty()) location.visibility = View.GONE
-            else {
-                location.visibility = View.VISIBLE
-                location.text = locationText
-            }
-            val categoryText = t.category
-                ?: t.categories.firstOrNull()?.replace('-', ' ')?.replaceFirstChar { it.uppercase() }
-            if (categoryText == null) category.visibility = View.GONE
-            else {
-                category.visibility = View.VISIBLE
-                category.text = categoryText
-            }
-
-            // Closing date: prominent, urgency-tiered, from server timestamps.
-            val closesText = DateUtils.closesLabel(t.closingAt, t.closingDate, t.deadlineState)
-            closes.text = closesText
-            val urgencyColor = when (DateUtils.urgency(t.closingAt, t.closingDate, t.deadlineState)) {
-                DateUtils.Urgency.CLOSED -> R.color.textMuted
-                DateUtils.Urgency.TODAY, DateUtils.Urgency.URGENT -> R.color.urgent
-                DateUtils.Urgency.SOON -> R.color.warning
-                DateUtils.Urgency.NORMAL -> R.color.primary
-            }
-            closes.setTextColor(ctx.getColor(urgencyColor))
-            closes.compoundDrawableTintList =
-                android.content.res.ColorStateList.valueOf(ctx.getColor(urgencyColor))
-
-            // Source, discreet.
-            source.text = t.source ?: ""
-
-            // Save / unsave (48dp touch target).
-            val isSaved = t.id in savedIds
-            save.setImageResource(
-                if (isSaved) R.drawable.ic_star_filled else R.drawable.ic_star_border
+            TenderCardBinder.bind(
+                view = itemView,
+                t = t,
+                isSaved = t.id in savedIds,
+                onClick = onTenderClick,
+                onSaveToggle = onSaveToggle
             )
-            save.contentDescription =
-                ctx.getString(if (isSaved) R.string.cd_unsave else R.string.cd_save)
-            save.setOnClickListener {
-                save.isEnabled = false
-                save.post { save.isEnabled = true }
-                onSaveToggle(t)
-            }
-
-            card.setOnClickListener { onTenderClick(t) }
         }
     }
 

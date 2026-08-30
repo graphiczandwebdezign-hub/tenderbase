@@ -58,6 +58,12 @@
             </intent-filter>
         </activity>
 
+        <!-- Deadline command centre (Sprint 4) -->
+        <activity
+            android:name=".DeadlinesActivity"
+            android:exported="false"
+            android:parentActivityName=".MainActivity" />
+
         <!-- Saved Tenders Activity -->
         <activity
             android:name=".SavedTendersActivity"

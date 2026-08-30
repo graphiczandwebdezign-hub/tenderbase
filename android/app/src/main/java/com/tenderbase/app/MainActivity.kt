@@ -1,21 +1,27 @@
 package com.tenderbase.app
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.ActionBarDrawerToggle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.core.view.GravityCompat
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.ItemTouchHelper
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.chip.Chip
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.android.material.snackbar.Snackbar
 import com.tenderbase.app.databinding.ActivityMainBinding
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -47,6 +53,33 @@ class MainActivity : AppCompatActivity() {
     private var facetsJson: String? = null
 
     private var searchJob: Job? = null
+
+    /** Swipe right = save, swipe left = hide (with undo). */
+    private val swipeHandler = object : ItemTouchHelper.SimpleCallback(
+        0, ItemTouchHelper.LEFT or ItemTouchHelper.RIGHT
+    ) {
+        override fun onMove(
+            rv: RecyclerView, vh: RecyclerView.ViewHolder, target: RecyclerView.ViewHolder
+        ): Boolean = false
+
+        override fun getMovementFlags(rv: RecyclerView, vh: RecyclerView.ViewHolder): Int {
+            // Never swipe the footer or skeleton rows.
+            return if (vh is TenderAdapter.FooterVH || vh is TenderAdapter.SkeletonVH) 0
+            else super.getMovementFlags(rv, vh)
+        }
+
+        override fun onSwiped(vh: RecyclerView.ViewHolder, direction: Int) {
+            val pos = vh.bindingAdapterPosition
+            val row = adapter.tenderAt(pos) ?: run { adapter.notifyItemChanged(pos); return }
+            when (direction) {
+                ItemTouchHelper.RIGHT -> onSwipeSave(row, pos)
+                else -> onSwipeHide(row, pos)
+            }
+        }
+    }
+
+    private val notifPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* result observed via prefs flag */ }
 
     companion object {
         private const val STATE_FILTERS = "discovery_filters"
@@ -129,6 +162,7 @@ class MainActivity : AppCompatActivity() {
 
         b.searchInput.setText(filters.query)
         updateSortButtonLabel()
+        maybeRequestNotificationPermission()
         load()
         loadFacets()
     }
@@ -177,6 +211,7 @@ class MainActivity : AppCompatActivity() {
                     renderFilterChips()
                     load()
                 }
+                R.id.nav_deadlines -> startActivity(Intent(this, DeadlinesActivity::class.java))
                 R.id.nav_notifications -> startActivity(Intent(this, NotificationsActivity::class.java))
                 R.id.nav_saved -> startActivity(Intent(this, SavedTendersActivity::class.java))
                 R.id.nav_saved_searches -> startActivity(Intent(this, SavedSearchesActivity::class.java))
@@ -211,6 +246,9 @@ class MainActivity : AppCompatActivity() {
         )
         b.recycler.layoutManager = LinearLayoutManager(this)
         b.recycler.adapter = adapter
+
+        // Swipe actions: right = save, left = hide.
+        ItemTouchHelper(swipeHandler).attachToRecyclerView(b.recycler)
 
         b.swipe.setColorSchemeResources(R.color.primary)
         b.swipe.setOnRefreshListener {
@@ -347,6 +385,45 @@ class MainActivity : AppCompatActivity() {
 
     // ------------------------------------------------------------- actions
 
+    private fun onSwipeSave(t: Tender, position: Int) {
+        lifecycleScope.launch {
+            val saved = repo.toggleSave(t)
+            val msg = getString(if (saved) R.string.tender_saved else R.string.tender_unsaved)
+            Snackbar.make(b.recycler, msg, Snackbar.LENGTH_SHORT)
+                .setAnchorView(b.recycler)
+                .show()
+        }
+        // Stay in place — the star updates via the saved-ids flow.
+        adapter.notifyItemChanged(position)
+    }
+
+    private fun onSwipeHide(t: Tender, position: Int) {
+        repo.hideTender(t.id)
+        adapter.removeTender(t.id)
+        updateCountText()
+        Snackbar.make(b.recycler, R.string.tender_hidden, Snackbar.LENGTH_LONG)
+            .setAction(R.string.undo) {
+                // Full un-hide keeps the state machine simple (documented).
+                repo.unhideAllTenders()
+                adapter.reinsertTender(t, position)
+                updateCountText()
+            }
+            .setAnchorView(b.recycler)
+            .show()
+    }
+
+    /** Ask for notification permission once (Android 13+). */
+    private fun maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < 33) return
+        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
+        if (prefs.getBoolean("notif_permission_asked", false)) return
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
+            == PackageManager.PERMISSION_GRANTED
+        ) return
+        prefs.edit().putBoolean("notif_permission_asked", true).apply()
+        notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+    }
+
     private fun appliedQuery(): String = filters.query.trim()
 
     /** Commit the typed text as the active search query and reload. */
@@ -418,16 +495,18 @@ class MainActivity : AppCompatActivity() {
         lifecycleScope.launch {
             try {
                 val page = ApiClient.fetchTenders(page = 1, limit = PAGE_SIZE, filters = filters)
+                val hidden = repo.hiddenTenderIds()
+                val items = Dashboard.filterHidden(page.items, hidden)
                 totalCount = page.total
                 currentPage = page.page
                 hasMore = currentPage < page.totalPages
                 val footer = when {
                     hasMore -> TenderAdapter.FooterState.LOADING
-                    page.items.isEmpty() -> null
+                    items.isEmpty() -> null
                     else -> TenderAdapter.FooterState.END
                 }
-                adapter.submitTenders(page.items, footer)
-                repo.cacheTenders(page.items)
+                adapter.submitTenders(items, footer)
+                repo.cacheTenders(items)
 
                 if (page.items.isEmpty()) showEmpty() else showList()
                 updateCountText()
@@ -464,7 +543,10 @@ class MainActivity : AppCompatActivity() {
                 totalCount = page.total
                 currentPage = page.page
                 hasMore = currentPage < page.totalPages
-                val more = page.items.filter { !adapter.contains(it.id) }
+                val more = Dashboard.filterHidden(
+                    page.items.filter { !adapter.contains(it.id) },
+                    repo.hiddenTenderIds()
+                )
                 val footer = if (hasMore) TenderAdapter.FooterState.LOADING else TenderAdapter.FooterState.END
                 adapter.appendTenders(more, footer)
                 repo.cacheTenders(more)

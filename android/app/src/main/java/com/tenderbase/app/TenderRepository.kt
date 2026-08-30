@@ -79,6 +79,25 @@ class TenderRepository(context: Context) {
         }
     }
 
+    // ------------------------------------------------------- hidden tenders
+    // Personal dismissals: ids the user swiped away on the discovery list.
+    // Stored locally (never sent to the server — they affect no one else).
+
+    fun hiddenTenderIds(): Set<Int> =
+        prefs.getStringSet("hidden_tender_ids", emptySet())?.mapNotNull { it.toIntOrNull() }?.toSet()
+            ?: emptySet()
+
+    fun hideTender(id: Int) {
+        prefs.edit().putStringSet(
+            "hidden_tender_ids",
+            (hiddenTenderIds() + id).map { it.toString() }.toSet()
+        ).apply()
+    }
+
+    fun unhideAllTenders() {
+        prefs.edit().remove("hidden_tender_ids").apply()
+    }
+
     // Offline Cache
     suspend fun cacheTenders(tenders: List<Tender>) {
         val entities = tenders.map { t ->

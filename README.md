@@ -230,6 +230,19 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Android deadline command centre — Sprint 4
+The **Deadlines** screen unifies everything that needs action:
+- *Closing this week* — every open tender closing within 7 days (server-side,
+  deadline-sorted via the Sprint 1 filter model)
+- *Saved deadlines* — the device's saved tenders grouped into urgency buckets
+  (Closed / Closes today / This week / Next two weeks / Later / No date)
+- *Recent alerts* — the last saved-search and deadline notifications, with a
+  shortcut to the full history
+Discovery cards support swipe actions: swipe right to save, swipe left to hide
+(undo snackbar; hidden ids are local-only, and Settings restores them).
+Android 13+ devices are asked (once) for notification permission, which the
+existing FCM alerts require.
+
 ### Android deep links & tender actions — Sprint 3
 The Android app registers the `tenderbase://tender/{id}` URI scheme:
 - Tender detail is deep-linkable (`tenderbase://tender/42`); malformed links
