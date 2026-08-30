@@ -44,7 +44,9 @@ object ApiClient {
         limit: Int = 25,
         filters: SearchFilters = SearchFilters()
     ): Page = withContext(Dispatchers.IO) {
-        val params = filters.toQueryParams(SearchFilters.todayIso()).toMutableList()
+        val params = filters.toQueryParams(SearchFilters.todayIso())
+            .map { (k, v) -> k to v }
+            .toMutableList()
         params.add("page" to page.toString())
         params.add("limit" to limit.toString())
         if (filters.query.isNotBlank()) params.add("search" to filters.query.trim())
