@@ -1,98 +1,97 @@
-# TenderBase — Android App (basic)
+# TenderBase — Android App
 
-A deliberately minimal Android app that **launches TenderBase**: it opens the
-live API browser (Swagger UI at `https://tenderbase-api.onrender.com/docs`)
-inside a WebView so you can browse tenders and try endpoints from your phone.
+A native Android app for browsing live South African government tenders from the
+TenderBase API. Built with Kotlin + Material 3.
 
-This is the starter foundation. It uses **only the Android framework** (no
-AndroidX / third-party libraries), so the build is fast and dependency-free —
-chosen specifically to make producing a **signed debug APK** painless.
+## Features
 
-- Package: `com.tenderbase.app` (debug builds install as `com.tenderbase.app.debug`)
-- `minSdk 24` (Android 7.0+), `targetSdk 34`
-- One screen (`MainActivity`) + a WebView, progress bar, and offline/retry view
+- **Tender list** — Material cards showing title, organisation, province,
+  category chips, and a colour-coded "Closes in N days" (red when urgent).
+- **Search** — search box (title / description / organisation).
+- **Category filter** — horizontally scrollable filter chips loaded live from
+  the API, single-select with an "All" reset.
+- **Pull-to-refresh** and graceful **loading / empty / error** states (the
+  error screen explains the free-tier server may take ~1 min to wake).
+- **Detail screen** — full description, type, status, closing date, category
+  chips, tappable **document links** (open in browser), and an **Open on
+  eTenders** button.
+- **Adaptive launcher icon** (API 26+) plus PNG icons for older devices.
+
+Talks to the live API at `https://tenderbase-api.onrender.com` (JSON endpoints
+`/api/v1/tenders`, `/api/v1/tenders/{id}`, `/api/v1/categories`). Change
+`ApiClient.BASE_URL` to point at another deployment.
 
 ---
 
-## Build a signed debug APK
+## Getting the installable APK
 
-You need **[Android Studio](https://developer.android.com/studio)** (it bundles
-a JDK, the Android SDK, and Gradle — no separate installs). Any recent version
-(Koala / 2024.1+) works.
+### Option 1 — Cloud build (recommended, no local tools) ⭐
 
-### Option A — Android Studio UI (easiest)
+This produces a downloadable, signed APK using GitHub's build servers — no
+Android Studio, no SDK on your machine.
 
-1. **File → Open** and select this `android/` folder.
-2. Let it finish "Gradle sync" (first time it downloads the SDK + Gradle; needs
-   internet — this is normal).
-3. **Build → Build Bundle(s) / APK(s) → Build APK(s)**.
-4. When it finishes, click **locate** in the notification. The file is:
-   ```
-   android/app/build/outputs/apk/debug/app-debug.apk
-   ```
-   Debug APKs are **automatically signed** with Android Studio's debug keystore,
-   so they install directly — no manual signing needed.
+1. In your repo on GitHub: **Add file → Create new file**.
+2. Name it exactly: `.github/workflows/build-apk.yml`
+3. Paste the entire contents of [`ci-build-apk.yml`](ci-build-apk.yml) (in this
+   folder) and **commit**.
+   *(GitHub blocks automation bots from adding workflow files, so this one step
+   is manual — everything after is automatic.)*
+4. Go to the **Actions** tab → **Build Android APK** → **Run workflow**.
+5. When it finishes (~3–5 min), download the APK two ways:
+   - **Artifacts** on the run page → `TenderBase-debug-apk`, or
+   - the auto-created **Release** tagged `apk-latest` →
+     `TenderBase-debug.apk` (a stable link you can open on your phone).
 
-### Option B — Command line
+### Option 2 — Android Studio (local)
 
-From the `android/` folder:
-
-```bash
-# Windows
-gradlew.bat assembleDebug
-
-# macOS / Linux
-./gradlew assembleDebug
-```
-
-Output: `app/build/outputs/apk/debug/app-debug.apk`
-
-> **Note on the Gradle wrapper JAR:** `gradle/wrapper/gradle-wrapper.jar` is a
-> binary and is not committed here. Android Studio **regenerates it
-> automatically** on first open/sync, so Option A just works. If you use the
-> command line first, run `gradle wrapper` once (with a system Gradle), or open
-> the project in Android Studio once to generate it.
+1. Install [Android Studio](https://developer.android.com/studio) (bundles JDK,
+   SDK, Gradle).
+2. **File → Open** → select this `android/` folder → let Gradle sync finish.
+3. **Build → Build App Bundle(s) / APK(s) → Build APK(s)**.
+4. Output: `app/build/outputs/apk/debug/app-debug.apk` (already debug-signed).
+5. Or press **Run ▶** with a phone connected to build + install + launch.
 
 ---
 
 ## Install on your phone
 
-**Easiest:** with the phone plugged in and Android Studio open, press the green
-**Run ▶** button — it builds, installs, and launches in one step.
+1. Download `TenderBase-debug.apk` (from the Release or Artifact) to your phone.
+2. Tap it. If prompted, allow **Install unknown apps** for your browser / file
+   manager.
+3. Open **TenderBase** from your app drawer.
 
-**Manual APK install:**
+Debug APKs are signed with Android's standard debug key, so they install on any
+device without extra signing setup. (For Play Store distribution you'd later
+create a release build with your own keystore.)
 
-1. Copy `app-debug.apk` to your phone.
-2. Enable **Settings → Security → Install unknown apps** for your file manager.
-3. Tap the APK to install. Open **TenderBase** from your app drawer.
+---
 
-**Via adb** (Android Studio ships it under `platform-tools`):
+## Project layout
 
-```bash
-adb install -r app/build/outputs/apk/debug/app-debug.apk
+```
+android/
+├─ app/src/main/
+│  ├─ java/com/tenderbase/app/
+│  │  ├─ MainActivity.kt      list + search + filters
+│  │  ├─ DetailActivity.kt    single-tender detail
+│  │  ├─ TenderAdapter.kt     RecyclerView card adapter
+│  │  ├─ ApiClient.kt         HttpURLConnection API client
+│  │  ├─ Tender.kt            model + JSON parsing
+│  │  └─ DateUtils.kt         "closes in N days" helpers
+│  └─ res/                    layouts, Material theme, icons
+├─ ci-build-apk.yml           → copy to .github/workflows/build-apk.yml
+└─ build.gradle, settings.gradle, gradlew(.bat)
 ```
 
----
-
-## Configuration
-
-To point the app at a different backend, edit `TENDERBASE_URL` in
-[`app/src/main/java/com/tenderbase/app/MainActivity.java`](app/src/main/java/com/tenderbase/app/MainActivity.java).
-It defaults to the live Render service. You can also point it at
-`.../` (the landing page) or `.../admin` instead of `/docs`.
-
-> The free-tier Render service sleeps when idle and can take ~1 minute to wake
-> on the first request. If the page fails to load, the app shows a **Retry**
-> button — give it a few seconds and retry.
+> **Gradle wrapper JAR:** `gradle/wrapper/gradle-wrapper.jar` (binary) is not
+> committed. The cloud workflow and Android Studio both regenerate/provide it
+> automatically. For a purely manual CLI build, run `gradle wrapper` once first.
 
 ---
 
-## What this is / isn't
+## Next steps (foundation for the notification app)
 
-**Is:** a clean, installable starting point that proves the pipeline end to end
-(phone → live API).
-
-**Isn't (yet):** a native tenders UI or push notifications. The natural next
-steps are to replace the WebView with native screens that call the JSON
-endpoints (`/api/v1/tenders`, `/search`, `/latest`, …) and to wire Firebase
-Cloud Messaging against the existing `/api/v1/notifications/*` endpoints.
+- Firebase Cloud Messaging against the existing `/api/v1/notifications/*`
+  endpoints (device registration + preferences already exist server-side).
+- Saved/bookmarked tenders and closing-soon reminders.
+- Infinite scroll / pagination (API already returns `pagination`).
