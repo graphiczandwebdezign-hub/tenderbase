@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -43,3 +44,32 @@ class SaveTenderIn(BaseModel):
     client_id: str = Field(..., min_length=1, max_length=128)
     tender_id: int
     reminders_enabled: bool = True
+
+
+class ChecklistItem(BaseModel):
+    label: str = Field(..., min_length=1, max_length=256)
+    done: bool = False
+
+
+class WorkspaceIn(BaseModel):
+    """Upsert a saved tender's workspace. Fields absent from the request are
+    left unchanged; explicit null / empty list clears them."""
+
+    client_id: str = Field(..., min_length=1, max_length=128)
+    note: Optional[str] = Field(None, max_length=8000)
+    checklist: Optional[List[ChecklistItem]] = Field(
+        None, max_length=100, description="Max 100 items"
+    )
+
+
+class SavedTenderOut(BaseModel):
+    tender_id: int
+    reminders_enabled: bool
+    note: Optional[str] = None
+    checklist: List[ChecklistItem] = []
+    created_at: datetime
+
+
+class SavedTenderListOut(BaseModel):
+    client_id: str
+    saved: List[SavedTenderOut]

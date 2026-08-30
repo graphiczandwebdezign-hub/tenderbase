@@ -125,6 +125,18 @@
     <string name="share_bid_pack">Share bid pack</string>
     <string name="cd_share_bid_pack">Share a summary of this tender with notes and checklist</string>
     <string name="doc_group_title">%1$s (%2$d)</string>
+
+    <string name="saved_search_queued">Offline — search saved and will sync when connected</string>
+    <string name="workspace_restore_title">Restore workspace from server</string>
+    <string name="workspace_restore_body">Replaces the note and checklist on this device with the server backup for tenders you have saved. Anything newer on this device will be overwritten.</string>
+    <string name="workspace_restore_confirm">Restore</string>
+    <string name="workspace_restore_done">%1$d workspaces restored</string>
+    <string name="workspace_restore_failed">Couldn't reach the server — nothing was changed</string>
+    <string name="workspace_restore_none">Nothing to restore yet</string>
+    <string name="reminder_title">Tender closing soon</string>
+    <string name="reminder_body">%1$s — %2$s</string>
+    <string name="reminder_channel_name">Tender Alerts</string>
+    <string name="reminder_channel_desc">Notifications for new matching tenders and deadlines</string>
     <string name="ref_prefix">REF: %1$s</string>
     <string name="closing_on">Closing on %1$s</string>
     <string name="label_closing_date">Closing date</string>

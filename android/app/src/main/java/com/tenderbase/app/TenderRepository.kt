@@ -3,6 +3,7 @@ package com.tenderbase.app
 import android.content.Context
 import android.content.SharedPreferences
 import kotlinx.coroutines.flow.Flow
+import org.json.JSONObject
 
 class TenderRepository(context: Context) {
     private val db = AppDatabase.getInstance(context)
@@ -22,6 +23,9 @@ class TenderRepository(context: Context) {
             return false
         } else {
             dao.saveTender(SavedTenderEntity.fromTender(tender))
+            // Back up the save server-side so the workspace can sync and
+            // deadline reminders reach this device. Best-effort.
+            saveOnServer(tender.id)
             return true
         }
     }
@@ -98,6 +102,20 @@ class TenderRepository(context: Context) {
         prefs.edit().remove("hidden_tender_ids").apply()
     }
 
+    // Local deadline reminders (Sprint 6): tenders already reminded offline.
+    fun remindedTenderIds(): Set<Int> =
+        prefs.getStringSet("reminded_tender_ids", emptySet())
+            ?.mapNotNull { it.toIntOrNull() }?.toSet() ?: emptySet()
+
+    fun markReminded(id: Int) {
+        prefs.edit()
+            .putStringSet(
+                "reminded_tender_ids",
+                (remindedTenderIds() + id).map { it.toString() }.toSet()
+            )
+            .apply()
+    }
+
     // ------------------------------------------------------- bid workspace
 
     fun noteFlow(tenderId: Int): Flow<TenderNoteEntity?> = dao.noteFlow(tenderId)
@@ -126,6 +144,111 @@ class TenderRepository(context: Context) {
     suspend fun setChecklistDone(id: Long, done: Boolean) = dao.setChecklistDone(id, done)
 
     suspend fun deleteChecklistItem(id: Long) = dao.deleteChecklistItem(id)
+
+    /** Replace the local checklist with the given items (restore path). */
+    suspend fun replaceChecklist(tenderId: Int, items: List<Pair<String, Boolean>>) {
+        dao.deleteChecklistFor(tenderId)
+        items.forEachIndexed { index, (label, done) ->
+            dao.insertChecklistItem(
+                ChecklistItemEntity(
+                    tenderId = tenderId, label = label, isDone = done, position = index
+                )
+            )
+        }
+    }
+
+    // -------------------------------------------------- server sync (Sprint 6)
+
+    /**
+     * Push a saved tender's workspace to the server. Best-effort: the local
+     * Room data stays the source of truth; failures are silent (the next
+     * mutation or restore retries).
+     */
+    suspend fun pushWorkspace(tenderId: Int, note: String?, checklist: List<Pair<String, Boolean>>) {
+        try {
+            ApiClient.putWorkspace(clientId(), tenderId, note, checklist)
+        } catch (_: Exception) {
+        }
+    }
+
+    /** Mark a tender saved server-side so its workspace can back up. */
+    suspend fun saveOnServer(tenderId: Int) {
+        try {
+            ApiClient.saveTenderOnServer(clientId(), tenderId)
+        } catch (_: Exception) {
+        }
+    }
+
+    /**
+     * Restore workspaces from the server into local Room. Only tenders already
+     * saved locally are restored (the server list carries ids, not full
+     * tenders). Returns the number of restored workspaces.
+     */
+    suspend fun restoreWorkspacesFromServer(): Int {
+        val entries = try {
+            ApiClient.fetchSavedWorkspace(clientId())
+        } catch (_: Exception) {
+            return -1
+        }
+        val savedIds = dao.getSavedTenders().map { it.id }.toSet()
+        var restored = 0
+        for (e in entries) {
+            if (e.tenderId !in savedIds) continue
+            if (e.note != null) dao.upsertNote(
+                TenderNoteEntity(tenderId = e.tenderId, note = e.note)
+            )
+            if (e.checklist.isNotEmpty()) {
+                replaceChecklist(e.tenderId, e.checklist)
+            }
+            restored++
+        }
+        return restored
+    }
+
+    // --------------------------------------- offline saved-search queue (S6)
+
+    fun queueSavedSearch(name: String, payloadJson: String) {
+        val current = prefs.getString("pending_saved_searches", null)
+        prefs.edit()
+            .putString("pending_saved_searches", SearchQueue.add(current, name, payloadJson))
+            .apply()
+    }
+
+    /**
+     * Try to create every queued saved search. Entries that succeed (or clash
+     * with an existing name — 409) are removed; network failures stay queued.
+     * Returns how many entries synced.
+     */
+    suspend fun flushSavedSearchQueue(): Int {
+        var synced = 0
+        while (true) {
+            val json = prefs.getString("pending_saved_searches", null) ?: break
+            val entries = SearchQueue.decode(json)
+            if (entries.isEmpty()) break
+            val entry = entries.first()
+            try {
+                ApiClient.createSavedSearch(
+                    clientId(), entry.name, JSONObject(entry.payload)
+                )
+            } catch (e: ApiClient.ApiException) {
+                if (e.statusCode == 409) {
+                    // Already saved server-side: drop the queued copy.
+                    prefs.edit()
+                        .putString("pending_saved_searches", SearchQueue.remove(json, entry.name))
+                        .apply()
+                    continue
+                }
+                break // network/server error: keep the queue for later
+            } catch (_: Exception) {
+                break
+            }
+            prefs.edit()
+                .putString("pending_saved_searches", SearchQueue.remove(json, entry.name))
+                .apply()
+            synced++
+        }
+        return synced
+    }
 
     /** Seed the default checklist once, when a workspace is first opened. */
     suspend fun ensureDefaultChecklist(tenderId: Int) {

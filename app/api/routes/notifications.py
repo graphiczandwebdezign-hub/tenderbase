@@ -27,6 +27,10 @@ from app.schemas.notifications import (
     PreferencesOut,
     PreferenceItem,
     SaveTenderIn,
+    ChecklistItem,
+    WorkspaceIn,
+    SavedTenderOut,
+    SavedTenderListOut,
 )
 
 router = APIRouter(
@@ -121,3 +125,78 @@ def save_tender(payload: SaveTenderIn, db: Session = Depends(get_db)):
                            reminders_enabled=payload.reminders_enabled))
     db.commit()
     return {"status": "saved", "tender_id": tender.id}
+
+
+def _saved_out(row: SavedTender) -> SavedTenderOut:
+    import json as _json
+
+    checklist: List[ChecklistItem] = []
+    if row.checklist_json:
+        try:
+            checklist = [ChecklistItem(**c) for c in _json.loads(row.checklist_json)]
+        except Exception:  # noqa: BLE001 - corrupt payload must not break reads
+            checklist = []
+    return SavedTenderOut(
+        tender_id=row.tender_id,
+        reminders_enabled=row.reminders_enabled,
+        note=row.note,
+        checklist=checklist,
+        created_at=row.created_at,
+    )
+
+
+@router.get("/saved", response_model=SavedTenderListOut, summary="List saved tenders incl. workspace")
+def list_saved_tenders(
+    client_id: str = Query(..., min_length=1, max_length=128),
+    db: Session = Depends(get_db),
+):
+    """The caller's saved tenders with their backed-up bid workspace."""
+    user = _get_or_create_user(db, client_id)
+    rows = db.execute(
+        select(SavedTender)
+        .where(SavedTender.user_id == user.id)
+        .order_by(SavedTender.created_at.desc())
+    ).scalars().all()
+    return SavedTenderListOut(
+        client_id=client_id, saved=[_saved_out(r) for r in rows]
+    )
+
+
+@router.put(
+    "/saved/{tender_id}/workspace",
+    response_model=SavedTenderOut,
+    summary="Back up a saved tender's workspace (note + checklist)",
+)
+def put_workspace(tender_id: int, payload: WorkspaceIn, db: Session = Depends(get_db)):
+    user = _get_or_create_user(db, payload.client_id)
+    tender = db.get(Tender, tender_id)
+    if not tender:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={"code": "TENDER_NOT_FOUND", "message": "Tender not found"},
+        )
+    row = db.execute(
+        select(SavedTender).where(
+            SavedTender.user_id == user.id, SavedTender.tender_id == tender_id
+        )
+    ).scalar_one_or_none()
+    if not row:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail={
+                "code": "SAVED_TENDER_NOT_FOUND",
+                "message": "Save the tender before syncing its workspace.",
+            },
+        )
+
+    import json as _json
+
+    updates = payload.model_dump(exclude_unset=True, exclude={"client_id"})
+    if "note" in updates:
+        row.note = updates["note"] or None
+    if "checklist" in updates:
+        items = updates.get("checklist") or []
+        row.checklist_json = _json.dumps(items) if items else None
+    db.commit()
+    db.refresh(row)
+    return _saved_out(row)

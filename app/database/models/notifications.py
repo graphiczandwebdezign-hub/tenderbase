@@ -175,6 +175,12 @@ class SavedTender(Base):
         ForeignKey("tenders.id", ondelete="CASCADE"), nullable=False
     )
     reminders_enabled: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
+
+    # Bid workspace backup (Sprint 6): free-form note + checklist state,
+    # synced from the device so a reinstall/new device can restore them.
+    note: Mapped[Optional[str]] = mapped_column(Text)
+    checklist_json: Mapped[Optional[str]] = mapped_column(Text)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), server_default=func.now(), nullable=False
     )

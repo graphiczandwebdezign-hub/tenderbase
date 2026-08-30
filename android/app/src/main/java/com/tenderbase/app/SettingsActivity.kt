@@ -6,6 +6,7 @@ import android.os.Environment
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.tenderbase.app.databinding.ActivitySettingsBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -50,6 +51,8 @@ class SettingsActivity : AppCompatActivity() {
         }
         updateHiddenTendersStatus()
 
+        b.rowWorkspaceRestore.setOnClickListener { confirmWorkspaceRestore() }
+
         checkApiStatus()
     }
 
@@ -59,6 +62,39 @@ class SettingsActivity : AppCompatActivity() {
             getString(R.string.hidden_tenders_none)
         } else {
             getString(R.string.hidden_tenders_count, count)
+        }
+    }
+
+    private fun confirmWorkspaceRestore() {
+        MaterialAlertDialogBuilder(this)
+            .setTitle(getString(R.string.workspace_restore_title))
+            .setMessage(getString(R.string.workspace_restore_body))
+            .setPositiveButton(getString(R.string.workspace_restore_confirm)) { _, _ ->
+                restoreWorkspace()
+            }
+            .setNegativeButton(getString(R.string.cancel), null)
+            .show()
+    }
+
+    private fun restoreWorkspace() {
+        lifecycleScope.launch {
+            when (val restored = repo.restoreWorkspacesFromServer()) {
+                -1 -> Toast.makeText(
+                    this@SettingsActivity,
+                    R.string.workspace_restore_failed,
+                    Toast.LENGTH_LONG
+                ).show()
+                0 -> Toast.makeText(
+                    this@SettingsActivity,
+                    R.string.workspace_restore_none,
+                    Toast.LENGTH_SHORT
+                ).show()
+                else -> Toast.makeText(
+                    this@SettingsActivity,
+                    getString(R.string.workspace_restore_done, restored),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
         }
     }
 

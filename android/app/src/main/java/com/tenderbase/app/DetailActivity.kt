@@ -61,6 +61,10 @@ class DetailActivity : AppCompatActivity() {
     private var workspaceNote: String? = null
     private var workspaceChecklist: List<ChecklistItemEntity> = emptyList()
 
+    // Debounced server backup of the workspace (only for saved tenders).
+    private var workspaceSyncJob: Job? = null
+    private var lastPushedState: String? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         b = ActivityDetailBinding.inflate(layoutInflater)
@@ -90,12 +94,14 @@ class DetailActivity : AppCompatActivity() {
             repo.noteFlow(id).collectLatest { note ->
                 workspaceNote = note?.note
                 renderWorkspaceNote()
+                scheduleWorkspaceBackup()
             }
         }
         lifecycleScope.launch {
             repo.checklistFlow(id).collectLatest { items ->
                 workspaceChecklist = items
                 renderChecklist()
+                scheduleWorkspaceBackup()
             }
         }
         b.workspaceNote.setOnClickListener { showNoteDialog() }
@@ -129,6 +135,29 @@ class DetailActivity : AppCompatActivity() {
                 true
             }
             b.checklistContainer.addView(box)
+        }
+    }
+
+    /**
+     * Back the workspace up to the server (saved tenders only), debounced so a
+     * burst of checkbox taps produces one PUT. The Room data stays the source
+     * of truth; failures are silent and retried on the next change.
+     */
+    private fun scheduleWorkspaceBackup() {
+        if (!isSaved) return
+        val checklist = workspaceChecklist.map { it.label to it.isDone }
+        val state = (workspaceNote.orEmpty()) + "|" +
+            checklist.joinToString(";") { "${'$'}{it.first}=${'$'}{it.second}" }
+        if (state == lastPushedState) return
+        workspaceSyncJob?.cancel()
+        workspaceSyncJob = lifecycleScope.launch {
+            delay(800)
+            try {
+                repo.pushWorkspace(tenderId, workspaceNote, checklist)
+                lastPushedState = state
+            } catch (_: Exception) {
+                // Best-effort only.
+            }
         }
     }
 

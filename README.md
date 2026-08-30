@@ -230,6 +230,23 @@ GET  /health
 GET  /api/v1/health
 ```
 
+### Workspace backup & offline reliability — Sprint 6
+- `GET /api/v1/notifications/saved?client_id=…` — the caller's saved tenders
+  with their backed-up workspace (note + checklist).
+- `PUT /api/v1/notifications/saved/{id}/workspace` — backs up a saved
+  tender's bid workspace (absent fields unchanged, null/empty clears,
+  per-user isolation; 404 unless the tender is saved). Migration
+  `d4b8c3f7a9e2` adds `note`/`checklist_json` to `saved_tenders`.
+- Android: starring a tender also saves it server-side; workspace changes
+  push to the server (debounced, best-effort); Settings offers
+  "Restore workspace from server" for reinstall/new-device recovery.
+- Offline: saved-search creation is queued locally and drains automatically
+  once connectivity returns (409 duplicates drop out of the queue).
+- A periodic WorkManager job (12h, network-constrained) pre-caches the
+  discovery feed + closing-this-week tenders and posts local deadline
+  reminders for saved tenders closing within 48h — reminders work even
+  without FCM.
+
 ### Android bid workspace — Sprint 5
 The tender detail screen gains a **Bid workspace** card (local-only Room data,
 migrated in-app v1 → v2):

@@ -184,6 +184,81 @@ object ApiClient {
         }
     }
 
+    // ------------------------------------------------- workspace sync (S6)
+
+    data class SavedWorkspaceEntry(
+        val tenderId: Int,
+        val note: String?,
+        val checklist: List<Pair<String, Boolean>>
+    )
+
+    /** GET /api/v1/notifications/saved — saved tenders incl. workspace. */
+    suspend fun fetchSavedWorkspace(clientId: String): List<SavedWorkspaceEntry> =
+        withContext(Dispatchers.IO) {
+            val root = JSONObject(
+                get("$BASE_URL/api/v1/notifications/saved?client_id=${enc(clientId)}")
+            )
+            val arr = root.optJSONArray("saved") ?: org.json.JSONArray()
+            val out = ArrayList<SavedWorkspaceEntry>(arr.length())
+            for (i in 0 until arr.length()) {
+                val o = arr.optJSONObject(i) ?: continue
+                val items = ArrayList<Pair<String, Boolean>>()
+                o.optJSONArray("checklist")?.let { ca ->
+                    for (j in 0 until ca.length()) {
+                        val c = ca.optJSONObject(j) ?: continue
+                        items.add(c.optString("label") to c.optBoolean("done"))
+                    }
+                }
+                out.add(
+                    SavedWorkspaceEntry(
+                        tenderId = o.optInt("tender_id"),
+                        note = o.optString("note").ifEmpty { null },
+                        checklist = items
+                    )
+                )
+            }
+            out
+        }
+
+    /** PUT /api/v1/notifications/saved/{id}/workspace — back up the workspace. */
+    suspend fun putWorkspace(
+        clientId: String,
+        tenderId: Int,
+        note: String?,
+        checklist: List<Pair<String, Boolean>>?
+    ) {
+        withContext(Dispatchers.IO) {
+            val body = JSONObject().put("client_id", clientId)
+            if (note != null) body.put("note", note)
+            if (checklist != null) {
+                val arr = org.json.JSONArray()
+                for ((label, done) in checklist) {
+                    arr.put(JSONObject().put("label", label).put("done", done))
+                }
+                body.put("checklist", arr)
+            }
+            request(
+                "PUT",
+                "$BASE_URL/api/v1/notifications/saved/$tenderId/workspace",
+                body
+            )
+        }
+    }
+
+    /** POST /api/v1/notifications/saved — mark the tender saved server-side. */
+    suspend fun saveTenderOnServer(clientId: String, tenderId: Int) {
+        withContext(Dispatchers.IO) {
+            request(
+                "POST",
+                "$BASE_URL/api/v1/notifications/saved",
+                JSONObject()
+                    .put("client_id", clientId)
+                    .put("tender_id", tenderId)
+                    .put("reminders_enabled", true)
+            )
+        }
+    }
+
     /** POST /api/v1/notifications/register-device (for saved-search alerts). */
     suspend fun registerDevice(clientId: String, deviceToken: String) {
         withContext(Dispatchers.IO) {

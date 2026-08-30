@@ -376,8 +376,10 @@ class MainActivity : AppCompatActivity() {
                 android.widget.Toast.makeText(this@MainActivity, msg, android.widget.Toast.LENGTH_LONG)
                     .show()
             } catch (_: Exception) {
+                // Offline: queue the search; it syncs when connectivity returns.
+                repo.queueSavedSearch(name, payload.toString())
                 android.widget.Toast.makeText(
-                    this@MainActivity, R.string.save_search_failed, android.widget.Toast.LENGTH_LONG
+                    this@MainActivity, R.string.saved_search_queued, android.widget.Toast.LENGTH_LONG
                 ).show()
             }
         }
@@ -565,6 +567,8 @@ class MainActivity : AppCompatActivity() {
             try {
                 val facets = ApiClient.fetchFacets()
                 facetsJson = FilterBottomSheet.facetsToJson(facets)
+                // The network is up: drain any offline-queued saved searches.
+                repo.flushSavedSearchQueue()
             } catch (_: Exception) {
                 // Filters still open; option lists just stay empty until online.
             }
