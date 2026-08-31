@@ -12,6 +12,17 @@ object Changelog {
     /** Newest first. The first entry is the current release. */
     val releases: List<ReleaseNotes> = listOf(
         ReleaseNotes(
+            version = "1.2",
+            highlights = listOf(
+                "• Complete visual redesign — new brand identity, light & dark themes",
+                "• Bottom navigation: Home, Search, Saved, Alerts, More",
+                "• Feed shows results summary with active-filter chips and instant re-search",
+                "• Tender detail is now a bid workspace: deadlines, documents, checklist, notes",
+                "• Download and share documents straight from the tender",
+                "• Friendlier offline / error handling with retry everywhere"
+            )
+        ),
+        ReleaseNotes(
             version = "1.1",
             highlights = listOf(
                 "• Deadline command centre: closing-this-week and saved buckets at a glance",

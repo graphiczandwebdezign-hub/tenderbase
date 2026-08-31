@@ -1,6 +1,7 @@
 package com.tenderbase.app
 
 import android.app.Application
+import androidx.appcompat.app.AppCompatDelegate
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
 import androidx.work.ExistingPeriodicWorkPolicy
@@ -14,6 +15,16 @@ class TenderBaseApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Honor a chosen theme before the first activity renders (avoids a flash).
+        val mode = getSharedPreferences("tenderbase_prefs", MODE_PRIVATE)
+            .getString("theme_mode", null)
+        AppCompatDelegate.setDefaultNightMode(
+            when (mode) {
+                "light" -> AppCompatDelegate.MODE_NIGHT_NO
+                "dark" -> AppCompatDelegate.MODE_NIGHT_YES
+                else -> AppCompatDelegate.MODE_NIGHT_FOLLOW_SYSTEM
+            }
+        )
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)
             .build()

@@ -323,3 +323,72 @@ def test_empty_result_set_meta(client):
 
 def test_facets_requires_api_key(noauth_client):
     assert noauth_client.get(f"{API}/tenders/facets").status_code == 401
+
+
+# ------------------------------------------------------------ document filters
+
+def test_has_documents_and_document_type_filters(client, db):
+    """has_documents=true/false and document_type narrows the feed via EXISTS.
+
+    Supports the Android filter sheet's DOCUMENTS section without touching the
+    default behaviour of any other query.
+    """
+    from app.database.models import TenderDocument
+
+    with_docs = _insert(db, title="Road upgrade with bid docs")
+    db.add(
+        TenderDocument(
+            tender_id=with_docs.id,
+            document_type="Tender notice",
+            title="Invitation to bid",
+            url="https://example.test/notice.pdf",
+        )
+    )
+    db.add(
+        TenderDocument(
+            tender_id=with_docs.id,
+            document_type="Specification",
+            title="Scope of works",
+            url="https://example.test/spec.pdf",
+        )
+    )
+    _insert(db, title="No documents here")
+    db.commit()
+
+    with_only = client.get(f"{API}/tenders?has_documents=true").json()
+    titles = [t["title"] for t in with_only["data"]]
+    assert titles == ["Road upgrade with bid docs"]
+    assert with_only["pagination"]["total"] == 1
+
+    without_only = client.get(f"{API}/tenders?has_documents=false").json()
+    titles = [t["title"] for t in without_only["data"]]
+    assert titles == ["No documents here"]
+
+    notice = client.get(f"{API}/tenders?document_type=notice").json()
+    assert [t["title"] for t in notice["data"]] == ["Road upgrade with bid docs"]
+
+    spec = client.get(f"{API}/tenders?document_type=specification").json()
+    assert [t["title"] for t in spec["data"]] == ["Road upgrade with bid docs"]
+
+    none = client.get(f"{API}/tenders?document_type=zzz-unknown").json()
+    assert none["data"] == []
+
+
+def test_document_filters_combine_with_search(client, db):
+    """New params compose with existing search/sort/pagination params."""
+    from app.database.models import TenderDocument
+
+    hit = _insert(db, title="Catering services at hospital")
+    db.add(
+        TenderDocument(
+            tender_id=hit.id,
+            document_type="Addendum",
+            title="Addendum 1",
+            url="https://example.test/add1.pdf",
+        )
+    )
+    _insert(db, title="Catering services without docs")
+    db.commit()
+
+    body = client.get(f"{API}/tenders?search=catering&has_documents=true").json()
+    assert [t["title"] for t in body["data"]] == ["Catering services at hospital"]

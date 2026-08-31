@@ -84,4 +84,32 @@ interface TenderDao {
 
     @Query("SELECT COALESCE(MAX(position), -1) + 1 FROM checklist_items WHERE tenderId = :tenderId")
     suspend fun nextChecklistPosition(tenderId: Int): Int
+
+    @Query("UPDATE checklist_items SET label = :label WHERE id = :id")
+    suspend fun renameChecklistItem(id: Long, label: String)
+
+    @Query("UPDATE checklist_items SET position = :position WHERE id = :id")
+    suspend fun setChecklistPosition(id: Long, position: Int)
+
+    @Query("SELECT * FROM checklist_items WHERE tenderId = :tenderId ORDER BY position ASC, id ASC")
+    suspend fun checklistItems(tenderId: Int): List<ChecklistItemEntity>
+
+    /** Per-tender completion stats so the Saved list can show bid progress. */
+    @Query(
+        "SELECT tenderId AS tenderId, COUNT(*) AS total, " +
+            "SUM(CASE WHEN isDone THEN 1 ELSE 0 END) AS done " +
+            "FROM checklist_items GROUP BY tenderId"
+    )
+    fun checklistStatsFlow(): Flow<List<ChecklistStats>>
+
+    /** Tenders that have a workspace note (drives the saved-list note dot). */
+    @Query("SELECT tenderId FROM tender_notes")
+    fun notedTenderIdsFlow(): Flow<List<Int>>
 }
+
+/** Projection row: checklist totals for one tender. */
+data class ChecklistStats(
+    val tenderId: Int,
+    val total: Int,
+    val done: Int
+)

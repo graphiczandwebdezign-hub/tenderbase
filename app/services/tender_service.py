@@ -18,14 +18,14 @@ from __future__ import annotations
 from datetime import date, timedelta
 from typing import List, Optional, Sequence, Tuple
 
-from sqlalchemy import or_, select, func, case
+from sqlalchemy import or_, select, func, case, exists
 from sqlalchemy.orm import Session, selectinload
 from sqlalchemy.sql.elements import ColumnElement
 
 from app.core.config import settings
 from app.core import normalization as norm
 from app.core.timeutils import utcnow, ensure_utc
-from app.database.models import Tender, TenderStatus, TenderCategory
+from app.database.models import Tender, TenderDocument, TenderStatus, TenderCategory
 
 
 # Statuses considered "relevant / live" for the default feed.
@@ -112,6 +112,8 @@ class TenderService:
         closing_after: Optional[date] = None,
         advertised_after: Optional[date] = None,
         advertised_before: Optional[date] = None,
+        has_documents: Optional[bool] = None,
+        document_type: Optional[str] = None,
         active_only: bool = True,
         order: str = "newest",
     ) -> Tuple[List[Tender], int]:
@@ -186,6 +188,31 @@ class TenderService:
             conditions.append(Tender.advertised_date >= advertised_after)
         if advertised_before:
             conditions.append(Tender.advertised_date <= advertised_before)
+
+        # Document availability refinement (Android "with documents" filters).
+        if has_documents is True:
+            conditions.append(
+                exists(select(TenderDocument.id).where(TenderDocument.tender_id == Tender.id))
+            )
+        elif has_documents is False:
+            conditions.append(
+                ~exists(select(TenderDocument.id).where(TenderDocument.tender_id == Tender.id))
+            )
+        if document_type:
+            doc_type = document_type.strip().lower()
+            if not doc_type:
+                raise InvalidParameter("document_type must not be blank.")
+            conditions.append(
+                exists(
+                    select(TenderDocument.id).where(
+                        TenderDocument.tender_id == Tender.id,
+                        or_(
+                            func.lower(TenderDocument.document_type).like(f"%{doc_type}%"),
+                            func.lower(TenderDocument.title).like(f"%{doc_type}%"),
+                        ),
+                    )
+                )
+            )
 
         # "Closing soonest" must never surface already-closed tenders when the
         # caller did not explicitly ask for closed ones.

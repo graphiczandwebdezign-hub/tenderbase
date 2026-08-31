@@ -74,14 +74,44 @@ object DateUtils {
     }
 
     /** True when closing within `withinDays` (used for the urgency accent). */
-    fun isUrgent(closingAt: String?, closingDate: String?, withinDays: Int = 7): Boolean {
-        val u = urgency(closingAt, closingDate)
+    fun isUrgent(
+        closingAt: String?,
+        closingDate: String?,
+        withinDays: Int = 7,
+        deadlineState: String? = null
+    ): Boolean {
+        val u = urgency(closingAt, closingDate, deadlineState)
         return u == Urgency.URGENT || u == Urgency.TODAY
     }
 
     fun prettyDate(closingAt: String?, closingDate: String?): String {
         val d = parse(closingAt) ?: parseDate(closingDate) ?: return "—"
         return prettyDate(d)
+    }
+
+    /**
+     * Exact closing stamp combining relative labels' missing half:
+     * "2 Sep 2026 · 11:00" when the instant is known, else "2 Sep 2026".
+     */
+    fun dateTimeLabel(closingAt: String?, closingDate: String?): String {
+        val d = parse(closingAt) ?: parseDate(closingDate) ?: return "Date not listed"
+        val datePart = SimpleDateFormat("d MMM yyyy", Locale.getDefault()).format(d)
+        return if (closingAt != null) {
+            val time = SimpleDateFormat("HH:mm", Locale.getDefault()).format(d)
+            "$datePart · $time"
+        } else datePart
+    }
+
+    /** "11:00" for the deadline card; null when no exact time is published. */
+    fun closingTimeLabel(closingAt: String?): String? {
+        val d = parse(closingAt) ?: return null
+        return SimpleDateFormat("HH:mm", Locale.getDefault()).format(d)
+    }
+
+    /** Weekday for the deadline card: "Wednesday". */
+    fun weekdayLabel(closingAt: String?, closingDate: String?): String? {
+        val d = parse(closingAt) ?: parseDate(closingDate) ?: return null
+        return SimpleDateFormat("EEEE", Locale.getDefault()).format(d)
     }
 
     /** The closing instant as epoch milliseconds, or null when unknown. */
