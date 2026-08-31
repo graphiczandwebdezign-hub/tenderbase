@@ -82,8 +82,6 @@ import com.tenderbase.app.ui.components.TbFilterChip
 import com.tenderbase.app.ui.components.TbNotificationRow
 import com.tenderbase.app.ui.components.TbPrimaryButton
 import com.tenderbase.app.ui.components.TbSectionHeader
-import com.tenderbase.app.ui.components.TbSettingsGroup
-import com.tenderbase.app.ui.components.TbSettingsRow
 import com.tenderbase.app.ui.components.TbSkeletonCard
 import com.tenderbase.app.ui.components.TbTopBar
 import com.tenderbase.app.ui.components.TenderCard
@@ -108,7 +106,10 @@ fun DeadlinesScreen(
     openAlerts: () -> Unit,
 ) {
     val vm: DeadlinesViewModel = androidx.lifecycle.viewmodel.compose.viewModel()
-    val (closingSoon, loading, errorKind) by vm.closingSoon.collectAsStateWithLifecycle()
+    val dl by vm.closingSoon.collectAsStateWithLifecycle()
+    val closingSoon = dl.first
+    val loading = dl.second
+    val errorKind = dl.third
     val showSavedIds by vm.savedIds.collectAsStateWithLifecycle()
     val saved by vm.savedTenders.collectAsStateWithLifecycle()
     val alerts by vm.alerts.collectAsStateWithLifecycle()
@@ -243,6 +244,7 @@ fun DownloadsScreen(
     val files by vm.files.collectAsStateWithLifecycle()
     var toDelete by remember { mutableStateOf<java.io.File?>(null) }
     val context = androidx.compose.ui.platform.LocalContext.current
+    val snDeleted = stringResource(R.string.delete_done)
 
     LaunchedEffect(Unit) { vm.refresh() }
 
@@ -310,7 +312,7 @@ fun DownloadsScreen(
                                 )
                             }
                             IconButton(onClick = {
-                                openDocumentWith(context, row.file) {
+                                openDownloadedFile(context, row.file) {
                                     snack(context.getString(R.string.open_failed))
                                 }
                             }) {
@@ -351,7 +353,7 @@ fun DownloadsScreen(
                 TextButton(onClick = {
                     vm.delete(f)
                     toDelete = null
-                    snack(stringResource(R.string.delete_done))
+                    snack(snDeleted)
                 }) { Text(stringResource(R.string.delete)) }
             },
             dismissButton = {

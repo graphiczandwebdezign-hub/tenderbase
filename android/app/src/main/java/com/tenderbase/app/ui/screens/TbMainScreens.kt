@@ -25,7 +25,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Category
-import androidx.compose.material.icons.filled.CheckDone
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
@@ -86,7 +86,6 @@ import com.tenderbase.app.ui.TbNav
 import com.tenderbase.app.ui.TbTab
 import com.tenderbase.app.ui.theme.TbDimens
 import com.tenderbase.app.ui.vm.DiscoveryViewModel
-import com.tenderbase.app.ui.vm.NotificationsUiRow
 import com.tenderbase.app.ui.vm.NotificationsViewModel
 import com.tenderbase.app.ui.vm.SavedRow
 import com.tenderbase.app.ui.vm.SavedViewModel
@@ -406,7 +405,7 @@ fun SavedScreen(
 
         if (shown.isEmpty() && rows.isEmpty()) {
             TbEmptyState(
-                icon = Icons.Filled.CheckDone,
+                icon = Icons.Filled.CheckCircle,
                 title = stringResource(R.string.empty_saved_title),
                 body = stringResource(R.string.empty_saved_body),
                 primaryLabel = stringResource(R.string.find_tenders),

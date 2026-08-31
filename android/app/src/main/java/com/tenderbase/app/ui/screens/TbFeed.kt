@@ -21,7 +21,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowDown
+import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.BookmarkAdded
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
@@ -143,6 +143,7 @@ fun DiscoveryFeed(
         state = ptrState,
         modifier = modifier.fillMaxWidth(),
     ) {
+        val activeChips = activeFilterChips(filters, vm)
         LazyColumn(state = listState, modifier = Modifier.fillMaxWidth()) {
 
             if (showSearchField && onSearchTap != null) {
@@ -196,7 +197,6 @@ fun DiscoveryFeed(
                 }
             }
 
-            val activeChips = activeFilterChips(filters, vm)
             if (activeChips.isNotEmpty()) {
                 item(key = "active-chips") {
                     TbChipFlow(modifier = Modifier.padding(horizontal = TbDimens.screenHMargin)) {
@@ -449,7 +449,7 @@ private fun FeedSummaryRow(
                     modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
                 ) {
                     Icon(
-                        Icons.AutoMirrored.Filled.Sort,
+                        Icons.Filled.Sort,
                         contentDescription = null,
                         modifier = Modifier.size(16.dp),
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,

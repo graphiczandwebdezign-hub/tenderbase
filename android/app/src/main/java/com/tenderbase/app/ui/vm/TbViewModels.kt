@@ -808,6 +808,8 @@ class NotificationsViewModel(app: Application) : AndroidViewModel(app) {
 
 class DeadlinesViewModel(app: Application) : AndroidViewModel(app) {
 
+    private companion object { const val TAG = "TenderBase" }
+
     private val repo = TenderRepository(app)
 
     private val _closingSoon = MutableStateFlow(
@@ -857,6 +859,8 @@ class DeadlinesViewModel(app: Application) : AndroidViewModel(app) {
 // ---------------------------------------------------------- saved searches
 
 class SavedSearchesViewModel(app: Application) : AndroidViewModel(app) {
+
+    private companion object { const val TAG = "TenderBase" }
 
     private val repo = TenderRepository(app)
 

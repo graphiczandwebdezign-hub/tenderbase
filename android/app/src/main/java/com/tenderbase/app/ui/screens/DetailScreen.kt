@@ -59,6 +59,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.tenderbase.app.BidPack
 import com.tenderbase.app.DateUtils
 import com.tenderbase.app.R
+import kotlinx.coroutines.launch
 import com.tenderbase.app.TenderActions
 import com.tenderbase.app.TenderTaxonomy
 import com.tenderbase.app.ui.components.DeadlineHeroCard
@@ -101,7 +102,9 @@ fun DetailScreen(
     val checklist by vm.checklist.collectAsStateWithLifecycle()
 
     val context = LocalContext.current
+    val bidSubject = stringResource(R.string.bid_pack_subject, state.tender?.title ?: "")
     val snackbar = remember { SnackbarHostState() }
+    val scope = androidx.compose.runtime.rememberCoroutineScope()
     var showNoteDialog by rememberSaveable { mutableStateOf(false) }
     var showAddItem by rememberSaveable { mutableStateOf(false) }
     var editItem by remember { mutableStateOf<com.tenderbase.app.ChecklistItemEntity?>(null) }
@@ -252,7 +255,7 @@ fun DetailScreen(
                                 text = stringResource(R.string.add_to_calendar),
                                 onClick = {
                                     addDeadlineToCalendar(context, t) { msg ->
-                                        snackbar.showSnackbar(msg)
+                                        scope.launch { snackbar.showSnackbar(msg) }
                                     }
                                 },
                                 leadingIcon = Icons.Filled.Event,
@@ -365,7 +368,7 @@ fun DetailScreen(
                         )
                     }
                 } else {
-                    val groups = remember(t) { BidPack.groupDocuments(t.documents) }
+                    val groups = BidPack.groupDocuments(t.documents)
                     groups.forEach { group ->
                         item(key = "docgrp-${group.title}") {
                             Text(
@@ -391,9 +394,11 @@ fun DetailScreen(
                                     if (st is DocDownloadState.Done &&
                                         !openDocument(context, st.file)
                                     ) {
-                                        snackbar.showSnackbar(
-                                            context.getString(R.string.open_failed)
-                                        )
+                                        scope.launch {
+                                            snackbar.showSnackbar(
+                                                context.getString(R.string.open_failed)
+                                            )
+                                        }
                                     }
                                 },
                                 onOpenSource = {
@@ -422,11 +427,7 @@ fun DetailScreen(
                         done = checklist.count { it.isDone },
                         total = checklist.size,
                         onShareBidPack = {
-                            sharePlainText(
-                                context,
-                                stringResource(R.string.bid_pack_subject, t.title),
-                                vm.bidPackText(),
-                            )
+                            sharePlainText(context, bidSubject, vm.bidPackText())
                         },
                     )
                 }
@@ -547,7 +548,7 @@ private fun ExpandableText(text: String, maxLines: Int) {
             maxLines = if (expanded) Int.MAX_VALUE else maxLines,
             overflow = TextOverflow.Ellipsis,
         )
-        if (text.lineCount() > maxLines * 8) { // cheap heuristic; hide the toggle for short bodies
+        if (text.length > maxLines * 90) { // cheap heuristic; hide the toggle for short bodies
             TextButton(
                 onClick = { expanded = !expanded },
                 contentPadding = androidx.compose.foundation.layout.PaddingValues(
