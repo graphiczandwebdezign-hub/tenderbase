@@ -230,7 +230,6 @@
     <string name="section_organisation">Procuring organisation</string>
     <string name="section_location">Location</string>
     <string name="section_dates">Important dates</string>
-    <string name="section_source">Source</string>
     <string name="deadline_overline">Closing date</string>
     <string name="read_more">Read more</string>
     <string name="read_less">Show less</string>
@@ -281,7 +280,6 @@
     <string name="bid_pack_subject">Bid pack: %1$s</string>
     <string name="calendar_deadline_title">Tender deadline: %1$s</string>
     <string name="feed_updated">Updated %1$s</string>
-    <plurals name="urgent_saved_banner">
         <item quantity="one">%d saved tender closes within 48 h</item>
         <item quantity="other">%d saved tenders close within 48 h</item>
     </plurals>
