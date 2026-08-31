@@ -9,7 +9,47 @@ import org.json.JSONObject
 class TenderRepository(context: Context) {
     private val db = AppDatabase.getInstance(context)
     private val dao = db.tenderDao()
-    private val prefs: SharedPreferences = context.getSharedPreferences("tenderbase_prefs", Context.MODE_PRIVATE)
+    private val prefs: SharedPreferences =
+        context.applicationContext.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+
+    // ------------------------------------------- crash-proof typed reads
+    // A key written by any app version with a different type crashes every
+    // later typed read of the same key (ClassCastException). All debug builds
+    // share one app id, so recover by resetting the corrupt key to default
+    // instead of dying (audit finding H3).
+
+    private fun safeStringSet(key: String): Set<String> = try {
+        prefs.getStringSet(key, emptySet()) ?: emptySet()
+    } catch (e: ClassCastException) {
+        resetCorruptKey(key, e)
+        emptySet()
+    }
+
+    private fun safeString(key: String): String? = try {
+        prefs.getString(key, null)
+    } catch (e: ClassCastException) {
+        resetCorruptKey(key, e)
+        null
+    }
+
+    private fun safeLong(key: String, default: Long = 0L): Long = try {
+        prefs.getLong(key, default)
+    } catch (e: ClassCastException) {
+        resetCorruptKey(key, e)
+        default
+    }
+
+    private fun safeBoolean(key: String, default: Boolean = false): Boolean = try {
+        prefs.getBoolean(key, default)
+    } catch (e: ClassCastException) {
+        resetCorruptKey(key, e)
+        default
+    }
+
+    private fun resetCorruptKey(key: String, e: ClassCastException) {
+        CrashReporter.breadcrumb("prefs: reset corrupt key '$key' (${e.javaClass.simpleName})")
+        prefs.edit().remove(key).apply()
+    }
 
     val savedTendersFlow: Flow<List<SavedTenderEntity>> = dao.getSavedTendersFlow()
     val notificationHistoryFlow: Flow<List<NotificationEntity>> = dao.getNotificationsFlow()
@@ -43,31 +83,38 @@ class TenderRepository(context: Context) {
     suspend fun markAllNotificationsRead() = dao.markAllNotificationsRead()
 
     // Preferences: Categories and Provinces
-    fun getSelectedCategories(): Set<String> {
-        return prefs.getStringSet("selected_categories", emptySet()) ?: emptySet()
-    }
+    fun getSelectedCategories(): Set<String> = safeStringSet("selected_categories")
 
     fun setSelectedCategories(categories: Set<String>) {
         prefs.edit().putStringSet("selected_categories", categories).apply()
     }
 
-    fun getSelectedProvinces(): Set<String> {
-        return prefs.getStringSet("selected_provinces", emptySet()) ?: emptySet()
-    }
+    fun getSelectedProvinces(): Set<String> = safeStringSet("selected_provinces")
 
     fun setSelectedProvinces(provinces: Set<String>) {
         prefs.edit().putStringSet("selected_provinces", provinces).apply()
     }
 
-    fun isOnboarded(): Boolean = prefs.getBoolean("is_onboarded", false)
+    fun isOnboarded(): Boolean = safeBoolean("is_onboarded", false)
     fun setOnboarded(onboarded: Boolean) = prefs.edit().putBoolean("is_onboarded", onboarded).apply()
+
+    /**
+     * Shared "have we already asked for notification permission" flag
+     * (audit finding H2): onboarding and MainActivity used to ask
+     * independently, producing back-to-back system prompts on first launch.
+     * One flag, one owner of the decision to ask.
+     */
+    fun notifPermissionAsked(): Boolean = safeBoolean("notif_permission_asked", false)
+    fun setNotifPermissionAsked() {
+        prefs.edit().putBoolean("notif_permission_asked", true).apply()
+    }
 
     /**
      * Stable per-install id (created on first use). Identifies this install to
      * the backend for saved searches and push notifications.
      */
     fun clientId(): String {
-        var id = prefs.getString("install_id", null)
+        var id = safeString("install_id")
         if (id == null) {
             id = java.util.UUID.randomUUID().toString()
             prefs.edit().putString("install_id", id).apply()
@@ -89,8 +136,7 @@ class TenderRepository(context: Context) {
     // Stored locally (never sent to the server — they affect no one else).
 
     fun hiddenTenderIds(): Set<Int> =
-        prefs.getStringSet("hidden_tender_ids", emptySet())?.mapNotNull { it.toIntOrNull() }?.toSet()
-            ?: emptySet()
+        safeStringSet("hidden_tender_ids").mapNotNull { it.toIntOrNull() }.toSet()
 
     fun hideTender(id: Int) {
         prefs.edit().putStringSet(
@@ -105,24 +151,23 @@ class TenderRepository(context: Context) {
 
     // Local deadline reminders (Sprint 6): tenders already reminded offline.
     fun remindedTenderIds(): Set<Int> =
-        prefs.getStringSet("reminded_tender_ids", emptySet())
-            ?.mapNotNull { it.toIntOrNull() }?.toSet() ?: emptySet()
+        safeStringSet("reminded_tender_ids").mapNotNull { it.toIntOrNull() }.toSet()
 
     // -------------------------------------------------- recent searches (1.2)
 
     fun recentSearches(): List<String> =
-        RecentSearches.decode(prefs.getString("recent_searches", null))
+        RecentSearches.decode(safeString("recent_searches"))
 
     fun addRecentSearch(query: String) {
         if (query.isBlank()) return
         prefs.edit()
-            .putString("recent_searches", RecentSearches.add(prefs.getString("recent_searches", null), query))
+            .putString("recent_searches", RecentSearches.add(safeString("recent_searches"), query))
             .apply()
     }
 
     fun removeRecentSearch(query: String) {
         prefs.edit()
-            .putString("recent_searches", RecentSearches.remove(prefs.getString("recent_searches", null), query))
+            .putString("recent_searches", RecentSearches.remove(safeString("recent_searches"), query))
             .apply()
     }
 
@@ -133,7 +178,7 @@ class TenderRepository(context: Context) {
     // ------------------------------------------------ last feed update (1.2)
 
     /** Timestamp of the last successful live fetch ("Updated 12 min ago"). */
-    fun lastFeedUpdate(): Long = prefs.getLong("last_feed_update", 0L)
+    fun lastFeedUpdate(): Long = safeLong("last_feed_update", 0L)
 
     fun setLastFeedUpdate(ts: Long) {
         prefs.edit().putLong("last_feed_update", ts).apply()
@@ -264,7 +309,7 @@ class TenderRepository(context: Context) {
     // --------------------------------------- offline saved-search queue (S6)
 
     fun queueSavedSearch(name: String, payloadJson: String) {
-        val current = prefs.getString("pending_saved_searches", null)
+        val current = safeString("pending_saved_searches")
         prefs.edit()
             .putString("pending_saved_searches", SearchQueue.add(current, name, payloadJson))
             .apply()
@@ -278,7 +323,7 @@ class TenderRepository(context: Context) {
     suspend fun flushSavedSearchQueue(): Int {
         var synced = 0
         while (true) {
-            val json = prefs.getString("pending_saved_searches", null) ?: break
+            val json = safeString("pending_saved_searches") ?: break
             val entries = SearchQueue.decode(json)
             if (entries.isEmpty()) break
             val entry = entries.first()
@@ -353,5 +398,10 @@ class TenderRepository(context: Context) {
                 documents = emptyList()
             )
         }
+    }
+
+    companion object {
+        /** Shared preferences file for the whole app (also read by MainActivity). */
+        const val PREFS_NAME = "tenderbase_prefs"
     }
 }

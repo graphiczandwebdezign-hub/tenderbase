@@ -34,12 +34,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,8 +44,11 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.tenderbase.app.ClickGuard
+import com.tenderbase.app.CrashReporter
+import com.tenderbase.app.OnboardingLogic
 import com.tenderbase.app.R
-import com.tenderbase.app.TenderRepository
 import com.tenderbase.app.TenderTaxonomy
 import com.tenderbase.app.ui.components.TbBrandMark
 import com.tenderbase.app.ui.components.TbChipFlow
@@ -56,26 +56,36 @@ import com.tenderbase.app.ui.components.TbFilterChip
 import com.tenderbase.app.ui.components.TbPrimaryButton
 import com.tenderbase.app.ui.components.TbSecondaryButton
 import com.tenderbase.app.ui.theme.TbDimens
+import com.tenderbase.app.ui.vm.OnboardingViewModel
 import kotlinx.coroutines.launch
 
 /**
  * First-launch flow (spec §14): discover → choose categories/provinces →
  * save → deadline alerts. No account required — TenderBase works offline-first
  * and the backend needs only the install id.
+ *
+ * Sprint 0+1: the screen is stateless — selections live in
+ * [OnboardingViewModel] (application context, single write on exit) and every
+ * step/tap leaves a [CrashReporter] breadcrumb so a failure here can never be
+ * invisible again. Page advances are clamped and double-tap guarded.
  */
 @Composable
 fun OnboardingScreen(
+    vm: OnboardingViewModel,
     onFinish: () -> Unit,
     onRequestNotifications: () -> Unit,
 ) {
-    val context = androidx.compose.ui.platform.LocalContext.current
-    val repo = remember(context) { TenderRepository(context) }
-    val pageCount = 4
+    val pageCount = vm.pageCount
     val pagerState = rememberPagerState(initialPage = 0, pageCount = { pageCount })
     val scope = rememberCoroutineScope()
 
-    var categories by rememberSaveable { mutableStateOf(repo.getSelectedCategories().sorted()) }
-    var provinces by rememberSaveable { mutableStateOf(repo.getSelectedProvinces().sorted()) }
+    val categories by vm.categories.collectAsStateWithLifecycle()
+    val provinces by vm.provinces.collectAsStateWithLifecycle()
+
+    // Breadcrumb trail of exactly where the user was (Sprint 0 diagnostics).
+    LaunchedEffect(pagerState.currentPage) {
+        CrashReporter.breadcrumb("ob: page ${pagerState.currentPage + 1}/$pageCount")
+    }
 
     Column(
         Modifier
@@ -101,11 +111,7 @@ fun OnboardingScreen(
             Spacer(Modifier.weight(1f))
             if (pagerState.currentPage < pageCount - 1) {
                 TextButton(
-                    onClick = {
-                        repo.setSelectedCategories(categories.toSet())
-                        repo.setSelectedProvinces(provinces.toSet())
-                        onFinish()
-                    },
+                    onClick = onFinish,
                     contentPadding = PaddingValues(horizontal = 8.dp, vertical = 4.dp),
                 ) {
                     Text(stringResource(R.string.ob_skip))
@@ -126,20 +132,14 @@ fun OnboardingScreen(
                     body = stringResource(R.string.ob_cat_body),
                     options = TenderTaxonomy.CATEGORIES,
                     selected = categories,
-                    onToggle = { name ->
-                        categories = if (name in categories) categories - name
-                        else categories + name
-                    },
+                    onToggle = vm::toggleCategory,
                 )
                 2 -> ObPicker(
                     title = stringResource(R.string.ob_prov_title),
                     body = stringResource(R.string.ob_prov_body),
                     options = TenderTaxonomy.PROVINCES,
                     selected = provinces,
-                    onToggle = { name ->
-                        provinces = if (name in provinces) provinces - name
-                        else provinces + name
-                    },
+                    onToggle = vm::toggleProvince,
                 )
                 else -> ObNotifications()
             }
@@ -175,42 +175,33 @@ fun OnboardingScreen(
                 .padding(vertical = TbDimens.spaceLg),
         ) {
             if (pagerState.currentPage == 1) {
-                TextButton(onClick = { categories = TenderTaxonomy.CATEGORIES }) {
+                TextButton(onClick = { vm.selectAllCategories() }) {
                     Text(stringResource(R.string.pref_select_all))
                 }
             }
             if (pagerState.currentPage == 2) {
-                TextButton(onClick = { provinces = TenderTaxonomy.PROVINCES }) {
+                TextButton(onClick = { vm.selectAllProvinces() }) {
                     Text(stringResource(R.string.pref_select_all))
                 }
             }
             Spacer(Modifier.weight(1f))
             when (pagerState.currentPage) {
-                in 0..1 -> TbPrimaryButton(
+                in 0..2 -> TbPrimaryButton(
                     text = stringResource(R.string.ob_continue),
                     onClick = {
-                        if (pagerState.currentPage == 0) {
-                            repo.setSelectedCategories(categories.toSet())
-                        }
-                        scope.launch { pagerState.animateScrollToPage(pagerState.currentPage + 1) }
-                    },
-                )
-                2 -> TbPrimaryButton(
-                    text = stringResource(R.string.ob_continue),
-                    onClick = {
-                        repo.setSelectedCategories(categories.toSet())
-                        repo.setSelectedProvinces(provinces.toSet())
-                        scope.launch { pagerState.animateScrollToPage(3) }
+                        if (!ClickGuard.tryClick()) return@TbPrimaryButton
+                        val current = pagerState.currentPage
+                        // Clamped: the target can never escape the page range,
+                        // even if a late frame reports a stale currentPage.
+                        val target = (current + 1).coerceAtMost(pageCount - 1)
+                        CrashReporter.breadcrumb("ob: continue ${current + 1}→${target + 1}")
+                        scope.launch { pagerState.animateScrollToPage(target) }
                     },
                 )
                 else -> Row(horizontalArrangement = Arrangement.spacedBy(TbDimens.spaceSm)) {
                     TbSecondaryButton(
                         text = stringResource(R.string.ob_notif_skip),
-                        onClick = {
-                            repo.setSelectedCategories(categories.toSet())
-                            repo.setSelectedProvinces(provinces.toSet())
-                            onFinish()
-                        },
+                        onClick = onFinish,
                     )
                     TbPrimaryButton(
                         text = stringResource(R.string.ob_notif_enable),
@@ -304,7 +295,7 @@ private fun ObPicker(
             options.forEach { name ->
                 TbFilterChip(
                     label = TenderTaxonomy.displayName(name),
-                    selected = selected.isEmpty() || name in selected,
+                    selected = OnboardingLogic.isChipSelected(selected, name),
                     onClick = { onToggle(name) },
                 )
             }

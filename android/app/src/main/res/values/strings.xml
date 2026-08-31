@@ -365,6 +365,15 @@
     <string name="downloads_cleared_n">%1$d documents cleared</string>
     <string name="deadlines_empty_body">Save a tender and its deadline will show up here with countdowns.</string>
 
+    <!-- Support / diagnostics (Sprint 0) -->
+    <string name="settings_support">Support</string>
+    <string name="diagnostics_row_title">Share diagnostics</string>
+    <string name="diagnostics_row_desc">Crash and device info that helps us fix issues — nothing personal, nothing sent until you share it</string>
+    <string name="diagnostics_last_crash">Last crash: %1$s — tap to share the report</string>
+    <string name="diagnostics_healthy">No crashes recorded — tap to share device info if something feels wrong</string>
+    <string name="diagnostics_share_subject">TenderBase diagnostics</string>
+    <string name="diagnostics_share_failed">No app available to share the diagnostics</string>
+
     <!-- Errors -->
     <string name="error_offline_title">You\'re offline</string>
     <string name="error_offline_body">Check your connection and try again.</string>

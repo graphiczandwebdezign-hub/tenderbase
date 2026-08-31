@@ -10,7 +10,6 @@
 -renamesourcefileattribute SourceFile
 
 # Entry points the manifest/OS instantiate by name.
--keep class com.tenderbase.app.TenderMessagingService { *; }
 -keep class com.tenderbase.app.TenderBaseApp { *; }
 
 # Room entities are referenced from generated implementation classes; keep

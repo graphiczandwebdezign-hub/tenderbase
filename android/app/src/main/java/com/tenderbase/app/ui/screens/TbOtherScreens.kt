@@ -25,6 +25,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.AlternateEmail
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Description
@@ -37,6 +38,7 @@ import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Restore
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -66,6 +68,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.tenderbase.app.ApiClient
+import com.tenderbase.app.BuildConfig
+import com.tenderbase.app.CrashReporter
 import com.tenderbase.app.Dashboard
 import com.tenderbase.app.DateUtils
 import com.tenderbase.app.R
@@ -697,6 +701,38 @@ fun SettingsScreen(
                 }
             }
 
+            // -------------------------------------------- Support (Sprint 0)
+            item { TbSectionHeader(label = stringResource(R.string.settings_support)) }
+            item {
+                val crashAt = CrashReporter.latestReportTime(context)
+                TbSettingsGroup {
+                    TbSettingsRow(
+                        icon = Icons.Filled.BugReport,
+                        title = stringResource(R.string.diagnostics_row_title),
+                        subtitle = if (crashAt != null) {
+                            stringResource(
+                                R.string.diagnostics_last_crash,
+                                RelativeTime.label(System.currentTimeMillis(), crashAt),
+                            )
+                        } else stringResource(R.string.diagnostics_healthy),
+                        onClick = { shareDiagnostics(context) { snack(it) } },
+                        trailing = { /* no chevron: this is an action, not a destination */ },
+                    )
+                    if (BuildConfig.DEBUG) {
+                        TbSettingsRow(
+                            icon = Icons.Filled.Warning,
+                            title = "Trigger test crash (debug only)",
+                            subtitle = "Verifies the on-device crash reporter end-to-end",
+                            onClick = {
+                                throw RuntimeException(
+                                    "TenderBase diagnostics self-test crash (debug build)"
+                                )
+                            },
+                        )
+                    }
+                }
+            }
+
             item {
                 val version = remember(context) {
                     runCatching {
@@ -884,4 +920,31 @@ private fun openNotificationSettings(context: android.content.Context) {
             .setData(android.net.Uri.fromParts("package", context.packageName, null))
     }
     runCatching { context.startActivity(intent) }
+}
+
+/**
+ * Settings → Support: hand the user their own diagnostics bundle (app/device
+ * facts + the latest crash report when one exists) via the standard share
+ * sheet. Nothing is uploaded automatically — the user picks where it goes.
+ */
+private fun shareDiagnostics(context: android.content.Context, onFail: (String) -> Unit) {
+    CrashReporter.breadcrumb("settings: share diagnostics tapped")
+    val body = CrashReporter.diagnosticsText(context)
+    val intent = android.content.Intent(android.content.Intent.ACTION_SEND).apply {
+        type = "text/plain"
+        putExtra(
+            android.content.Intent.EXTRA_SUBJECT,
+            context.getString(R.string.diagnostics_share_subject),
+        )
+        putExtra(android.content.Intent.EXTRA_TEXT, body)
+    }
+    val launched = runCatching {
+        context.startActivity(
+            android.content.Intent.createChooser(
+                intent,
+                context.getString(R.string.diagnostics_share_subject),
+            )
+        )
+    }.isSuccess
+    if (!launched) onFail(context.getString(R.string.diagnostics_share_failed))
 }

@@ -73,8 +73,6 @@ class MainActivity : AppCompatActivity() {
         registerForActivityResult(ActivityResultContracts.RequestPermission()) { /* observed via prefs */ }
 
     companion object {
-        private const val PREFS = "tenderbase_prefs"
-
         /** Intent extra: a saved-search filters JSON to apply on open. */
         const val EXTRA_APPLY_FILTERS = "apply_filters_json"
         /** Intent extra: a named discovery preset ("closing_week"). */
@@ -93,6 +91,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+        CrashReporter.breadcrumb("main: onCreate (recreated=${savedInstanceState != null})")
 
         val consumingIntentExtras = savedInstanceState == null
         handleIntent(intent, consuming = consumingIntentExtras)
@@ -155,15 +154,20 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /** Ask for notification permission once (Android 13+). */
+    /**
+     * Ask for notification permission once (Android 13+). The "asked" flag is
+     * owned by [TenderRepository] and is also set by onboarding's own prompt,
+     * so the user is never greeted with two system dialogs back to back
+     * (audit finding H2).
+     */
     private fun maybeRequestNotificationPermission() {
         if (Build.VERSION.SDK_INT < 33) return
-        val prefs = getSharedPreferences(PREFS, MODE_PRIVATE)
-        if (prefs.getBoolean("notif_permission_asked", false)) return
+        val repo = TenderRepository(applicationContext)
+        if (repo.notifPermissionAsked()) return
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS)
             == PackageManager.PERMISSION_GRANTED
         ) return
-        prefs.edit().putBoolean("notif_permission_asked", true).apply()
+        repo.setNotifPermissionAsked()
         notifPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 }

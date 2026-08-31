@@ -11,7 +11,13 @@ class ChangelogTest {
 
     @Test
     fun `latest version is the newest release`() {
-        assertEquals("1.2", Changelog.latestVersion())
+        assertEquals("1.2.1", Changelog.latestVersion())
+    }
+
+    @Test
+    fun `shows on patch update and has notes for it`() {
+        assertTrue(Changelog.shouldShow("1.2.1", "1.2"))
+        assertEquals("1.2.1", Changelog.notesFor("1.2.1")?.version)
     }
 
     @Test

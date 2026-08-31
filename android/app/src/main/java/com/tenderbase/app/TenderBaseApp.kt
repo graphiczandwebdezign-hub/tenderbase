@@ -1,6 +1,7 @@
 package com.tenderbase.app
 
 import android.app.Application
+import android.os.StrictMode
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.work.BackoffPolicy
 import androidx.work.Constraints
@@ -10,13 +11,19 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import java.util.concurrent.TimeUnit
 
-/** App entry: schedules the periodic pre-cache/deadline-reminder worker. */
+/** App entry: crash capture first, periodic pre-cache/reminder worker second. */
 class TenderBaseApp : Application() {
 
     override fun onCreate() {
         super.onCreate()
+        // Sprint 0 (audit C2): capture every fatal crash to on-device storage
+        // BEFORE anything else runs — the handler must exist before any code
+        // that could throw.
+        CrashReporter.install(this)
+        installStrictMode()
+
         // Honor a chosen theme before the first activity renders (avoids a flash).
-        val mode = getSharedPreferences("tenderbase_prefs", MODE_PRIVATE)
+        val mode = getSharedPreferences(TenderRepository.PREFS_NAME, MODE_PRIVATE)
             .getString("theme_mode", null)
         AppCompatDelegate.setDefaultNightMode(
             when (mode) {
@@ -36,6 +43,27 @@ class TenderBaseApp : Application() {
             PrecacheWorker.UNIQUE_WORK_NAME,
             ExistingPeriodicWorkPolicy.KEEP,
             request
+        )
+    }
+
+    /**
+     * Debug builds surface disk/network-on-main and lifecycle violations in
+     * logcat (log-only — never takes the app down, so instrumented tests and
+     * daily dogfooding stay green while violations become visible).
+     */
+    private fun installStrictMode() {
+        if (!BuildConfig.DEBUG) return
+        StrictMode.setThreadPolicy(
+            StrictMode.ThreadPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build()
+        )
+        StrictMode.setVmPolicy(
+            StrictMode.VmPolicy.Builder()
+                .detectAll()
+                .penaltyLog()
+                .build()
         )
     }
 }

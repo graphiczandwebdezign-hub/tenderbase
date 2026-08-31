@@ -12,6 +12,15 @@ object Changelog {
     /** Newest first. The first entry is the current release. */
     val releases: List<ReleaseNotes> = listOf(
         ReleaseNotes(
+            version = "1.2.1",
+            highlights = listOf(
+                "• Fixed a startup crash that could end onboarding and drop you back to the home screen",
+                "• New: Settings → Share diagnostics — sends us a crash report when something goes wrong",
+                "• Onboarding is sturdier: preferences save once, taps are double-tap safe",
+                "• Notification permission is asked once, not twice"
+            )
+        ),
+        ReleaseNotes(
             version = "1.2",
             highlights = listOf(
                 "• Complete visual redesign — new brand identity, light & dark themes",
