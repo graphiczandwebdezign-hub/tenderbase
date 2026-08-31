@@ -192,7 +192,6 @@
     <string name="quick_saved">Saved</string>
     <string name="quick_with_docs">With documents</string>
     <string name="offline_banner">Showing your offline copy — pull to refresh when connected</string>
-    <string name="urgent_saved_banner">Saved tenders closing within 48 hours</string>
     <string name="urgent_saved_action">Review</string>
 
     <plurals name="opportunities_count">
@@ -280,6 +279,7 @@
     <string name="bid_pack_subject">Bid pack: %1$s</string>
     <string name="calendar_deadline_title">Tender deadline: %1$s</string>
     <string name="feed_updated">Updated %1$s</string>
+    <plurals name="urgent_saved_banner">
         <item quantity="one">%d saved tender closes within 48 h</item>
         <item quantity="other">%d saved tenders close within 48 h</item>
     </plurals>
