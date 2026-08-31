@@ -11,27 +11,27 @@ class ChangelogTest {
 
     @Test
     fun `latest version is the newest release`() {
-        assertEquals("1.1", Changelog.latestVersion())
+        assertEquals("1.2", Changelog.latestVersion())
     }
 
     @Test
     fun `shows on update from an older version`() {
-        assertTrue(Changelog.shouldShow("1.1", "1.0"))
+        assertTrue(Changelog.shouldShow("1.2", "1.1"))
     }
 
     @Test
     fun `fresh install stays silent`() {
-        assertFalse(Changelog.shouldShow("1.1", null))
+        assertFalse(Changelog.shouldShow("1.2", null))
     }
 
     @Test
     fun `same version restart stays silent`() {
-        assertFalse(Changelog.shouldShow("1.1", "1.1"))
+        assertFalse(Changelog.shouldShow("1.2", "1.2"))
     }
 
     @Test
     fun `notes exist for known versions only`() {
-        assertEquals("1.1", Changelog.notesFor("1.1")?.version)
+        assertEquals("1.2", Changelog.notesFor("1.2")?.version)
         assertNull(Changelog.notesFor("9.9"))
         // every release carries highlights
         Changelog.releases.forEach { assertTrue(it.highlights.isNotEmpty()) }

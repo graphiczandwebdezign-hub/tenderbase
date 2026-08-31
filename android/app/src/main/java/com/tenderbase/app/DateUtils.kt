@@ -74,8 +74,13 @@ object DateUtils {
     }
 
     /** True when closing within `withinDays` (used for the urgency accent). */
-    fun isUrgent(closingAt: String?, closingDate: String?, withinDays: Int = 7): Boolean {
-        val u = urgency(closingAt, closingDate)
+    fun isUrgent(
+        closingAt: String?,
+        closingDate: String?,
+        withinDays: Int = 7,
+        deadlineState: String? = null
+    ): Boolean {
+        val u = urgency(closingAt, closingDate, deadlineState)
         return u == Urgency.URGENT || u == Urgency.TODAY
     }
 

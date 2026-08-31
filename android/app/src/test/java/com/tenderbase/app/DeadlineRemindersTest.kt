@@ -60,14 +60,14 @@ class DeadlineRemindersTest {
             tender(5, hoursOut = null),         // no deadline
             tender(6, hoursOut = 30, deadlineState = "CLOSED") // server says closed
         )
-        val due = DeadlineReminders.due(saved, remindedIds = emptySet())
+        val due = DeadlineReminders.due(saved, alreadyRemindedIds = emptySet())
         assertEquals(listOf(1, 2), due.map { it.id })
     }
 
     @Test
     fun `already reminded ids are excluded`() {
         val saved = listOf(tender(1, hoursOut = 24), tender(2, hoursOut = 24))
-        val due = DeadlineReminders.due(saved, remindedIds = setOf(1))
+        val due = DeadlineReminders.due(saved, alreadyRemindedIds = setOf(1))
         assertEquals(listOf(2), due.map { it.id })
     }
 

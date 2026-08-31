@@ -14,11 +14,11 @@ class NotificationGroupsTest {
         cal.set(2026, Calendar.AUGUST, 30, 0, 30, 0)
         cal.set(Calendar.MILLISECOND, 0)
         val justAfterMidnight = cal.timeInMillis
-        // 36h before 00:30 is the *previous day's* 12:30 — two days back on
-        // the rolling clock, but the day before on the calendar.
+        // 1h before 00:30 is the previous evening — inside 24h on a rolling
+        // clock, but *yesterday* on the calendar. Buckets follow the calendar.
         assertEquals(
             NotificationBucket.YESTERDAY,
-            NotificationGroups.bucketOf(justAfterMidnight - 36L * 60 * 60 * 1000, justAfterMidnight)
+            NotificationGroups.bucketOf(justAfterMidnight - 60L * 60 * 1000, justAfterMidnight)
         )
     }
 
