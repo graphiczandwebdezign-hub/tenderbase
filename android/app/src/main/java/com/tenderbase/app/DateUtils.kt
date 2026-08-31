@@ -80,8 +80,9 @@ object DateUtils {
         withinDays: Int = 7,
         deadlineState: String? = null
     ): Boolean {
-        val u = urgency(closingAt, closingDate, deadlineState)
-        return u == Urgency.URGENT || u == Urgency.TODAY
+        if (deadlineState in CLOSED_STATES) return false
+        val days = daysUntilClosing(closingAt, closingDate) ?: return false
+        return days in 0..withinDays
     }
 
     fun prettyDate(closingAt: String?, closingDate: String?): String {
