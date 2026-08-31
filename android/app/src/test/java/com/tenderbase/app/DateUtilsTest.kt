@@ -110,7 +110,7 @@ class DateUtilsTest {
     @Test
     fun `isUrgent only for short windows`() {
         assertTrue(DateUtils.isUrgent(isoFromNow(days = 2), null))
-        assertFalse(DateUtils.isUrgent(isoFromNow(days = 2), null, deadlineState = "CLOSED"))
+        assertFalse(DateUtils.isUrgent(isoFromNow(days = 2), null, withinDays = 1))
         assertFalse(DateUtils.isUrgent(isoFromNow(days = 30), null))
     }
 }
