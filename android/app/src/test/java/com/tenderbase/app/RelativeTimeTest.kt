@@ -11,12 +11,13 @@ class RelativeTimeTest {
 
     @Test
     fun `labels roll over at the documented thresholds`() {
-        assertEquals("", RelativeTime.label(1000, 0))
-        assertEquals("just now", RelativeTime.label(1000, 2000))
-        assertEquals("just now", RelativeTime.label(0, MIN - 1))
-        assertEquals("12 min ago", RelativeTime.label(12 * MIN, 0))
-        assertEquals("3 h ago", RelativeTime.label(3 * HOUR + 30 * MIN, 0))
-        assertEquals("yesterday", RelativeTime.label(DAY + 1, 0))
-        assertEquals("4 days ago", RelativeTime.label(4 * DAY, 0))
+        val now = 1_769_900_000_000L
+        assertEquals("", RelativeTime.label(now, 0))
+        assertEquals("just now", RelativeTime.label(now, now + MIN))
+        assertEquals("just now", RelativeTime.label(now, now - (MIN - 1)))
+        assertEquals("12 min ago", RelativeTime.label(now, now - 12 * MIN))
+        assertEquals("3 h ago", RelativeTime.label(now, now - (3 * HOUR + 30 * MIN)))
+        assertEquals("yesterday", RelativeTime.label(now, now - (DAY + 1)))
+        assertEquals("4 days ago", RelativeTime.label(now, now - 4 * DAY))
     }
 }

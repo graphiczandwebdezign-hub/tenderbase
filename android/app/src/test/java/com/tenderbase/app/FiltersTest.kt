@@ -43,7 +43,8 @@ class FiltersTest {
     fun `published windows map to advertised date bounds`() {
         val f = SearchFilters(dateFilter = DateFilter.PUBLISHED_7D)
         val params = f.toQueryParams(today)
-        assertEquals("2026-08-25", params["advertised_after"])
+        // 7-day window = today inclusive, so the lower bound is today minus 6.
+        assertEquals("2026-08-24", params["advertised_after"])
         assertEquals(today, params["advertised_before"])
         assertNull(params["closing_within"])
     }

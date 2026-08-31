@@ -38,8 +38,8 @@ object TenderActions {
         t.province?.let { appendLine("Province: $it") }
         t.category?.let { appendLine("Category: $it") }
         appendLine()
-        appendLine("View in TenderBase: ${deepLinkFor(t.id)}")
-        t.sourceUrl?.let { append("Source: $it") }
+        append("View in TenderBase: ${deepLinkFor(t.id)}")
+        t.sourceUrl?.let { append("\nSource: $it") }
     }
 
     // -------------------------------------------------------------- calendar
@@ -74,7 +74,9 @@ object TenderActions {
         if (kb < 1024) return "${round(kb)} KB"
         val mb = kb / 1024.0
         if (mb < 1024) return "${round(mb)} MB"
-        return "${round(mb / 1024.0)} GB"
+        // Above 1024 MiB we report in decimal GB (1e9), the convention the
+        // source portals use for their advertised file sizes.
+        return "${round(bytes / 1_000_000_000.0)} GB"
     }
 
     private fun round(v: Double): String =

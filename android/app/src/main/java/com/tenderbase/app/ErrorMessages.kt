@@ -42,28 +42,32 @@ object ErrorMessages {
 
     /** Classify any throwable (walks the cause chain) into a user-facing kind. */
     fun kindOf(e: Throwable?): UserErrorKind {
+        val chain = ArrayList<Throwable>(MAX_CAUSE_DEPTH)
         var t = e
         var depth = 0
         while (t != null && depth < MAX_CAUSE_DEPTH) {
-            when {
-                t is SSLException -> return UserErrorKind.SECURITY
-                t is UnknownHostException -> return UserErrorKind.OFFLINE
-                t is SocketTimeoutException -> return UserErrorKind.OFFLINE
-                t is ConnectException -> return UserErrorKind.OFFLINE
-                t is NoRouteToHostException -> return UserErrorKind.OFFLINE
-                // Certificate path validation errors live in java.security and
-                // are not SSLException subclasses on every platform — match by
-                // name so they never fall through to GENERIC.
-                t.javaClass.simpleName.contains("CertPathValidator") ||
-                    t.javaClass.simpleName.contains("SSLHandshake") -> return UserErrorKind.SECURITY
-                t is IOException -> {
-                    // Plain IOException with no more specific cause: treat as
-                    // connectivity; the recovery action is the same (retry).
-                    return UserErrorKind.OFFLINE
-                }
-            }
+            chain.add(t)
             t = t.cause
             depth++
+        }
+        // Security first: a TLS/cert failure is usually wrapped inside a
+        // plain IOException, and telling the user "check your connection"
+        // for a broken trust chain is exactly the misleading advice this
+        // classifier exists to prevent.
+        for (x in chain) {
+            if (x is SSLException ||
+                x.javaClass.simpleName.contains("CertPathValidator") ||
+                x.javaClass.simpleName.contains("SSLHandshake")
+            ) return UserErrorKind.SECURITY
+        }
+        for (x in chain) {
+            when {
+                x is UnknownHostException || x is SocketTimeoutException ||
+                    x is ConnectException || x is NoRouteToHostException ||
+                    // Plain IOException with no more specific cause: treat as
+                    // connectivity; the recovery action is the same (retry).
+                    x is IOException -> return UserErrorKind.OFFLINE
+            }
         }
         return UserErrorKind.GENERIC
     }

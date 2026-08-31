@@ -208,6 +208,9 @@ data class SearchFilters(
         for ((k, v) in params) {
             if (k != "sort") o.put(k, v)
         }
+        // The query travels as `search`, mirroring the live-list endpoint's
+        // parameter (added by ApiClient at request time, not by toQueryParams).
+        if (query.isNotBlank()) o.put("search", query.trim())
         o.put("date_key", dateFilter.key)
         return o
     }
