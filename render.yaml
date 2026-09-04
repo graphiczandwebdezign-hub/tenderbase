@@ -18,7 +18,6 @@ services:
     runtime: python
     region: singapore          # closest to Durban, ZA — matches Neon Singapore
     plan: free                 # NOTE: free web services sleep when idle (see README)
-    branch: arena/01a04c59-tenderbase
     buildCommand: "pip install -r requirements.txt"
     # Migrations run before the server starts (entrypoint also waits for Neon)
     startCommand: "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
