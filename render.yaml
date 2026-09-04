@@ -1,23 +1,26 @@
-# Render Blueprint for the SA Tender API.
+# Render Blueprint for the SA Tender API — Neon edition.
 # In the Render dashboard: New → Blueprint → connect this repo → Apply.
-# It provisions a managed PostgreSQL database and a web service, wires the
-# DATABASE_URL automatically, and generates API_KEY / ADMIN_SECRET for you.
+# This version uses an EXTERNAL Neon PostgreSQL (free 0.5GB, better than Render's
+# ephemeral free DB). You paste the Neon pooled DATABASE_URL once in the
+# Render dashboard; Render auto-generates API_KEY / ADMIN_SECRET.
+#
+# Setup:
+#  1. Create Neon project (Singapore or Frankfurt) → Connect → Pooled → psycopg2 → copy URL
+#     e.g. postgresql://neondb_owner:npg_xxx@ep-xxx-pooler.singapore.aws.neon.tech/neondb?sslmode=require
+#  2. Render → New → Blueprint → select this repo → Apply → when prompted, paste DATABASE_URL
+#  3. Or: New → Web Service (manual) → use same build/start below and paste env vars
 #
 # Docs: https://render.com/docs/blueprint-spec
-databases:
-  - name: tenderbase-db
-    databaseName: tenderbase
-    user: tender
-    plan: free            # upgrade to a paid plan for production/persistence
 
 services:
   - type: web
     name: tenderbase-api
     runtime: python
-    plan: free            # NOTE: free web services sleep when idle (see README)
+    region: singapore          # closest to Durban, ZA — matches Neon Singapore
+    plan: free                 # NOTE: free web services sleep when idle (see README)
     branch: arena/01a04c59-tenderbase
     buildCommand: "pip install -r requirements.txt"
-    # Render injects $PORT; migrations run before the server starts.
+    # Migrations run before the server starts (entrypoint also waits for Neon)
     startCommand: "alembic upgrade head && uvicorn app.main:app --host 0.0.0.0 --port $PORT"
     healthCheckPath: /health
     envVars:
@@ -25,25 +28,27 @@ services:
         value: production
       - key: PYTHON_VERSION
         value: "3.11.9"
-      # Wire the database connection string from the managed DB above.
+      # ── Neon external DB ──
+      # Paste your Neon POOLED connection string in the Render dashboard when it prompts.
+      # Must include ?sslmode=require. App auto-rewrites postgres:// → postgresql+psycopg2://
       - key: DATABASE_URL
-        fromDatabase:
-          name: tenderbase-db
-          property: connectionString
-      # Auto-generated secrets — you never see or type these; rotate anytime.
+        sync: false
+      # Auto-generated secrets — Render generates + shows once; rotate anytime in dashboard.
       - key: API_KEY
         generateValue: true
       - key: ADMIN_SECRET
         generateValue: true
-      # In-process scheduler. On the FREE plan the service sleeps when idle, so
-      # the scheduler pauses too — either upgrade to a paid instance, or set
-      # SYNC_ENABLED=false and use a cron pinging POST /api/v1/admin/sync.
+      # ── Scheduler (in-process). On FREE plan service sleeps → scheduler pauses.
+      # Either upgrade to Starter $7/mo (always-on) OR set SYNC_ENABLED=false and add
+      # a cron (cron-job.org) pinging POST /api/v1/admin/sync every 15 min.
       - key: SYNC_ENABLED
         value: "true"
       - key: SYNC_INTERVAL_MINUTES
         value: "15"
       - key: TENDER_RETENTION_DAYS
         value: "7"
+      - key: CLOSING_SOON_HOURS
+        value: "48"
       # Never load bundled dev sample data in production.
       - key: INGESTION_ALLOW_SAMPLE_FALLBACK
         value: "false"
@@ -51,3 +56,5 @@ services:
         value: "100"
       - key: CORS_ORIGINS
         value: "*"
+      - key: TIMEZONE
+        value: "Africa/Johannesburg"
