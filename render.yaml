@@ -5,8 +5,8 @@
 # Render dashboard; Render auto-generates API_KEY / ADMIN_SECRET.
 #
 # Setup:
-#  1. Create Neon project (Singapore or Frankfurt) → Connect → Pooled → psycopg2 → copy URL
-#     e.g. postgresql://neondb_owner:npg_xxx@ep-xxx-pooler.singapore.aws.neon.tech/neondb?sslmode=require
+#  1. Create Neon project (Frankfurt eu-central-1) → Connect → Pooled → psycopg2 → copy URL
+#     e.g. postgresql://neondb_owner:npg_xxx@ep-xxx-pooler.eu-central-1.aws.neon.tech/neondb?sslmode=require
 #  2. Render → New → Blueprint → select this repo → Apply → when prompted, paste DATABASE_URL
 #  3. Or: New → Web Service (manual) → use same build/start below and paste env vars
 #
@@ -16,7 +16,7 @@ services:
   - type: web
     name: tenderbase-api
     runtime: python
-    region: singapore          # closest to Durban, ZA — matches Neon Singapore
+    region: frankfurt          # best to SITA gov (WACS cable) + matches Neon Frankfurt
     plan: free                 # NOTE: free web services sleep when idle (see README)
     buildCommand: "pip install -r requirements.txt"
     # Migrations run before the server starts (entrypoint also waits for Neon)
