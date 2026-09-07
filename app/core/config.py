@@ -24,13 +24,22 @@ from pydantic_settings import BaseSettings, SettingsConfigDict, NoDecode
 # ("hardcode these into the api for now"), so a fresh checkout / fresh database
 # authenticates without any env setup.
 #
-# These are DEFAULTS ONLY: `API_KEY` / `ADMIN_SECRET` in the environment or in
-# .env override them, so the Render service keeps using its generated values and
-# nothing about the live deployment changes.
+# They work in TWO ways:
+#   1. As DEFAULTS for API_KEY / ADMIN_SECRET — a value in the environment or
+#      .env replaces the default (so a deployment that already sets them keeps
+#      its own values).
+#   2. As ADDITIONAL accepted credentials while ALLOW_BUNDLED_CREDENTIALS=true —
+#      the bundled API key is ensured into the api_keys table at startup and the
+#      bundled admin secret is accepted by the admin API/dashboard alongside
+#      whatever the environment says. This is what makes the bundled key work on
+#      a host that already has API_KEY set (e.g. Render's generated secret).
 #
-# TODO(security): delete both constants and rotate the two credentials before
-# this service has real users. This repository is PUBLIC on GitHub, so these
-# values must be treated as disclosed.
+# Kill switch: set ALLOW_BUNDLED_CREDENTIALS=false (env only, no code change)
+# to stop accepting the bundled pair immediately.
+#
+# TODO(security): delete both constants, the flag and their usages, and rotate
+# the two credentials before this service has real users. This repository is
+# PUBLIC on GitHub, so these values must be treated as disclosed.
 # --------------------------------------------------------------------------- #
 BUNDLED_API_KEY = "fy944HfxOInWK13NIl8tdmocAyrrPqt7eJpX3PRqO0I="
 BUNDLED_ADMIN_SECRET = "HUprlD1oQBFKDrNHxPw/N09ZpldgNWCfJ1HfC7LuFH8="
@@ -62,6 +71,9 @@ class Settings(BaseSettings):
     # api_keys table (hashed). Additional keys are managed via the admin API.
     api_key: Optional[str] = Field(default=BUNDLED_API_KEY)
     admin_secret: Optional[str] = Field(default=BUNDLED_ADMIN_SECRET)
+    # TEMPORARY: also accept the bundled key/secret even when the environment
+    # defines its own. Set to false to disable (see BUNDLED_* above).
+    allow_bundled_credentials: bool = Field(default=True)
 
     # ----- Sync / ingestion -----
     sync_interval_minutes: int = Field(default=15)
