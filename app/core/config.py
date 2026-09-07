@@ -82,6 +82,10 @@ class Settings(BaseSettings):
     sync_lookback_days: int = Field(default=3)
     # Full backfill window used by the manual/initial sync.
     sync_backfill_days: int = Field(default=30)
+    # Run one sync at process start when the last successful sync is older than
+    # SYNC_INTERVAL_MINUTES. Essential on hosts that sleep when idle (Render
+    # free tier), where the interval timer restarts on every wake.
+    sync_on_boot: bool = Field(default=True)
     etenders_base_url: str = Field(
         default="https://ocds-api.etenders.gov.za/api/OCDSReleases"
     )

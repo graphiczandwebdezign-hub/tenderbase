@@ -205,6 +205,7 @@ All configuration is environment-based (`.env`, never committed). See
 | `ALLOW_BUNDLED_CREDENTIALS` | `true`* | Also accept the bundled key/secret when the environment defines its own |
 | `SYNC_INTERVAL_MINUTES` | `15` | Scheduled sync cadence |
 | `SYNC_ENABLED` | `true` | Toggle the in-process scheduler |
+| `SYNC_ON_BOOT` | `true` | Sync immediately at startup if the last successful sync is older than `SYNC_INTERVAL_MINUTES` (needed on hosts that sleep when idle) |
 | `TENDER_RETENTION_DAYS` | `7` | Keep expired tenders this long before deletion |
 | `CLEANUP_INTERVAL_HOURS` | `24` | Cleanup/expiry cadence |
 | `CLOSING_SOON_HOURS` | `48` | Window for `CLOSING_SOON` state |

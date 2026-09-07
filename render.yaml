@@ -44,6 +44,11 @@ services:
         value: "true"
       - key: SYNC_INTERVAL_MINUTES
         value: "15"
+      # Sync at startup whenever the DB is stale. On the free plan the service
+      # sleeps when idle, so the 15-min interval timer is rebuilt on every wake
+      # and rarely fires; this flag is what actually keeps data fresh.
+      - key: SYNC_ON_BOOT
+        value: "true"
       - key: TENDER_RETENTION_DAYS
         value: "7"
       - key: CLOSING_SOON_HOURS

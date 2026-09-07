@@ -22,3 +22,7 @@ tenderbase.db
 
 # OS
 .DS_Store
+
+# Temporary local credential drops (the value was committed once on the
+# arena branch; rotate it - history still holds it).
+key.txt
