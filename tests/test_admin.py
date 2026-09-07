@@ -25,6 +25,30 @@ def _seed(n=3):
         db.close()
 
 
+def test_bundled_credentials_are_defaults_only(monkeypatch):
+    """Pin the TEMPORARY bundled credentials in app/core/config.py.
+
+    Two guarantees: a fresh process with no env config authenticates with the
+    bundled key/secret, and any API_KEY / ADMIN_SECRET in the environment still
+    overrides them (so the Render deployment keeps its generated values).
+    Delete this test together with the BUNDLED_* constants when they are
+    rotated.
+    """
+    from app.core.config import Settings, BUNDLED_API_KEY, BUNDLED_ADMIN_SECRET
+
+    for var in ("API_KEY", "ADMIN_SECRET"):
+        monkeypatch.delenv(var, raising=False)
+    fresh = Settings(_env_file=None)
+    assert fresh.api_key == BUNDLED_API_KEY
+    assert fresh.admin_secret == BUNDLED_ADMIN_SECRET
+
+    monkeypatch.setenv("API_KEY", "env-key")
+    monkeypatch.setenv("ADMIN_SECRET", "env-secret")
+    overridden = Settings(_env_file=None)
+    assert overridden.api_key == "env-key"
+    assert overridden.admin_secret == "env-secret"
+
+
 def test_admin_requires_secret(client):
     r = client.get(f"{API}/admin/dashboard")
     assert r.status_code == 401

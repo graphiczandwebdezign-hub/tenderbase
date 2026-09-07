@@ -17,7 +17,7 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.config import settings
+from app.core.config import settings, BUNDLED_API_KEY, BUNDLED_ADMIN_SECRET
 from app.core.logging import get_logger, log_event, setup_logging
 from app.database.database import Base, engine, session_scope
 from app.core.security import ensure_bootstrap_key
@@ -71,6 +71,16 @@ async def lifespan(app: FastAPI):
         db.close()
     scheduler = start_scheduler()
     log_event(logger, 20, "app_started", env=settings.app_env, postgres=settings.is_postgres)
+    # Loud, visible nudge while the temporary bundled credentials are in play.
+    if settings.api_key == BUNDLED_API_KEY or settings.admin_secret == BUNDLED_ADMIN_SECRET:
+        log_event(
+            logger, 30, "bundled_credentials_in_use",
+            api_key_default=settings.api_key == BUNDLED_API_KEY,
+            admin_secret_default=settings.admin_secret == BUNDLED_ADMIN_SECRET,
+            hint="Set API_KEY / ADMIN_SECRET in the environment or .env to "
+                 "override the bundled values, and rotate the bundled ones "
+                 "(they are committed in a public repo).",
+        )
     try:
         yield
     finally:

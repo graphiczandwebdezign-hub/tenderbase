@@ -1,7 +1,14 @@
 """Application configuration loaded from environment variables.
 
-All configuration is environment-based. Secrets (DATABASE_URL, API keys,
-FCM credentials, ADMIN_SECRET) are never hard-coded in source.
+All configuration is environment-based. Secrets that should never be baked in
+(DATABASE_URL, FCM credentials) come from the environment only.
+
+TEMPORARY EXCEPTION (2026-09-07): `API_KEY` and `ADMIN_SECRET` currently have
+hard-coded fallback values — see BUNDLED_* constants below. They are defaults
+only: any value set in the environment or `.env` still wins, so Render's
+generated env vars keep overriding them. Remove these defaults and ROTATE both
+credentials before this service holds real users — this repository is public on
+GitHub.
 """
 from __future__ import annotations
 
@@ -11,6 +18,22 @@ from typing_extensions import Annotated
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict, NoDecode
+
+# --------------------------------------------------------------------------- #
+# TEMPORARY bundled credentials — added 2026-09-07 at the operator's request
+# ("hardcode these into the api for now"), so a fresh checkout / fresh database
+# authenticates without any env setup.
+#
+# These are DEFAULTS ONLY: `API_KEY` / `ADMIN_SECRET` in the environment or in
+# .env override them, so the Render service keeps using its generated values and
+# nothing about the live deployment changes.
+#
+# TODO(security): delete both constants and rotate the two credentials before
+# this service has real users. This repository is PUBLIC on GitHub, so these
+# values must be treated as disclosed.
+# --------------------------------------------------------------------------- #
+BUNDLED_API_KEY = "fy944HfxOInWK13NIl8tdmocAyrrPqt7eJpX3PRqO0I="
+BUNDLED_ADMIN_SECRET = "HUprlD1oQBFKDrNHxPw/N09ZpldgNWCfJ1HfC7LuFH8="
 
 
 class Settings(BaseSettings):
@@ -37,8 +60,8 @@ class Settings(BaseSettings):
     # ----- Authentication -----
     # Bootstrap API key. On startup this key is ensured to exist in the
     # api_keys table (hashed). Additional keys are managed via the admin API.
-    api_key: Optional[str] = Field(default=None)
-    admin_secret: Optional[str] = Field(default=None)
+    api_key: Optional[str] = Field(default=BUNDLED_API_KEY)
+    admin_secret: Optional[str] = Field(default=BUNDLED_ADMIN_SECRET)
 
     # ----- Sync / ingestion -----
     sync_interval_minutes: int = Field(default=15)
