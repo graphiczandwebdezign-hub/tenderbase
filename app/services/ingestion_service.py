@@ -49,6 +49,32 @@ _AMENDMENT_FIELDS = [
 ]
 
 
+def reap_orphan_runs(db: Session) -> int:
+    """Mark abandoned RUNNING sync rows as FAILED and return how many.
+
+    A RUNNING row means "some process is syncing right now" — but a free plan
+    that spins the container down mid-run strands it forever, and `/health`
+    keeps answering `last_sync_status: RUNNING` for a sync that stopped hours
+    ago. Called from the application lifespan (so a fresh process corrects the
+    record immediately, before answering any health check) and again at the
+    start of every run.
+    """
+    from app.database.models import SyncRun, SyncStatus
+    from app.core.timeutils import utcnow
+
+    orphans = db.execute(
+        select(SyncRun).where(SyncRun.status == SyncStatus.RUNNING)
+    ).scalars().all()
+    for o in orphans:
+        o.status = SyncStatus.FAILED
+        o.completed_at = o.completed_at or utcnow()
+        o.error_message = o.error_message or "Interrupted (process restarted before completion)."
+    if orphans:
+        db.commit()
+        log_event(logger, 30, "orphaned_sync_runs_reaped", count=len(orphans))
+    return len(orphans)
+
+
 class IngestionService:
     def __init__(self, db: Session, adapter: Optional[TenderSourceAdapter] = None):
         self.db = db
@@ -67,15 +93,7 @@ class IngestionService:
         # Reap orphaned RUNNING rows from previously crashed/killed runs. The
         # worker's process lock guarantees no real run is active here, so any
         # RUNNING row is stale (e.g. an old synchronous request Render killed).
-        orphans = self.db.execute(
-            select(SyncRun).where(SyncRun.status == SyncStatus.RUNNING)
-        ).scalars().all()
-        for o in orphans:
-            o.status = SyncStatus.FAILED
-            o.completed_at = utcnow()
-            o.error_message = o.error_message or "Interrupted (process restarted before completion)."
-        if orphans:
-            self.db.commit()
+        reap_orphan_runs(self.db)
 
         run = SyncRun(source=self.adapter.name, trigger=trigger, status=SyncStatus.RUNNING)
         self.db.add(run)
