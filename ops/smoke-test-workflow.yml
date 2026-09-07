@@ -1,0 +1,62 @@
+# ============================================================================
+# COPY THIS FILE INTO YOUR REPO AT:  .github/workflows/smoke-test.yml
+#
+# GitHub refuses to let the Arena connector create or update anything under
+# .github/workflows/ ("refusing to allow a GitHub App to create or update
+# workflow ... without `workflows` permission"), so this lives in ops/ and has
+# to be added by hand — same as build-apk.yml. GitHub web UI: Add file ->
+# Create new file -> path ".github/workflows/smoke-test.yml" -> paste -> Commit.
+#
+# Manual smoke test against a deployed instance.
+#
+# Why this exists: this sandbox (and any other egress-filtered environment) can
+# reach /health but not an authenticated request, so a 401 cannot be
+# distinguished from a stale Swagger result panel. GitHub's runners have plain
+# internet access, which makes them a good place to verify that API_KEY and
+# ADMIN_SECRET actually work against the deployment after a release.
+#
+# Nothing is printed but statuses and counts — credentials are never echoed.
+#
+#   Actions -> "Smoke test deployed API" -> Run workflow
+name: Smoke test deployed API
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: Deployment base URL
+        required: true
+        default: https://tenderbase-api.onrender.com
+      trigger_sync:
+        description: Also POST /admin/sync (writes to the database)
+        type: boolean
+        required: false
+        default: false
+      max_sync_age_minutes:
+        description: Fail when the newest successful sync is older than this
+        required: false
+        default: "90"
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Credentials come from repo secrets when defined, otherwise the script
+      # falls back to the bundled constants in app/core/config.py.
+      - name: Smoke test
+        env:
+          API_KEY: ${{ secrets.API_KEY }}
+          ADMIN_SECRET: ${{ secrets.ADMIN_SECRET }}
+        run: |
+          args=(--base-url "${{ inputs.base_url }}"
+                --max-sync-age-minutes "${{ inputs.max_sync_age_minutes }}")
+          if [ "${{ inputs.trigger_sync }}" = "true" ]; then
+            args+=(--trigger-sync)
+          fi
+          python3 scripts/smoke_test.py "${args[@]}"

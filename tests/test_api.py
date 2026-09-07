@@ -31,6 +31,26 @@ def test_health_is_public(client):
     assert r2.status_code == 200
 
 
+def test_health_reports_deployed_commit(client, monkeypatch):
+    """/health should say which commit is running, so 'is it deployed?' needs
+    no log access. Render sets RENDER_GIT_COMMIT; other hosts use APP_COMMIT."""
+    from app.core.config import settings
+
+    # Unset (this test run): the key is omitted rather than reported as null.
+    assert "build" not in client.get("/health", headers={}).json()
+
+    monkeypatch.setattr(settings, "render_git_commit", "5bb30cf01234567890abcdef")
+    monkeypatch.setattr(settings, "render_git_branch", "Main")
+    build = client.get("/health", headers={}).json()["build"]
+    assert build["short_commit"] == "5bb30cf"
+    assert build["commit"] == "5bb30cf01234567890abcdef"
+    assert build["branch"] == "Main"
+
+    # APP_COMMIT wins over the Render-provided value.
+    monkeypatch.setattr(settings, "app_commit", "deadbeefdeadbeef")
+    assert client.get("/health", headers={}).json()["build"]["short_commit"] == "deadbee"
+
+
 def test_requires_api_key(noauth_client):
     r = noauth_client.get(f"{API}/tenders")
     assert r.status_code == 401

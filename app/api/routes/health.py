@@ -29,9 +29,12 @@ def _health_payload(db: Session) -> dict:
         select(SyncRun).order_by(SyncRun.started_at.desc())
     ).scalars().first()
 
+    build = settings.build_info
     return {
         "status": "healthy" if db_status == "connected" else "degraded",
         "version": settings.app_version,
+        # Absent unless the host advertises it (Render does, by default).
+        **({"build": build} if build else {}),
         "database": db_status,
         "last_sync": last_success.completed_at.isoformat() if last_success and last_success.completed_at else None,
         "last_sync_status": last_any.status.value if last_any else None,
