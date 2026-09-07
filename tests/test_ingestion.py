@@ -113,6 +113,77 @@ def test_normalization_categories_and_province(db):
     assert "information-technology" in slugs
 
 
+def _live_shape_release(ext_id: str, **kwargs) -> dict:
+    """Build a release shaped like the REAL OCPO payload.
+
+    The shared ``make_release`` helper fills ``parties[].address.region``, which
+    is how the tests used to supply the province — but live eTenders releases
+    publish ``parties: []`` and carry the province on ``tender.province`` plus
+    the CPV-style text on ``tender.category`` (with an empty
+    ``mainProcurementCategory``). This helper reproduces that so the mapping is
+    tested against the shape that actually arrives over the wire.
+    """
+    release = make_release(ext_id, **kwargs)
+    release["parties"] = []
+    tender = release["tender"]
+    tender["mainProcurementCategory"] = ""
+    return release
+
+
+def test_province_read_from_tender_province_when_parties_empty(db):
+    release = _live_shape_release(
+        "LIVE1", title="RFQ2568",
+        description="APPOINTMENT OF A SERVICE PROVIDER TO DESIGN AND FACILITATE A "
+                    "CULTURE TRANSFORMATION PROGRAMME",
+        org="Mine Health and Safety Council",
+        closing_iso=_future(),
+    )
+    release["tender"]["province"] = "Gauteng"
+    release["tender"]["category"] = (
+        "Office administrative, office support and other business support activities"
+    )
+    IngestionService(db, MockSourceAdapter([release])).run_sync(trigger="manual")
+    t = db.execute(select(Tender)).scalar_one()
+    assert t.province == "Gauteng"
+
+
+def test_province_falls_back_to_delivery_location(db):
+    release = _live_shape_release(
+        "LIVE2", title="Road resurfacing", description="Misc works",
+        org="Umkhanyakude District Municipality", closing_iso=_future(),
+    )
+    release["tender"]["province"] = ""
+    release["tender"]["deliveryLocation"] = "55 Mahashade Street, Thohoyandou - 0950"
+    IngestionService(db, MockSourceAdapter([release])).run_sync(trigger="manual")
+    t = db.execute(select(Tender)).scalar_one()
+    assert t.province == "Limpopo"
+
+
+def test_declared_province_beats_stray_mention_in_description(db):
+    release = _live_shape_release(
+        "LIVE3", title="Tender board meeting",
+        description="Tender will be adjudicated in KwaZulu-Natal",
+        org="Department of Public Works", closing_iso=_future(),
+    )
+    release["tender"]["province"] = "North West"
+    IngestionService(db, MockSourceAdapter([release])).run_sync(trigger="manual")
+    t = db.execute(select(Tender)).scalar_one()
+    assert t.province == "North West"
+
+
+def test_category_mapped_from_cpv_text_when_main_category_empty(db):
+    release = _live_shape_release(
+        "LIVE4", title="PR16381", description="Monthly monitoring of smart metering.",
+        org="Automotive Industry Development Centre (AIDC)", closing_iso=_future(),
+    )
+    release["tender"]["category"] = "Services: Electrical"
+    IngestionService(db, MockSourceAdapter([release])).run_sync(trigger="manual")
+    t = db.execute(select(Tender)).scalar_one()
+    slugs = [link.category.slug for link in t.categories]
+    assert "electrical" in slugs
+    assert t.category == "Electrical"
+
+
 class _PartialFetchAdapter(MockSourceAdapter):
     """Yields some records, then raises to simulate a mid-stream source timeout."""
 
