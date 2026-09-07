@@ -209,6 +209,7 @@ All configuration is environment-based (`.env`, never committed). See
 | `TENDER_RETENTION_DAYS` | `7` | Keep expired tenders this long before deletion |
 | `CLEANUP_INTERVAL_HOURS` | `24` | Cleanup/expiry cadence |
 | `CLOSING_SOON_HOURS` | `48` | Window for `CLOSING_SOON` state |
+| `APP_COMMIT` / `APP_BRANCH` | – | Override the deployment identity shown on `/health` (Render supplies `RENDER_GIT_COMMIT`/`RENDER_GIT_BRANCH` itself) |
 | `RATE_LIMIT_PER_MINUTE` | `100` | Per-key (or per-IP) rate limit |
 | `CORS_ORIGINS` | `*` | Comma-separated allowlist |
 | `FCM_ENABLED` | `false` | Enable Firebase push |
@@ -587,6 +588,36 @@ curl localhost:8000/health
 # 28–29: restart recovery
 docker compose restart && curl localhost:8000/health
 ```
+
+### Verifying a deployment
+
+`/health` is public and reports which build is running, so "is the version I
+just deployed actually live?" needs no credentials and no log access (Render
+supplies `RENDER_GIT_COMMIT`/`RENDER_GIT_BRANCH` automatically; set
+`APP_COMMIT`/`APP_BRANCH` elsewhere):
+
+```json
+{ "status": "healthy", "version": "1.0.0",
+  "build": { "commit": "5bb30cf…", "short_commit": "5bb30cf", "branch": "Main" },
+  "database": "connected", "last_sync": "…", "last_sync_status": "SUCCESS" }
+```
+
+`scripts/smoke_test.py` checks that plus the parts a browser panel cannot:
+whether `X-API-Key` is accepted on a protected route, that a **bogus** key is
+still rejected (so disabled auth can't masquerade as success), whether the newest
+successful sync is within a freshness budget, and optionally that the deployed
+commit matches. Stdlib only — no dependencies, safe to run from a runner or a
+container. Nothing is ever printed but statuses and counts.
+
+```bash
+python3 scripts/smoke_test.py --base-url https://<service>.onrender.com \
+    --expect-commit "$(git rev-parse --short=7 HEAD)"
+python3 scripts/smoke_test.py --base-url https://<service>.onrender.com --trigger-sync
+```
+
+Exit code is non-zero on any failed check. A GitHub Actions wrapper is kept at
+`ops/smoke-test-workflow.yml` — copy it to `.github/workflows/smoke-test.yml`
+by hand, since GitHub will not let an app/bot create workflow files.
 
 ---
 

@@ -60,6 +60,15 @@ class Settings(BaseSettings):
     debug: bool = Field(default=False)
     timezone: str = Field(default="Africa/Johannesburg")
 
+    # Deployment identity. Render populates RENDER_GIT_COMMIT / RENDER_GIT_BRANCH
+    # at build and runtime; APP_COMMIT / APP_BRANCH override them for any other
+    # host (Docker, VMs). Surfaced on the public /health so "is my change
+    # actually deployed?" is answerable with one GET and no log access.
+    render_git_commit: Optional[str] = Field(default=None)
+    render_git_branch: Optional[str] = Field(default=None)
+    app_commit: Optional[str] = Field(default=None)
+    app_branch: Optional[str] = Field(default=None)
+
     # ----- Database -----
     # Defaults to a local SQLite file so the project runs anywhere out of the
     # box (e.g. sandboxes/CI without PostgreSQL). Production/Docker set a
@@ -154,6 +163,19 @@ class Settings(BaseSettings):
         if v.startswith("postgresql://"):
             v = "postgresql+psycopg2://" + v[len("postgresql://"):]
         return v
+
+    @property
+    def build_info(self) -> dict:
+        """Commit/branch the running process was built from, omitting unknowns."""
+        commit = self.app_commit or self.render_git_commit
+        branch = self.app_branch or self.render_git_branch
+        info: dict = {}
+        if commit:
+            info["commit"] = commit
+            info["short_commit"] = commit[:7]
+        if branch:
+            info["branch"] = branch
+        return info
 
     @property
     def is_production(self) -> bool:
