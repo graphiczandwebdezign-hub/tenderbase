@@ -22,6 +22,7 @@ from app.core.logging import get_logger, log_event, setup_logging
 from app.database.database import Base, engine, session_scope
 from app.core.security import ensure_bootstrap_key, prune_bundled_credentials
 from app.services import taxonomy_service
+from app.services.ingestion_service import reap_orphan_runs
 from app.workers.scheduler import start_scheduler, shutdown_scheduler
 
 # Import models so metadata is populated for create_all (dev/SQLite path).
@@ -70,6 +71,10 @@ async def lifespan(app: FastAPI):
         # from an earlier run if the kill switch has since been turned off.
         ensure_bootstrap_key(db)
         prune_bundled_credentials(db)
+        # A container killed mid-sync (e.g. free-plan spin-down) leaves a RUNNING
+        # row behind; correct it before the first /health is served, so the
+        # endpoint never reports a sync that is not actually happening.
+        reap_orphan_runs(db)
     finally:
         db.close()
     scheduler = start_scheduler()

@@ -184,6 +184,37 @@ def test_category_mapped_from_cpv_text_when_main_category_empty(db):
     assert t.category == "Electrical"
 
 
+def test_orphaned_running_rows_are_reaped_without_a_new_sync(db):
+    """A container killed mid-sync leaves RUNNING behind, and /health then
+    reports `last_sync_status: RUNNING` for a sync that is not happening. The
+    helper the app calls at startup must correct that on its own."""
+    from app.database.models import SyncRun, SyncStatus
+    from app.services.ingestion_service import reap_orphan_runs
+
+    db.add(SyncRun(source="eTenders", trigger="scheduled", status=SyncStatus.RUNNING))
+    db.commit()
+
+    assert reap_orphan_runs(db) == 1
+    row = db.execute(select(SyncRun)).scalars().one()
+    assert row.status == SyncStatus.FAILED
+    assert row.completed_at is not None
+    assert "Interrupted" in (row.error_message or "")
+
+    # Idempotent: a second pass finds nothing to correct.
+    assert reap_orphan_runs(db) == 0
+
+
+def test_reap_preserves_an_existing_error_message(db):
+    from app.database.models import SyncRun, SyncStatus
+    from app.services.ingestion_service import reap_orphan_runs
+
+    db.add(SyncRun(source="eTenders", trigger="scheduled", status=SyncStatus.RUNNING,
+                   error_message="upstream 502"))
+    db.commit()
+    reap_orphan_runs(db)
+    assert db.execute(select(SyncRun)).scalars().one().error_message == "upstream 502"
+
+
 class _PartialFetchAdapter(MockSourceAdapter):
     """Yields some records, then raises to simulate a mid-stream source timeout."""
 
