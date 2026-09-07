@@ -25,6 +25,102 @@ def _seed(n=3):
         db.close()
 
 
+def test_bundled_credentials_are_defaults_only(monkeypatch):
+    """Pin the TEMPORARY bundled credentials in app/core/config.py.
+
+    Two guarantees: a fresh process with no env config authenticates with the
+    bundled key/secret, and any API_KEY / ADMIN_SECRET in the environment still
+    overrides them (so the Render deployment keeps its generated values).
+    Delete this test together with the BUNDLED_* constants when they are
+    rotated.
+    """
+    from app.core.config import Settings, BUNDLED_API_KEY, BUNDLED_ADMIN_SECRET
+
+    for var in ("API_KEY", "ADMIN_SECRET"):
+        monkeypatch.delenv(var, raising=False)
+    fresh = Settings(_env_file=None)
+    assert fresh.api_key == BUNDLED_API_KEY
+    assert fresh.admin_secret == BUNDLED_ADMIN_SECRET
+
+    monkeypatch.setenv("API_KEY", "env-key")
+    monkeypatch.setenv("ADMIN_SECRET", "env-secret")
+    overridden = Settings(_env_file=None)
+    assert overridden.api_key == "env-key"
+    assert overridden.admin_secret == "env-secret"
+
+
+def test_bundled_credentials_are_accepted_alongside_env_ones(client):
+    """The Render situation: the host sets its own API_KEY / ADMIN_SECRET, so
+    the bundled defaults are NOT the configured values — yet with
+    ALLOW_BUNDLED_CREDENTIALS=true (default) both the bundled API key and the
+    bundled admin secret must still authenticate."""
+    from app.core.config import settings, BUNDLED_API_KEY, BUNDLED_ADMIN_SECRET
+
+    # conftest configures different values, proving the env wins as defaults.
+    assert settings.api_key == "test-api-key" != BUNDLED_API_KEY
+    assert settings.admin_secret == "test-admin-secret" != BUNDLED_ADMIN_SECRET
+
+    r = client.get(f"{API}/tenders", headers={"X-API-Key": BUNDLED_API_KEY})
+    assert r.status_code == 200
+
+    r = client.get(f"{API}/admin/dashboard", headers={"X-Admin-Secret": BUNDLED_ADMIN_SECRET})
+    assert r.status_code == 200
+
+    # And the host's own credentials keep working.
+    assert client.get(
+        f"{API}/admin/dashboard", headers={"X-Admin-Secret": "test-admin-secret"}
+    ).status_code == 200
+
+
+def test_bundled_credentials_can_be_switched_off(monkeypatch):
+    """ALLOW_BUNDLED_CREDENTIALS=false must reject the bundled pair while the
+    environment credentials keep working."""
+    from fastapi.testclient import TestClient
+
+    from app.core.config import settings, BUNDLED_API_KEY, BUNDLED_ADMIN_SECRET
+    from app.main import app
+
+    monkeypatch.setattr(settings, "allow_bundled_credentials", False)
+    with TestClient(app) as c:
+        c.headers.update({"X-API-Key": "test-api-key"})
+        assert c.get(f"{API}/tenders").status_code == 200
+        assert c.get(f"{API}/tenders", headers={"X-API-Key": BUNDLED_API_KEY}).status_code == 401
+        assert c.get(
+            f"{API}/admin/dashboard", headers={"X-Admin-Secret": "test-admin-secret"}
+        ).status_code == 200
+        assert c.get(
+            f"{API}/admin/dashboard", headers={"X-Admin-Secret": BUNDLED_ADMIN_SECRET}
+        ).status_code == 401
+
+
+def test_ensure_bootstrap_key_does_not_resurrect_revoked_keys(db, monkeypatch):
+    """A revoked bundled key stays revoked across restarts."""
+    _ = db  # creates/seeds the schema
+    from sqlalchemy import select
+
+    from app.core.config import settings, BUNDLED_API_KEY
+    from app.core.security import ensure_bootstrap_key, hash_key
+    from app.database.models import ApiKey
+
+    monkeypatch.setattr(settings, "api_key", "env-key")
+    db = SessionLocal()
+    try:
+        ensure_bootstrap_key(db)
+        row = db.execute(
+            select(ApiKey).where(ApiKey.key_hash == hash_key(BUNDLED_API_KEY))
+        ).scalar_one()
+        assert row.name == "bootstrap-bundled" and row.active is True
+        row.active = False
+        db.commit()
+        ensure_bootstrap_key(db)  # simulates a restart
+        db.expire_all()
+        assert db.execute(
+            select(ApiKey).where(ApiKey.key_hash == hash_key(BUNDLED_API_KEY))
+        ).scalar_one().active is False
+    finally:
+        db.close()
+
+
 def test_admin_requires_secret(client):
     r = client.get(f"{API}/admin/dashboard")
     assert r.status_code == 401

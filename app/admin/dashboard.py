@@ -7,7 +7,6 @@ CMS/CRM.
 from __future__ import annotations
 
 import os
-import secrets
 
 from fastapi import APIRouter, BackgroundTasks, Depends, Form, Request, status
 from fastapi.responses import HTMLResponse, RedirectResponse
@@ -16,7 +15,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from app.api.routes.admin import build_dashboard
-from app.core.config import settings
+from app.core.security import accepted_admin_secrets, matches_admin_secret
 from app.database.database import get_db
 from app.database.models import SyncRun
 from app.schemas.admin import SyncRunOut
@@ -31,10 +30,9 @@ _COOKIE = "admin_session"
 
 
 def _authed(request: Request) -> bool:
-    if not settings.admin_secret:
+    if not accepted_admin_secrets():
         return False
-    cookie = request.cookies.get(_COOKIE)
-    return bool(cookie) and secrets.compare_digest(cookie, settings.admin_secret)
+    return matches_admin_secret(request.cookies.get(_COOKIE))
 
 
 @router.get("/login", response_class=HTMLResponse)
@@ -44,7 +42,7 @@ def login_form(request: Request):
 
 @router.post("/login")
 def login(request: Request, secret: str = Form(...)):
-    if settings.admin_secret and secrets.compare_digest(secret, settings.admin_secret):
+    if matches_admin_secret(secret):
         resp = RedirectResponse(url="/admin", status_code=status.HTTP_303_SEE_OTHER)
         resp.set_cookie(_COOKIE, secret, httponly=True, samesite="lax", max_age=3600)
         return resp

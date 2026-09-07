@@ -200,10 +200,12 @@ All configuration is environment-based (`.env`, never committed). See
 |---|---|---|
 | `APP_ENV` | `development` | `development` or `production` |
 | `DATABASE_URL` | `sqlite:///./tenderbase.db` | Postgres in prod/Docker |
-| `API_KEY` | – | Bootstrap application key (hashed into `api_keys`) |
-| `ADMIN_SECRET` | – | Admin API + dashboard secret |
+| `API_KEY` | bundled* | Bootstrap application key (hashed into `api_keys`) |
+| `ADMIN_SECRET` | bundled* | Admin API + dashboard secret |
+| `ALLOW_BUNDLED_CREDENTIALS` | `true`* | Also accept the bundled key/secret when the environment defines its own |
 | `SYNC_INTERVAL_MINUTES` | `15` | Scheduled sync cadence |
 | `SYNC_ENABLED` | `true` | Toggle the in-process scheduler |
+| `SYNC_ON_BOOT` | `true` | Sync immediately at startup if the last successful sync is older than `SYNC_INTERVAL_MINUTES` (needed on hosts that sleep when idle) |
 | `TENDER_RETENTION_DAYS` | `7` | Keep expired tenders this long before deletion |
 | `CLEANUP_INTERVAL_HOURS` | `24` | Cleanup/expiry cadence |
 | `CLOSING_SOON_HOURS` | `48` | Window for `CLOSING_SOON` state |
@@ -214,8 +216,18 @@ All configuration is environment-based (`.env`, never committed). See
 | `REMINDER_OFFSETS_HOURS` | `168,72,24,3` | Deadline reminder windows |
 | `INGESTION_ALLOW_SAMPLE_FALLBACK` | `true` | Dev-only offline fallback |
 
-Secrets (`DATABASE_URL`, API keys, FCM credentials, `ADMIN_SECRET`) are never
-hard-coded and never logged.
+Secrets (`DATABASE_URL`, FCM credentials) are never hard-coded and never
+logged.
+
+\* **TEMPORARY (2026-09-07):** `API_KEY` / `ADMIN_SECRET` currently fall back to
+bundled constants in `app/core/config.py`, and while `ALLOW_BUNDLED_CREDENTIALS`
+is `true` those bundled values are *additionally accepted* on hosts that set
+their own. That exists so a fresh checkout, a fresh database, and a Render
+service with generated env vars can all be reached with the same credentials.
+Because this repository is public, both values must be treated as disclosed:
+rotate them and set `ALLOW_BUNDLED_CREDENTIALS=false` (env only, no code
+change) — startup then deactivates any API-key row it had bootstrapped from the
+bundled value. Remove the constants entirely before this service has real users.
 
 ---
 
@@ -324,7 +336,9 @@ Missing/invalid/expired keys return `401` with a stable error `code`. Keys are
 stored **only as SHA-256 hashes** in the `api_keys` table (raw keys are shown
 once at creation). The bootstrap `API_KEY` from the environment is ensured on
 startup; more keys are created/revoked via the admin API or
-`scripts/manage.py create-key`.
+`scripts/manage.py create-key`. While the temporary `ALLOW_BUNDLED_CREDENTIALS`
+flag is on (see [Configuration](#configuration)), the bundled key is ensured as
+a second row named `bootstrap-bundled`.
 
 Admin endpoints require `X-Admin-Secret: <ADMIN_SECRET>`.
 

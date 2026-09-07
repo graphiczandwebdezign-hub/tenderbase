@@ -17,10 +17,10 @@ from slowapi.errors import RateLimitExceeded
 from slowapi.util import get_remote_address
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
-from app.core.config import settings
+from app.core.config import settings, BUNDLED_API_KEY, BUNDLED_ADMIN_SECRET
 from app.core.logging import get_logger, log_event, setup_logging
 from app.database.database import Base, engine, session_scope
-from app.core.security import ensure_bootstrap_key
+from app.core.security import ensure_bootstrap_key, prune_bundled_credentials
 from app.services import taxonomy_service
 from app.workers.scheduler import start_scheduler, shutdown_scheduler
 
@@ -66,11 +66,29 @@ async def lifespan(app: FastAPI):
     db = session_scope()
     try:
         taxonomy_service.seed_taxonomy(db)
+        # Ensure the bootstrap key(s), and revoke any bundled key row left over
+        # from an earlier run if the kill switch has since been turned off.
         ensure_bootstrap_key(db)
+        prune_bundled_credentials(db)
     finally:
         db.close()
     scheduler = start_scheduler()
     log_event(logger, 20, "app_started", env=settings.app_env, postgres=settings.is_postgres)
+    # Loud, visible nudge while the temporary bundled credentials are in play.
+    bundled_active = (
+        settings.api_key == BUNDLED_API_KEY or settings.admin_secret == BUNDLED_ADMIN_SECRET
+    )
+    if settings.allow_bundled_credentials:
+        log_event(
+            logger, 30, "bundled_credentials_enabled",
+            # True when the bundled pair is accepted *in addition to* the
+            # host's own API_KEY / ADMIN_SECRET (the Render case).
+            accepted_in_addition=not bundled_active,
+            used_as_default=bundled_active,
+            hint="Temporary (app/core/config.py BUNDLED_*). These values are "
+                 "committed to a PUBLIC repo: rotate them and set "
+                 "ALLOW_BUNDLED_CREDENTIALS=false to stop accepting them.",
+        )
     try:
         yield
     finally:

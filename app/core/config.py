@@ -1,7 +1,14 @@
 """Application configuration loaded from environment variables.
 
-All configuration is environment-based. Secrets (DATABASE_URL, API keys,
-FCM credentials, ADMIN_SECRET) are never hard-coded in source.
+All configuration is environment-based. Secrets that should never be baked in
+(DATABASE_URL, FCM credentials) come from the environment only.
+
+TEMPORARY EXCEPTION (2026-09-07): `API_KEY` and `ADMIN_SECRET` currently have
+hard-coded fallback values — see BUNDLED_* constants below. They are defaults
+only: any value set in the environment or `.env` still wins, so Render's
+generated env vars keep overriding them. Remove these defaults and ROTATE both
+credentials before this service holds real users — this repository is public on
+GitHub.
 """
 from __future__ import annotations
 
@@ -11,6 +18,31 @@ from typing_extensions import Annotated
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict, NoDecode
+
+# --------------------------------------------------------------------------- #
+# TEMPORARY bundled credentials — added 2026-09-07 at the operator's request
+# ("hardcode these into the api for now"), so a fresh checkout / fresh database
+# authenticates without any env setup.
+#
+# They work in TWO ways:
+#   1. As DEFAULTS for API_KEY / ADMIN_SECRET — a value in the environment or
+#      .env replaces the default (so a deployment that already sets them keeps
+#      its own values).
+#   2. As ADDITIONAL accepted credentials while ALLOW_BUNDLED_CREDENTIALS=true —
+#      the bundled API key is ensured into the api_keys table at startup and the
+#      bundled admin secret is accepted by the admin API/dashboard alongside
+#      whatever the environment says. This is what makes the bundled key work on
+#      a host that already has API_KEY set (e.g. Render's generated secret).
+#
+# Kill switch: set ALLOW_BUNDLED_CREDENTIALS=false (env only, no code change)
+# to stop accepting the bundled pair immediately.
+#
+# TODO(security): delete both constants, the flag and their usages, and rotate
+# the two credentials before this service has real users. This repository is
+# PUBLIC on GitHub, so these values must be treated as disclosed.
+# --------------------------------------------------------------------------- #
+BUNDLED_API_KEY = "fy944HfxOInWK13NIl8tdmocAyrrPqt7eJpX3PRqO0I="
+BUNDLED_ADMIN_SECRET = "HUprlD1oQBFKDrNHxPw/N09ZpldgNWCfJ1HfC7LuFH8="
 
 
 class Settings(BaseSettings):
@@ -37,8 +69,11 @@ class Settings(BaseSettings):
     # ----- Authentication -----
     # Bootstrap API key. On startup this key is ensured to exist in the
     # api_keys table (hashed). Additional keys are managed via the admin API.
-    api_key: Optional[str] = Field(default=None)
-    admin_secret: Optional[str] = Field(default=None)
+    api_key: Optional[str] = Field(default=BUNDLED_API_KEY)
+    admin_secret: Optional[str] = Field(default=BUNDLED_ADMIN_SECRET)
+    # TEMPORARY: also accept the bundled key/secret even when the environment
+    # defines its own. Set to false to disable (see BUNDLED_* above).
+    allow_bundled_credentials: bool = Field(default=True)
 
     # ----- Sync / ingestion -----
     sync_interval_minutes: int = Field(default=15)
@@ -47,6 +82,10 @@ class Settings(BaseSettings):
     sync_lookback_days: int = Field(default=3)
     # Full backfill window used by the manual/initial sync.
     sync_backfill_days: int = Field(default=30)
+    # Run one sync at process start when the last successful sync is older than
+    # SYNC_INTERVAL_MINUTES. Essential on hosts that sleep when idle (Render
+    # free tier), where the interval timer restarts on every wake.
+    sync_on_boot: bool = Field(default=True)
     etenders_base_url: str = Field(
         default="https://ocds-api.etenders.gov.za/api/OCDSReleases"
     )

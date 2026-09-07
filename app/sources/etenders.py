@@ -181,11 +181,19 @@ class ETendersSourceAdapter(TenderSourceAdapter):
         closing_date = closing_at.date() if closing_at else None
         closing_time = closing_at.timetz().replace(tzinfo=None) if closing_at else None
 
-        # Classification
-        source_category = tender.get("mainProcurementCategory")
-        category_slugs = norm.normalize_categories(source_category, title, description)
-        province_slug = norm.normalize_province(
-            organisation, self._entity_region(raw), title, description
+        # Classification.
+        # Live OCPO releases often publish an EMPTY ``mainProcurementCategory``
+        # while carrying the useful CPV-style text in ``category`` (e.g.
+        # "Services: Electrical"). Feed both in so records do not collapse to
+        # "other".
+        category_slugs = norm.normalize_categories(
+            tender.get("mainProcurementCategory"),
+            tender.get("category"),
+            title,
+            description,
+        )
+        province_slug = self._extract_province(
+            raw, tender, organisation, title, description
         )
 
         raw_status = self._map_status(tender.get("status"))
@@ -310,6 +318,46 @@ class ETendersSourceAdapter(TenderSourceAdapter):
                 identifier = ident.get("id") or ident.get("legalName")
                 break
         return name, identifier
+
+    @staticmethod
+    def _extract_province(
+        raw: dict,
+        tender: dict,
+        organisation: Optional[str],
+        title: str,
+        description: Optional[str],
+    ) -> Optional[str]:
+        """Resolve the province for a release.
+
+        Priority (most authoritative first):
+          1. ``tender.province`` — the field eTenders actually publishes. It is
+             often a province name but can also be "National", a metro name
+             ("eThekwini") or a municipal alias ("City of Tshwane"), so it is
+             only trusted when it normalizes to a known province.
+          2. ``tender.deliveryLocation`` — the physical delivery site, which is
+             what the app filters on (a Gauteng department delivering in
+             Limpopo is a Limpopo job for a contractor).
+          3. Procuring entity name, then the parties/buyer address region.
+          4. Title + description free text, as a last resort.
+
+        Each candidate is tried in isolation so a confident match on a precise
+        field can never be overridden by a stray mention in loose prose.
+        """
+        candidates = (
+            tender.get("province"),
+            tender.get("deliveryLocation"),
+            organisation,
+            ETendersSourceAdapter._entity_region(raw),
+            title,
+            description,
+        )
+        for candidate in candidates:
+            if not candidate:
+                continue
+            slug = norm.normalize_province(candidate)
+            if slug:
+                return slug
+        return None
 
     @staticmethod
     def _entity_region(raw: dict) -> Optional[str]:
